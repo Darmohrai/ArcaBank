@@ -2,3 +2,4 @@
 
 Darmohrai Vadym
 Berehovyi Kyrylo
+Redko Arsenii
