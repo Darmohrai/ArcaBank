@@ -5,3 +5,4 @@ Marher Bohdan
 Darmohrai Vadym
 Berehovyi Kyrylo
 Redko Arsenii
+Smozhevskykh Kostiantyn
