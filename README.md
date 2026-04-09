@@ -4,7 +4,7 @@ An online banking system that allows users to manage accounts, make P2P transfer
 
 ## 🚀 Tech Stack
 - **Backend:** Java 21, Spring Boot, PostgreSQL
-- **Frontend:** React 18, TypeScript, Tailwind CSS
+- **Frontend:** Angular 17 LTS, TypeScript, Tailwind CSS
 - **Infrastructure:** Docker, Docker Compose
 
 ## 🛠 Getting Started
@@ -13,6 +13,7 @@ An online banking system that allows users to manage accounts, make P2P transfer
 Ensure you have the following installed on your local machine:
 - `Java 21`
 - `Node.js (v18+)`
+- Angular CLI (`npm install -g @angular/cli`)
 - `Docker` & `Docker Compose`
 
 ### 2. Infrastructure Setup (Database)

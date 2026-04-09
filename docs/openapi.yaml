@@ -1,0 +1,94 @@
+openapi: 3.0.3
+info:
+  title: ArcaBank Core API
+  version: 1.0.0
+  description: API для управління фінансами, P2P переказів та накопичувальних скриньок.
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local Development Server
+
+paths:
+  /transfers:
+    post:
+      summary: Здійснити P2P переказ
+      description: Переказ коштів між рахунками користувачів. Потребує авторизації.
+      tags:
+        - Transfers
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '200':
+          description: Переказ успішно завершено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+        '400':
+          description: Невалідна сума переказу
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Недостатньо коштів на рахунку
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    TransferRequest:
+      type: object
+      required:
+        - receiverAccountId
+        - amount
+      properties:
+        receiverAccountId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        amount:
+          type: number
+          format: float
+          example: 1500.50
+    TransferResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          example: "tx-998877"
+        status:
+          type: string
+          example: "COMPLETED"
+        amount:
+          type: number
+          example: 1500.50
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-04-10T15:30:05Z"
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-04-10T15:30:00Z"
+        errorCode:
+          type: string
+          example: "INSUFFICIENT_FUNDS"
+        message:
+          type: string
+          example: "Недостатньо коштів на рахунку відправника"
