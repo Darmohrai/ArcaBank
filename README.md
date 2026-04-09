@@ -20,3 +20,10 @@ Ensure you have the following installed on your local machine:
 Run the following command to start the PostgreSQL database in a Docker container:
 ```bash
 docker-compose up -d
+
+### Installation & Running
+1. Clone the repository: `git clone https://github.com/your-repo/arcabank.git`
+2. Set up environment variables: `cp .env.example .env`
+3. Start the PostgreSQL database: `docker-compose up -d`
+4. Start Backend: `cd server && ./mvnw spring-boot:run`
+5. Start Frontend: `cd client && npm install && ng serve`
