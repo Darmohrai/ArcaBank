@@ -1,0 +1,25 @@
+# Секретні дані (КРИТИЧНО!)
+.env
+*.pem
+*.key
+
+# Backend (Java / Spring Boot)
+target/
+build/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+*.class
+*.log
+
+# Frontend (React / Node)
+node_modules/
+dist/
+build/
+.eslintcache
+
+# Системні файли та IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
