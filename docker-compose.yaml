@@ -7,14 +7,13 @@ services:
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
     ports:
       - "${DB_PORT:-5433}:5432"
     networks:
       - arcabank_net
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./deploy/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./deploy/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
 
   pgadmin:
     image: dpage/pgadmin4
@@ -38,7 +37,7 @@ services:
     command: start-dev
     environment:
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      KC_DB_URL: jdbc:postgresql://postgres:5432/arcabank_keycloak
       KC_DB_USERNAME: ${DB_USER}
       KC_DB_PASSWORD: ${DB_PASSWORD}
       KEYCLOAK_ADMIN: admin
@@ -111,7 +110,7 @@ services:
     container_name: arcabank_core-service
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/arcabank_core
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
@@ -128,6 +127,9 @@ services:
     container_name: arcabank_auth
     restart: unless-stopped
     environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/arcabank_auth
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       KC_ISSUER_URI: http://keycloak:8080/realms/arcabank
     ports:
       - "8081:8081"
@@ -135,6 +137,7 @@ services:
     networks:
       - arcabank_net
     depends_on:
+      - postgres
       - keycloak
 
   notification-service:
@@ -143,10 +146,14 @@ services:
       dockerfile: notification-service/Dockerfile
     container_name: arcabank_notification
     environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/arcabank_notif
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     networks:
       - arcabank_net
     depends_on:
+      - postgres
       - kafka
 
   frontend:
@@ -168,3 +175,4 @@ networks:
 
 volumes:
   pgdata:
+  kafka_data:
