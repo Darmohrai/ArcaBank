@@ -1,4 +1,4 @@
-# Секретні дані (КРИТИЧНО!)
+# Secret data
 .env
 *.pem
 *.key
@@ -11,13 +11,13 @@ build/
 *.class
 *.log
 
-# Frontend (React / Node)
+# Frontend (Angular / Node)
 node_modules/
 dist/
-build/
+.angular/
 .eslintcache
 
-# Системні файли та IDE
+# System files and IDE
 .DS_Store
 Thumbs.db
 .idea/

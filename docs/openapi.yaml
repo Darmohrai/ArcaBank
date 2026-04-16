@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: API для управління фінансами, P2P переказів та накопичувальних скриньок.
 servers:
-  - url: http://localhost:8080/api/v1
+  - url: http://localhost:8088/api/v1
     description: Local Development Server
 
 paths:
