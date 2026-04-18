@@ -9,9 +9,14 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak:8080/realms/arcabank
-          jwk-set-uri: http://keycloak:8080/realms/arcabank/protocol/openid-connect/certs
+          issuer-uri: http://localhost:8180/realms/arcabank
 
 grpc:
   server:
     port: 9091
+
+keycloak:
+  server-url: http://localhost:8180
+  realm: arcabank
+  client-id: arcabank-admin-client
+  client-secret: arcabank-super-secret-key-123
