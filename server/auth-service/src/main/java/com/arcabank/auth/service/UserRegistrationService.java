@@ -1,6 +1,7 @@
 package com.arcabank.auth.service;
 
 import com.arcabank.auth.dto.RegistrationRequest;
+import com.arcabank.common.exception.AppException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,10 +58,18 @@ public class UserRegistrationService {
 
             } else if (response.getStatus() == 409) {
                 log.warn("A knight with the crest {} already exists in the archives.", request.passport_id());
-                throw new RuntimeException("User already exists!");
+                throw new AppException(
+                    "User already exists!",
+                    "USER_ALREADY_EXISTS",
+                    HttpStatus.CONFLICT
+                    );
             } else {
                 log.error("Failed to forge identity. Citadel responded with code: {}", response.getStatus());
-                throw new RuntimeException("Failed to register user");
+                throw new AppException(
+                    "Failed to register user!",
+                    "KEYCLOAK_REGISTRATION_FAILED",
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
             }
         } finally {
             if (response != null) {

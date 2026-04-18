@@ -31,6 +31,7 @@
         <module>auth-service</module>
         <module>common-proto</module>
         <module>notification-service</module>
+        <module>common-lib</module>
     </modules>
 
     <dependencyManagement>
