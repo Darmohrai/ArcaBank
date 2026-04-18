@@ -23,14 +23,14 @@ public class UserLoginService {
     private final RestClient restClient = RestClient.create();
 
     public TokenResponse authenticate(LoginRequest request) {
-        log.info("Knight {} is requesting the keys to the Citadel...", request.username());
+        log.info("Knight {} is requesting the keys to the Citadel...", request.email());
 
         String tokenEndpoint = serverUrl + "/realms/" + realm + "/protocol/openid-connect/token";
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", "password");
         formData.add("client_id", "arcabank-frontend");
-        formData.add("username", request.username());
+        formData.add("username", request.email());
         formData.add("password", request.password());
 
         try {
@@ -41,12 +41,12 @@ public class UserLoginService {
                 .retrieve()
                 .body(TokenResponse.class);
 
-            log.info("Access granted for knight {}.", request.username());
+            log.info("Access granted for knight {}.", request.email());
             return response;
 
         } catch (Exception e) {
-            log.error("Failed to authenticate knight {}. Invalid credentials?", request.username());
-            throw new RuntimeException("Invalid username or password");
+            log.error("Failed to authenticate knight {}. Invalid credentials?", request.email());
+            throw new RuntimeException("Invalid email or password");
         }
     }
 }

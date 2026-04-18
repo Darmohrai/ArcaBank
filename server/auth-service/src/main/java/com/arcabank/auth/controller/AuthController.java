@@ -22,7 +22,7 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<String> registerUser(@RequestBody RegistrationRequest request) {
         registrationService.registerUser(request);
-        return ResponseEntity.ok("User created successfully");
+        return ResponseEntity.status(HttpStatus.CREATED).body("User created successfully");
     }
 
     @PostMapping("/login")

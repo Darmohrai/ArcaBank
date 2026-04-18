@@ -1,7 +1,7 @@
 package com.arcabank.auth.dto;
 
 public record RegistrationRequest(
-    String username,
+    String passport_id,
     String email,
     String firstName,
     String lastName,

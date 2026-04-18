@@ -1,7 +1,6 @@
 package com.arcabank.auth.service;
 
 import com.arcabank.auth.dto.RegistrationRequest;
-import com.arcabank.auth.repository.UserRepository;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -22,18 +20,17 @@ import java.util.UUID;
 public class UserRegistrationService {
 
     private final Keycloak keycloak;
-    private final UserRepository userRepository;
 
     @Value("${keycloak.realm}")
     private String realm;
 
     public void registerUser(RegistrationRequest request) {
-        log.info("A new squire approaches the gates. Preparing to forge identity for: {}", request.username());
+        log.info("A new squire approaches the gates. Preparing to forge identity for: {}", request.passport_id());
 
         UsersResource usersResource = keycloak.realm(realm).users();
 
         UserRepresentation user = new UserRepresentation();
-        user.setUsername(request.username());
+        user.setUsername(request.passport_id());
         user.setEmail(request.email());
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
@@ -44,22 +41,21 @@ public class UserRegistrationService {
             response = usersResource.create(user);
 
             if (response.getStatus() == 201) {
-                String userIdStr = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
-                UUID userId = UUID.fromString(userIdStr);
+                String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
 
                 CredentialRepresentation passwordCred = new CredentialRepresentation();
                 passwordCred.setTemporary(false);
                 passwordCred.setType(CredentialRepresentation.PASSWORD);
                 passwordCred.setValue(request.password());
-                usersResource.get(userIdStr).resetPassword(passwordCred);
+                usersResource.get(userId).resetPassword(passwordCred);
 
                 RoleRepresentation userRole = keycloak.realm(realm).roles().get("USER").toRepresentation();
-                usersResource.get(userIdStr).roles().realmLevel().add(List.of(userRole));
+                usersResource.get(userId).roles().realmLevel().add(List.of(userRole));
 
-                log.info("Identity forged in the citadel and recorded in local archives. Squire {} is now a Knight.", request.username());
+                log.info("Identity forged in the citadel. Squire {} is now a Knight.", request.passport_id());
 
             } else if (response.getStatus() == 409) {
-                log.warn("A knight with the crest {} already exists in the archives.", request.username());
+                log.warn("A knight with the crest {} already exists in the archives.", request.passport_id());
                 throw new RuntimeException("User already exists!");
             } else {
                 log.error("Failed to forge identity. Citadel responded with code: {}", response.getStatus());
