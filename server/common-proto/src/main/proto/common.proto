@@ -6,18 +6,18 @@ option java_multiple_files = true;
 option java_package = "com.arcabank.grpc";
 option java_outer_classname = "ArcaBankIntercomProto";
 
-//service VaultProvisioningService {
-//  rpc ForgeInitialVault (ForgeVaultRequest) returns (ForgeVaultResponse);
-//}
-//
-//message ForgeVaultRequest {
-//  string username = 1;
-//  string user_id = 2;
-//  string currency_code = 3;
-//}
-//
-//message ForgeVaultResponse {
-//  string vault_id = 1;
-//  bool success = 2;
-//  string message = 3;
-//}
+service VaultProvisioningService {
+  rpc ForgeInitialVault (ForgeVaultRequest) returns (ForgeVaultResponse);
+}
+
+message ForgeVaultRequest {
+  string username = 1;
+  string user_id = 2;
+  string currency_code = 3;
+}
+
+message ForgeVaultResponse {
+  string vault_id = 1;
+  bool success = 2;
+  string message = 3;
+}
