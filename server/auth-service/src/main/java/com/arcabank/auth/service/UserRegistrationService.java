@@ -1,7 +1,7 @@
 package com.arcabank.auth.service;
 
 import com.arcabank.auth.dto.RegistrationRequest;
-import com.arcabank.common.exception.AppException;
+import com.arcabank.auth.exception.AppException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

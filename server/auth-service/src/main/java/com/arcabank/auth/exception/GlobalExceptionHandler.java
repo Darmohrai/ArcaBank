@@ -1,4 +1,4 @@
-package com.arcabank.common.exception;
+package com.arcabank.auth.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
