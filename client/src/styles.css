@@ -1,1 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  --primary-color: #299D91;
+  --secondary-color: #525256;
+  --default-black: #191919;
+  --gray01: #666666;
+  --gray02: #878787;
+  --gray03: #9F9F9F;
+  --gray05: #E8E8E8;
+  --gray06: #F3F3F3;
+  --special-red: #E73D1C;
+  --special-green: #4DAF6E;
+  --special-bg-opacity-25: rgba(210, 210, 210, 0.25);
+  --special-white-opacity-70: rgba(255, 255, 255, 0.7);
+  --special-white-opacity-8: rgba(255, 255, 255, 0.08);
+}
+
+* {
+  font-family: Inter, sans-serif;
+}
