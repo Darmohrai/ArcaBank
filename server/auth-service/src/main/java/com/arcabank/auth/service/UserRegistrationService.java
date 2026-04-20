@@ -2,6 +2,7 @@ package com.arcabank.auth.service;
 
 import com.arcabank.auth.dto.RegistrationRequest;
 import com.arcabank.auth.exception.AppException;
+import com.arcabank.auth.repository.UserRepository;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 import java.util.List;
 
 @Slf4j
@@ -22,6 +25,7 @@ import java.util.List;
 public class UserRegistrationService {
 
     private final Keycloak keycloak;
+    private final UserRepository userRepository;
 
     @Value("${keycloak.realm}")
     private String realm;
@@ -54,7 +58,17 @@ public class UserRegistrationService {
                 RoleRepresentation userRole = keycloak.realm(realm).roles().get("USER").toRepresentation();
                 usersResource.get(userId).roles().realmLevel().add(List.of(userRole));
 
-                log.info("User successfully registered and configured in Keycloak. Passport_id: {}", request.passport_id());
+                // Додавання користувача у бд
+                userRepository.syncUser(
+                    UUID.fromString(userId),
+                    request.email(),
+                    request.firstName(),
+                    request.lastName(),
+                    request.passport_id(),
+                    request.phoneNumber()
+                );
+
+                log.info("User successfully registered in Keycloak and synced to local Database. Passport_id: {}", request.passport_id());
 
             } else if (response.getStatus() == 409) {
                 log.warn("Registration failed: User with passport_id {} already exists (Conflict 409).", request.passport_id());
@@ -62,7 +76,7 @@ public class UserRegistrationService {
                     "User already exists!",
                     "USER_ALREADY_EXISTS",
                     HttpStatus.CONFLICT
-                    );
+                );
             } else {
                 log.error("Failed to register user in Keycloak. Received unexpected response code: {}", response.getStatus());
                 throw new AppException(
