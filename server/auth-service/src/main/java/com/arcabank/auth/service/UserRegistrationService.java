@@ -27,7 +27,7 @@ public class UserRegistrationService {
     private String realm;
 
     public void registerUser(RegistrationRequest request) {
-        log.info("A new squire approaches the gates. Preparing to forge identity for: {}", request.passport_id());
+        log.info("Initiating user registration process for passport_id: {}", request.passport_id());
 
         UsersResource usersResource = keycloak.realm(realm).users();
 
@@ -54,17 +54,17 @@ public class UserRegistrationService {
                 RoleRepresentation userRole = keycloak.realm(realm).roles().get("USER").toRepresentation();
                 usersResource.get(userId).roles().realmLevel().add(List.of(userRole));
 
-                log.info("Identity forged in the citadel. Squire {} is now a Knight.", request.passport_id());
+                log.info("User successfully registered and configured in Keycloak. Passport_id: {}", request.passport_id());
 
             } else if (response.getStatus() == 409) {
-                log.warn("A knight with the crest {} already exists in the archives.", request.passport_id());
+                log.warn("Registration failed: User with passport_id {} already exists (Conflict 409).", request.passport_id());
                 throw new AppException(
                     "User already exists!",
                     "USER_ALREADY_EXISTS",
                     HttpStatus.CONFLICT
                     );
             } else {
-                log.error("Failed to forge identity. Citadel responded with code: {}", response.getStatus());
+                log.error("Failed to register user in Keycloak. Received unexpected response code: {}", response.getStatus());
                 throw new AppException(
                     "Failed to register user!",
                     "KEYCLOAK_REGISTRATION_FAILED",
