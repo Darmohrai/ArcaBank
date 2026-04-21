@@ -56,6 +56,12 @@
             <version>${grpc-starter.version}</version>
         </dependency>
         <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-client-spring-boot-starter</artifactId>
+            <version>${grpc-starter.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.arcabank</groupId>
             <artifactId>common-proto</artifactId>
             <version>${project.version}</version>

@@ -25,6 +25,10 @@ spring:
 grpc:
   server:
     port: 9091
+  client:
+    core-finance:
+      address: 'static://localhost:9098'
+      negotiation-type: plaintext
 
 keycloak:
   server-url: http://localhost:8180
