@@ -58,7 +58,6 @@ public class UserRegistrationService {
                 RoleRepresentation userRole = keycloak.realm(realm).roles().get("USER").toRepresentation();
                 usersResource.get(userId).roles().realmLevel().add(List.of(userRole));
 
-                // Додавання користувача у бд
                 userRepository.syncUser(
                     UUID.fromString(userId),
                     request.email(),
