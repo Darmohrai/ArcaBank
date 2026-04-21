@@ -1,1 +1,8 @@
-<p>secondary-btn works!</p>
+<button class="secondary-btn">
+  <ng-container *ngIf="icon">
+    <img class="secondary-btn__icon" [src]="icon" alt="icon">
+  </ng-container>
+  <p>
+    {{ btnText }}
+  </p>
+</button>

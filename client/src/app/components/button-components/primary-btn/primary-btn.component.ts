@@ -1,12 +1,16 @@
-import { Component } from '@angular/core';
+import {Component, Input} from '@angular/core';
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-primary-btn',
   standalone: true,
-  imports: [],
+  imports: [
+    NgIf
+  ],
   templateUrl: './primary-btn.component.html',
   styleUrl: './primary-btn.component.css'
 })
 export class PrimaryBtnComponent {
-
+  @Input() btnText!: string;
+  @Input() icon?: string;
 }

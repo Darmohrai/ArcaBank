@@ -1,1 +1,9 @@
-<p>primary-btn works!</p>
+<button class="primary-btn">
+  <p>
+    {{ btnText }}
+  </p>
+
+  <ng-container *ngIf="icon">
+    <img class="primary-btn__icon" [src]="icon" alt="icon">
+  </ng-container>
+</button>

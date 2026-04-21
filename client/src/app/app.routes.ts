@@ -4,6 +4,7 @@ import {LoginComponent} from "./pages/login/login.component";
 import {SignupComponent} from "./pages/signup/signup.component";
 import {ForgotPasswordComponent} from "./pages/forgot-password/forgot-password.component";
 import {OverviewComponent} from "./pages/overview/overview.component";
+import {PageNotFoundComponent} from "./pages/page-not-found/page-not-found.component";
 
 export const routes: Routes = [
   {path: '', component: WelcomePageComponent},
@@ -11,4 +12,5 @@ export const routes: Routes = [
   {path: 'signup', component: SignupComponent},
   {path: 'forgot-password', component: ForgotPasswordComponent},
   {path: 'overview', component: OverviewComponent},
+  {path: '**', component: PageNotFoundComponent},
 ];

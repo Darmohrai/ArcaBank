@@ -1,0 +1,59 @@
+.custom-checkbox {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  user-select: none;
+  position: relative;
+}
+
+.custom-checkbox input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  cursor: pointer;
+}
+
+.checkmark {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border: 2px solid var(--primary-color, #299D91);
+  border-radius: 4px;
+  margin-right: 10px;
+  transition: all 0.2s ease;
+}
+
+/* При наведенні */
+.custom-checkbox:hover input ~ .checkmark {
+  background-color: #f0f0f0;
+}
+
+/* Коли чекбокс вибраний */
+.custom-checkbox input:checked ~ .checkmark {
+  background-color: var(--primary-color, #299D91);
+  border-color: var(--primary-color, #299D91);
+}
+
+/* Галочка */
+.custom-checkbox input:checked ~ .checkmark:after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Фокус для доступності */
+.custom-checkbox input:focus ~ .checkmark {
+  outline: 2px solid rgba(41, 157, 145, 0.5);
+  outline-offset: 2px;
+}

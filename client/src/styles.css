@@ -3,6 +3,7 @@
   --primary-color: #299D91;
   --secondary-color: #525256;
   --default-black: #191919;
+  --default-white: #FFFFFF;
   --gray01: #666666;
   --gray02: #878787;
   --gray03: #9F9F9F;
@@ -17,4 +18,5 @@
 
 * {
   font-family: Inter, sans-serif;
+  margin: 0;
 }
