@@ -1,15 +1,7 @@
-server:
-  port: 8082
-
 spring:
   application:
     name: notification-service
-  kafka:
-    bootstrap-servers: kafka:9092
-    consumer:
-      group-id: notification-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "com.arcabank.*"
+  config:
+    import: "optional:configserver:http://localhost:8888"
+  profiles:
+    active: dev
