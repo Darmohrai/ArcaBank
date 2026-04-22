@@ -4,6 +4,7 @@
 :root {
   --app-primary-color: #299D91;
   --app-secondary-color: #525256;
+  --app-background-color: #f4f5f7;
   --default-black: #191919;
   --default-white: #FFFFFF;
   --gray01: #666666;
@@ -26,4 +27,5 @@ html,
 body {
   height: 100%;
   margin: 0;
+  background-color: var(--app-background-color);
 }
