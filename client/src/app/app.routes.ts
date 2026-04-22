@@ -13,14 +13,14 @@ export const routes: Routes = [
     path: '',
     component: MainLayoutComponent,
     children: [
-      {path: '', component: WelcomePageComponent},
-      {path: 'overview', component: OverviewComponent},
+      {path: '', component: OverviewComponent},
     ]
   },
   {
     path: '',
     component: AuthLayoutComponent,
     children: [
+      {path: 'welcome', component: WelcomePageComponent},
       {path: 'login', component: LoginComponent},
       {path: 'signup', component: SignupComponent},
       {path: 'forgot-password', component: ForgotPasswordComponent},
