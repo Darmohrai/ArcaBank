@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM maven:3.9.6-eclipse-temurin-21-alpine AS builder
+FROM maven:3.9.6-eclipse-temurin-21-jammy AS builder
 WORKDIR /app
 
 COPY pom.xml .
@@ -7,6 +7,7 @@ COPY pom.xml .
 COPY api-gateway/pom.xml api-gateway/
 COPY core-finance/pom.xml core-finance/
 COPY auth-service/pom.xml auth-service/
+COPY config-server/pom.xml config-server/
 COPY common-proto/pom.xml common-proto/
 COPY notification-service/pom.xml notification-service/
 

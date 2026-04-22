@@ -1,0 +1,73 @@
+{
+  "realm": "arcabank",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "arcabank-frontend",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "http://localhost:4200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200",
+        "+"
+      ]
+    },
+    {
+      "clientId": "arcabank-admin-client",
+      "enabled": true,
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "arcabank-super-secret-key-123",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "USER",
+        "description": "Standard bank customer"
+      },
+      {
+        "name": "ADMIN",
+        "description": "Bank administrator"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "testuser",
+      "enabled": true,
+      "email": "testuser@arcabank.com",
+      "firstName": "Test",
+      "lastName": "Knight",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "USER"
+      ]
+    },
+    {
+      "username": "service-account-arcabank-admin-client",
+      "enabled": true,
+      "serviceAccountClientId": "arcabank-admin-client",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users",
+          "view-realm"
+        ]
+      }
+    }
+  ]
+}
