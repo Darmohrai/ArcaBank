@@ -31,6 +31,7 @@
         <module>core-finance</module>
         <module>auth-service</module>
         <module>notification-service</module>
+        <module>config-server</module>
     </modules>
 
     <dependencyManagement>

@@ -1,5 +1,4 @@
 services:
-  # --- Database & Management ---
   postgres:
     image: postgres:16-alpine
     container_name: arcabank_db
@@ -29,7 +28,6 @@ services:
     depends_on:
       - postgres
 
-  # --- Identity & Access Management ---
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.1
     container_name: arcabank_keycloak
@@ -51,7 +49,6 @@ services:
     depends_on:
       - postgres
 
-  # --- Message Broker (Confluent Kafka + Zookeeper) ---
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     container_name: arcabank_zookeeper
@@ -91,7 +88,26 @@ services:
     networks:
       - arcabank_net
 
-  # --- Microservices ---
+  config-server:
+    build:
+      context: ./server
+      dockerfile: config-server/Dockerfile
+    container_name: arcabank_config
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_CLOUD_CONFIG_SERVER_GIT_URI=https://github.com/Darmohrai/ArcaBankConfig
+      - SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT_LABEL=master
+      - ENCRYPT_KEY=${CONFIG_ENCRYPT_KEY:-great-acorns-team-key-2026}
+    networks:
+      - arcabank_net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/health" ]
+      interval: 20s
+      timeout: 30s
+      retries: 5
+      start_period: 60s
+
   api-gateway:
     build:
       context: ./server
@@ -99,11 +115,18 @@ services:
     container_name: arcabank_gateway
     ports:
       - "80:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
     networks:
       - arcabank_net
     depends_on:
-      - core-service
-      - auth-service
+      config-server:
+        condition: service_healthy
+      core-service:
+        condition: service_started
+      auth-service:
+        condition: service_started
 
   core-service:
     build:
@@ -112,15 +135,17 @@ services:
     container_name: arcabank_core-service
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/arcabank_core
-      SPRING_DATASOURCE_USERNAME: ${DB_USER}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
     networks:
       - arcabank_net
     depends_on:
-      - postgres
-      - kafka
+      config-server:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
 
   auth-service:
     build:
@@ -129,18 +154,20 @@ services:
     container_name: arcabank_auth
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/arcabank_auth
-      SPRING_DATASOURCE_USERNAME: ${DB_USER}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      KC_ISSUER_URI: http://keycloak:8080/realms/arcabank
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
     ports:
       - "8081:8081"
       - "9091:9091"
     networks:
       - arcabank_net
     depends_on:
-      - postgres
-      - keycloak
+      config-server:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      keycloak:
+        condition: service_started
 
   notification-service:
     build:
@@ -148,15 +175,17 @@ services:
       dockerfile: notification-service/Dockerfile
     container_name: arcabank_notification
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/arcabank_notif
-      SPRING_DATASOURCE_USERNAME: ${DB_USER}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
     networks:
       - arcabank_net
     depends_on:
-      - postgres
-      - kafka
+      config-server:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
 
   frontend:
     build:

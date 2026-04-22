@@ -65,7 +65,6 @@ public class UserRegistrationService {
                 RoleRepresentation userRole = keycloak.realm(realm).roles().get("USER").toRepresentation();
                 usersResource.get(userId).roles().realmLevel().add(List.of(userRole));
 
-                // Додавання користувача у бд
                 userRepository.syncUser(
                     UUID.fromString(userId),
                     request.email(),
@@ -77,7 +76,6 @@ public class UserRegistrationService {
 
                 log.info("User successfully registered in Keycloak and synced to local Database. Passport_id: {}", request.passport_id());
 
-                // Автоматичне створення рахунку для користувача
                 try {
                     ForgeVaultRequest vaultRequest = ForgeVaultRequest.newBuilder()
                         .setUsername(request.passport_id())
