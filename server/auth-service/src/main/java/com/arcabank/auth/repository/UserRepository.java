@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public class UserRepository extends BaseRepository<User> {
 
-    private static final String SP_SYNC_USER = "sp_sync_user";
+    private static final String SP_SYNC_USER_PROCEDURE = "sp_sync_user";
 
     private final RowMapper<User> userMapper = (rs, rowNum) -> User.builder()
         .id(rs.getObject("id", UUID.class))
@@ -45,6 +45,6 @@ public class UserRepository extends BaseRepository<User> {
     }
 
     public void syncUser(UUID id, String email, String firstName, String lastName, String passportId, String phoneNumber) {
-        callProcedure(SP_SYNC_USER, id, email, firstName, lastName, passportId, phoneNumber);
+        callProcedure(SP_SYNC_USER_PROCEDURE, id, email, firstName, lastName, passportId, phoneNumber);
     }
 }
