@@ -1,5 +1,7 @@
 .primary-btn {
   display: flex;
+  width: 100%;
+  justify-content: center;
   align-items: center;
   gap: 14px;
   background-color: var(--app-primary-color);

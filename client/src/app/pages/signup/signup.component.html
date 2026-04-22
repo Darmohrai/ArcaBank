@@ -1,1 +1,42 @@
-<p>signup works!</p>
+<section class="signup">
+
+  <div class="signup_main-content">
+    <div class="signup__logo-container">
+      <h2 class="signup__logo">ArcaBank</h2>
+    </div>
+
+    <form class="signup__login-form">
+
+      <div class="signup__input-container">
+        <label for="nameInput">Введіть Ім'я</label>
+        <app-regular-input id="nameInput"/>
+      </div>
+
+      <div class="signup__input-container">
+        <label for="emailInput">Введіть email</label>
+        <app-email-input id="emailInput"/>
+      </div>
+
+      <div class="signup__input-container">
+        <div class="signup__container">
+          <label for="passwordInput">Введіть пароль</label>
+        </div>
+        <app-password-input id="passwordInput"/>
+      </div>
+
+      <div class="signup__checkbox-container">
+        <app-checkbox text="Запам'ятати мене"/>
+      </div>
+
+      <div class="signup__btn-container">
+        <app-primary-btn btnType="submit" btnText="Зареєструватися"/>
+      </div>
+    </form>
+
+    <div class="signup__to-login-container">
+      <p>Вже маєте акаунт? <span (click)="goToLogin()" >Увійти</span></p>
+    </div>
+
+  </div>
+
+</section>

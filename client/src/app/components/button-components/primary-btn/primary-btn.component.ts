@@ -13,4 +13,5 @@ import {NgIf} from "@angular/common";
 export class PrimaryBtnComponent {
   @Input() btnText!: string;
   @Input() icon?: string;
+  @Input() btnType: "button" | "submit" | "reset" = "button";
 }
