@@ -2,8 +2,8 @@
 @import "primeng/resources/primeng.css";
 
 :root {
-  --primary-color: #299D91;
-  --secondary-color: #525256;
+  --app-primary-color: #299D91;
+  --app-secondary-color: #525256;
   --default-black: #191919;
   --default-white: #FFFFFF;
   --gray01: #666666;
@@ -20,5 +20,10 @@
 
 p, h1, h2, h3, h4, h5, h6, a, input, button, select, textarea, input::placeholder, textarea::placeholder {
   font-family: Inter, sans-serif;
+  margin: 0;
+}
+html,
+body {
+  height: 100%;
   margin: 0;
 }

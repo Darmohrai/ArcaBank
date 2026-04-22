@@ -1,0 +1,45 @@
+.sidebar {
+  min-width: 280px;
+  height: 100%;
+  background-color: var(--default-black);
+  padding: 48px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .sidebar__top-content {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    .sidebar__logo-container {
+      h1 {
+        text-align: center;
+        color: var(--default-white);
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 32px;
+        letter-spacing: 1.92px;
+      }
+    }
+
+    .sidebar__navbar {
+      ul {
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+
+  }
+
+  .sidebar__bottom-content {
+    .sidebar__bottom-hr {
+      border: 1px solid var(--special-bg-opacity-25);
+      margin: 40px 0;
+    }
+  }
+
+
+}

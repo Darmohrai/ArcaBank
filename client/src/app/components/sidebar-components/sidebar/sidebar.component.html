@@ -1,1 +1,25 @@
-<p>sidebar works!</p>
+<aside class="sidebar">
+
+  <div class="sidebar__top-content">
+    <div class="sidebar__logo-container">
+      <h1>ArcaBank</h1>
+    </div>
+
+    <nav class="sidebar__navbar">
+      <ul>
+        <app-sidebar-btn text="Огляд" icon="/assets/svg/menu.svg"/>
+        <app-sidebar-btn text="Рахунки" icon="/assets/svg/wallet.svg"/>
+        <app-sidebar-btn text="Транзакції" icon="/assets/svg/arrows.svg"/>
+        <app-sidebar-btn text="Спільний рахунок" icon="/assets/svg/expenses.svg"/>
+        <app-sidebar-btn text="Налаштування" icon="/assets/svg/settings.svg"/>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="sidebar__bottom-content">
+    <app-sidebar-logout-btn/>
+    <hr class="sidebar__bottom-hr">
+    <app-sidebar-user-profile userProfileName="Arsenii Redko" userProfilePicture="/assets/images/kabachok.jpg"/>
+  </div>
+
+</aside>

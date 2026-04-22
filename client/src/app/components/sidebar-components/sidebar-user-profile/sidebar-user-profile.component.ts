@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 @Component({
   selector: 'app-sidebar-user-profile',
@@ -8,5 +8,6 @@ import { Component } from '@angular/core';
   styleUrl: './sidebar-user-profile.component.css'
 })
 export class SidebarUserProfileComponent {
-
+  @Input() userProfilePicture!: string;
+  @Input() userProfileName!: string;
 }

@@ -22,7 +22,7 @@
   width: 20px;
   height: 20px;
   background-color: white;
-  border: 2px solid var(--primary-color, #299D91);
+  border: 2px solid var(--app-primary-color, #299D91);
   border-radius: 4px;
   margin-right: 10px;
   transition: all 0.2s ease;
@@ -35,8 +35,8 @@
 
 /* Коли чекбокс вибраний */
 .custom-checkbox input:checked ~ .checkmark {
-  background-color: var(--primary-color, #299D91);
-  border-color: var(--primary-color, #299D91);
+  background-color: var(--app-primary-color, #299D91);
+  border-color: var(--app-primary-color, #299D91);
 }
 
 /* Галочка */
