@@ -1,0 +1,80 @@
+.signup {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .signup_main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+
+    .signup__logo-container {
+      .signup__logo {
+        text-align: center;
+        color: var(--app-primary-color);
+        font-size: 40px;
+        font-weight: 700;
+        line-height: 32px;
+        letter-spacing: 3.20px;
+      }
+    }
+
+    .signup__login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      width: 400px;
+
+      .signup__input-container {
+        label {
+          color: var(--default-black);
+          font-weight: 500;
+          line-height: 24px;
+          font-size: 16px;
+        }
+
+        .signup__container {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        a {
+          text-decoration: none;
+          color: var(--app-primary-color);
+          font-size: 12px;
+          font-weight: 500;
+          cursor: pointer;
+        }
+      }
+
+      .signup__checkbox-container {
+      }
+
+      .signup__hint {
+        margin-top: 8px;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--default-black);
+        opacity: 0.75;
+      }
+    }
+
+    .signup__to-login-container {
+      color: var(--default-black);
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 24px;
+
+      span {
+        color: var(--app-primary-color);
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 24px;
+        cursor: pointer;
+      }
+    }
+  }
+}

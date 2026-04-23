@@ -1,0 +1,31 @@
+.sidebar__user-profile {
+
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .image-container {
+    img {
+      width: 32px;
+      height: 32px;
+      border-radius: 100%;
+    }
+  }
+
+  .user-name-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    p {
+      font-size: 16px;
+      color: var(--default-white);
+      margin: 0;
+    }
+    a {
+      font-size: 14px;
+      color: var(--special-white-opacity-70);
+      margin: 0;
+      text-decoration: none;
+    }
+  }
+}

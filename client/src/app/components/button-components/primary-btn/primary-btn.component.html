@@ -1,0 +1,9 @@
+<button class="primary-btn" [type]="btnType">
+  <p>
+    {{ btnText }}
+  </p>
+
+  <ng-container *ngIf="icon">
+    <img class="primary-btn__icon" [src]="icon" alt="icon">
+  </ng-container>
+</button>

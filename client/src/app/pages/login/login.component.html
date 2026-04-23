@@ -1,0 +1,40 @@
+<section class="login">
+
+<div class="login_main-content">
+  <div class="login__logo-container">
+    <h2 class="login__logo">ArcaBank</h2>
+  </div>
+
+  <form class="login__login-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="login__input-container">
+      <label for="emailInput">Введіть email</label>
+      <app-email-input inputId="emailInput" formControlName="email"/>
+    </div>
+
+    <div class="login__input-container">
+      <div class="login__container">
+        <label for="passwordInput">Введіть пароль</label>
+        <a href="#" (click)="$event.preventDefault(); goToForgotPassword()">Забули пароль?</a>
+      </div>
+      <app-password-input inputId="passwordInput" formControlName="password" autocomplete="current-password"/>
+    </div>
+
+    <div class="login__checkbox-container">
+      <app-checkbox text="Запам'ятати мене" formControlName="rememberMe"/>
+    </div>
+
+    <p *ngIf="submitError" class="login__error">
+      {{ submitError }}
+    </p>
+
+    <div class="login__btn-container">
+      <app-primary-btn btnType="submit" btnText="Логін"/>
+    </div>
+  </form>
+
+  <div class="login__create-account-btn-container">
+    <a href="#" (click)="$event.preventDefault(); goToSignUp()">Створити акаунт</a>
+  </div>
+</div>
+
+</section>

@@ -1,0 +1,11 @@
+<input
+  class="email-input"
+  [id]="resolvedId"
+  type="email"
+  [attr.autocomplete]="autocomplete"
+  [placeholder]="placeholder"
+  [disabled]="disabled"
+  [value]="value"
+  (input)="onInput($any($event.target).value)"
+  (blur)="onTouched()"
+>

@@ -1,1 +1,31 @@
-/* You can add global styles to this file, and also import other style files */
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.css";
+
+:root {
+  --app-primary-color: #299D91;
+  --app-secondary-color: #525256;
+  --app-background-color: #f4f5f7;
+  --default-black: #191919;
+  --default-white: #FFFFFF;
+  --gray01: #666666;
+  --gray02: #878787;
+  --gray03: #9F9F9F;
+  --gray05: #E8E8E8;
+  --gray06: #F3F3F3;
+  --special-red: #E73D1C;
+  --special-green: #4DAF6E;
+  --special-bg-opacity-25: rgba(210, 210, 210, 0.25);
+  --special-white-opacity-70: rgba(255, 255, 255, 0.7);
+  --special-white-opacity-8: rgba(255, 255, 255, 0.08);
+}
+
+p, h1, h2, h3, h4, h5, h6, a, input, button, select, textarea, input::placeholder, textarea::placeholder {
+  font-family: Inter, sans-serif;
+  margin: 0;
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background-color: var(--app-background-color);
+}
