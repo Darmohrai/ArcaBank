@@ -5,31 +5,82 @@
       <h2 class="signup__logo">ArcaBank</h2>
     </div>
 
-    <form class="signup__login-form">
+    <form class="signup__login-form" [formGroup]="form" (ngSubmit)="onSubmit()">
 
       <div class="signup__input-container">
-        <label for="nameInput">Введіть Ім'я</label>
-        <app-regular-input id="nameInput"/>
+        <label for="passportIdInput">Номер паспорта (10 цифр)</label>
+        <app-regular-input
+          inputId="passportIdInput"
+          formControlName="passport_id"
+          type="text"
+          inputMode="numeric"
+          autocomplete="off"
+        />
       </div>
 
       <div class="signup__input-container">
-        <label for="emailInput">Введіть email</label>
-        <app-email-input id="emailInput"/>
+        <label for="firstNameInput">Ім'я</label>
+        <app-regular-input
+          inputId="firstNameInput"
+          formControlName="firstName"
+          type="text"
+          autocomplete="given-name"
+        />
+      </div>
+
+      <div class="signup__input-container">
+        <label for="lastNameInput">Прізвище</label>
+        <app-regular-input
+          inputId="lastNameInput"
+          formControlName="lastName"
+          type="text"
+          autocomplete="family-name"
+        />
+      </div>
+
+      <div class="signup__input-container">
+        <label for="emailInput">Email</label>
+        <app-email-input
+          inputId="emailInput"
+          formControlName="email"
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="signup__input-container">
+        <label for="phoneInput">Телефон</label>
+        <app-regular-input
+          inputId="phoneInput"
+          formControlName="phoneNumber"
+          type="tel"
+          placeholder="+380XXXXXXXXX"
+          autocomplete="tel"
+        />
       </div>
 
       <div class="signup__input-container">
         <div class="signup__container">
-          <label for="passwordInput">Введіть пароль</label>
+          <label for="passwordInput">Пароль</label>
         </div>
-        <app-password-input id="passwordInput"/>
+        <app-password-input
+          inputId="passwordInput"
+          formControlName="password"
+          autocomplete="new-password"
+        />
+        <p class="signup__hint">
+          Мінімум 8 символів, 1 велика, 1 мала, 1 цифра, 1 спецсимвол з: &#64; # $ % ^ & + = !
+        </p>
       </div>
 
-      <div class="signup__checkbox-container">
-        <app-checkbox text="Запам'ятати мене"/>
-      </div>
+      <p *ngIf="submitError" style="color: #b00020; font-size: 14px; line-height: 20px; margin: 0;">
+        {{ submitError }}
+      </p>
 
       <div class="signup__btn-container">
-        <app-primary-btn btnType="submit" btnText="Зареєструватися"/>
+        <app-primary-btn
+          [btnType]="'submit'"
+          btnText="Зареєструватися"
+        />
       </div>
     </form>
 

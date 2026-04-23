@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
 import {NgIf} from "@angular/common";
 
 @Component({
@@ -11,5 +11,11 @@ import {NgIf} from "@angular/common";
   styleUrl: './sidebar-logout-btn.component.css'
 })
 export class SidebarLogoutBtnComponent {
+
+  @Output() btnClicked = new EventEmitter<void>();
+
+  onClick() {
+    this.btnClicked.emit();
+  }
 
 }

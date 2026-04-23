@@ -7,11 +7,13 @@ import {OverviewComponent} from "./pages/overview/overview.component";
 import {PageNotFoundComponent} from "./pages/page-not-found/page-not-found.component";
 import {MainLayoutComponent} from "./layout/main-layout";
 import {AuthLayoutComponent} from "./layout/auth-layout";
+import {authGuard} from "./guard/auth.guard";
 
 export const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
     children: [
       {path: '', component: OverviewComponent},
     ]

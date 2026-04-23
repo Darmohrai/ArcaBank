@@ -1,1 +1,12 @@
-<input class="regular-input" placeholder="John Doe" type="text">
+<input
+  class="regular-input"
+  [id]="resolvedId"
+  [type]="type"
+  [attr.inputmode]="inputMode"
+  [attr.autocomplete]="autocomplete"
+  [placeholder]="placeholder"
+  [disabled]="disabled"
+  [value]="value"
+  (input)="onInput($any($event.target).value)"
+  (blur)="onTouched()"
+>

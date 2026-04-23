@@ -51,6 +51,14 @@
 
       .signup__checkbox-container {
       }
+
+      .signup__hint {
+        margin-top: 8px;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--default-black);
+        opacity: 0.75;
+      }
     }
 
     .signup__to-login-container {

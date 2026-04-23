@@ -1,5 +1,11 @@
 <label class="custom-checkbox">
-  <input type="checkbox">
+  <input
+    type="checkbox"
+    [checked]="value"
+    [disabled]="disabled"
+    (change)="onChecked($any($event.target).checked)"
+    (blur)="onTouched()"
+  >
   <span class="checkmark"></span>
   {{text}}
 </label>

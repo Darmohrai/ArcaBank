@@ -17,7 +17,7 @@
   </div>
 
   <div class="sidebar__bottom-content">
-    <app-sidebar-logout-btn/>
+    <app-sidebar-logout-btn (click)="auth.signOut()"/>
     <hr class="sidebar__bottom-hr">
     <app-sidebar-user-profile userProfileName="Arsenii Redko" userProfilePicture="/assets/images/kabachok.jpg"/>
   </div>

@@ -53,6 +53,13 @@
 
       .login__btn-container {
       }
+
+      .login__error {
+        margin: 0;
+        color: #b00020;
+        font-size: 14px;
+        line-height: 20px;
+      }
     }
 
     .login__create-account-btn-container {
