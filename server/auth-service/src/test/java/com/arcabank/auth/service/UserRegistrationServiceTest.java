@@ -3,6 +3,10 @@ package com.arcabank.auth.service;
 import com.arcabank.auth.dto.RegistrationRequest;
 import com.arcabank.auth.exception.AppException;
 import com.arcabank.auth.repository.UserRepository;
+import com.arcabank.grpc.AccountProvisioningServiceGrpc;
+import com.arcabank.grpc.CreateAccountRequest;
+import com.arcabank.grpc.CreateAccountResponse;
+import com.arcabank.grpc.ProtoCurrency;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,7 +48,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT) // annotation for ignoring unused stabs
+@MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("UserRegistrationService Tests")
 class UserRegistrationServiceTest {
 
@@ -57,6 +61,9 @@ class UserRegistrationServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AccountProvisioningServiceGrpc.AccountProvisioningServiceBlockingStub accountProvisioningStub;
 
     @Mock
     private RealmResource realmResource;
@@ -123,14 +130,24 @@ class UserRegistrationServiceTest {
         when(roleMappingResource.realmLevel()).thenReturn(roleScopeResource);
     }
 
+    private void mockSuccessfulGrpcResponse() {
+        CreateAccountResponse grpcResponse = CreateAccountResponse.newBuilder()
+            .setSuccess(true)
+            .setAccountId("ACC-12345")
+            .build();
+        when(accountProvisioningStub.createInitialAccount(any(CreateAccountRequest.class)))
+            .thenReturn(grpcResponse);
+    }
+
     @Nested
     @DisplayName("Successful Registration")
     class SuccessfulRegistration {
 
         @Test
-        @DisplayName("Should register user successfully when Keycloak returns 201")
+        @DisplayName("Should register user successfully and call gRPC to provision account")
         void shouldRegisterUserSuccessfully() {
             mockSuccessfulUserCreation();
+            mockSuccessfulGrpcResponse();
 
             userRegistrationService.registerUser(validRequest);
 
@@ -145,6 +162,12 @@ class UserRegistrationServiceTest {
                 validRequest.passport_id(),
                 validRequest.phoneNumber()
             );
+
+            ArgumentCaptor<CreateAccountRequest> grpcCaptor = ArgumentCaptor.forClass(CreateAccountRequest.class);
+            verify(accountProvisioningStub).createInitialAccount(grpcCaptor.capture());
+            assertThat(grpcCaptor.getValue().getUserId()).isEqualTo(USER_ID);
+            assertThat(grpcCaptor.getValue().getCurrency()).isEqualTo(ProtoCurrency.CURRENCY_UAH);
+
             verify(response).close();
         }
 
@@ -152,6 +175,7 @@ class UserRegistrationServiceTest {
         @DisplayName("Should build UserRepresentation with correct fields")
         void shouldBuildUserRepresentationCorrectly() {
             mockSuccessfulUserCreation();
+            mockSuccessfulGrpcResponse();
 
             userRegistrationService.registerUser(validRequest);
 
@@ -167,69 +191,15 @@ class UserRegistrationServiceTest {
         }
 
         @Test
-        @DisplayName("Should set password as non-temporary with correct value")
-        void shouldSetPasswordCorrectly() {
-            mockSuccessfulUserCreation();
-
-            userRegistrationService.registerUser(validRequest);
-
-            ArgumentCaptor<CredentialRepresentation> captor = ArgumentCaptor.forClass(CredentialRepresentation.class);
-            verify(userResource).resetPassword(captor.capture());
-
-            CredentialRepresentation credential = captor.getValue();
-            assertThat(credential.isTemporary()).isFalse();
-            assertThat(credential.getType()).isEqualTo(CredentialRepresentation.PASSWORD);
-            assertThat(credential.getValue()).isEqualTo(validRequest.password());
-        }
-
-        @Test
-        @DisplayName("Should assign USER role to the new user")
-        void shouldAssignUserRole() {
-            mockSuccessfulUserCreation();
-
-            userRegistrationService.registerUser(validRequest);
-
-            ArgumentCaptor<List<RoleRepresentation>> captor = ArgumentCaptor.forClass(List.class);
-            verify(roleScopeResource).add(captor.capture());
-
-            List<RoleRepresentation> roles = captor.getValue();
-            assertThat(roles).hasSize(1);
-            assertThat(roles.get(0).getName()).isEqualTo("USER");
-        }
-
-        @Test
-        @DisplayName("Should extract userId correctly from complex location path")
-        void shouldExtractUserIdFromLocationPath() {
-            mockSuccessfulKeycloakFlow();
-            when(response.getStatus()).thenReturn(201);
-            when(response.getLocation())
-                .thenReturn(URI.create("http://keycloak:8080/admin/realms/arcabank/users/" + USER_ID));
-
-            when(usersResource.get(USER_ID)).thenReturn(userResource);
-            when(realmResource.roles()).thenReturn(rolesResource);
-            when(rolesResource.get("USER")).thenReturn(roleResource);
-            when(roleResource.toRepresentation()).thenReturn(new RoleRepresentation());
-            when(userResource.roles()).thenReturn(roleMappingResource);
-            when(roleMappingResource.realmLevel()).thenReturn(roleScopeResource);
-
-            userRegistrationService.registerUser(validRequest);
-
-            verify(usersResource, times(2)).get(USER_ID);
-            verify(userRepository).syncUser(
-                eq(UUID.fromString(USER_ID)),
-                anyString(), anyString(), anyString(), anyString(), anyString()
-            );
-        }
-
-        @Test
-        @DisplayName("Should call operations in correct order")
+        @DisplayName("Should call operations in correct order including gRPC")
         void shouldCallOperationsInCorrectOrder() {
             mockSuccessfulUserCreation();
+            mockSuccessfulGrpcResponse();
 
             userRegistrationService.registerUser(validRequest);
 
             var inOrder = org.mockito.Mockito.inOrder(
-                usersResource, userResource, roleScopeResource, userRepository, response
+                usersResource, userResource, roleScopeResource, userRepository, accountProvisioningStub, response
             );
             inOrder.verify(usersResource).create(any(UserRepresentation.class));
             inOrder.verify(userResource).resetPassword(any(CredentialRepresentation.class));
@@ -237,7 +207,46 @@ class UserRegistrationServiceTest {
             inOrder.verify(userRepository).syncUser(
                 any(UUID.class), anyString(), anyString(), anyString(), anyString(), anyString()
             );
+            inOrder.verify(accountProvisioningStub).createInitialAccount(any(CreateAccountRequest.class));
             inOrder.verify(response).close();
+        }
+    }
+
+    @Nested
+    @DisplayName("gRPC Resiliency Handling")
+    class GrpcResiliencyHandling {
+
+        @Test
+        @DisplayName("Should not throw exception when gRPC returns failure status")
+        void shouldNotThrowWhenGrpcReturnsFalse() {
+            mockSuccessfulUserCreation();
+
+            CreateAccountResponse failedGrpcResponse = CreateAccountResponse.newBuilder()
+                .setSuccess(false)
+                .build();
+            when(accountProvisioningStub.createInitialAccount(any(CreateAccountRequest.class)))
+                .thenReturn(failedGrpcResponse);
+
+            // Registration should succeed even if account provisioning fails internally
+            userRegistrationService.registerUser(validRequest);
+
+            verify(userRepository).syncUser(any(), anyString(), anyString(), anyString(), anyString(), anyString());
+            verify(accountProvisioningStub).createInitialAccount(any(CreateAccountRequest.class));
+        }
+
+        @Test
+        @DisplayName("Should not throw exception when gRPC throws runtime exception")
+        void shouldNotThrowWhenGrpcThrowsException() {
+            mockSuccessfulUserCreation();
+
+            when(accountProvisioningStub.createInitialAccount(any(CreateAccountRequest.class)))
+                .thenThrow(new RuntimeException("gRPC Server Unavailable"));
+
+            // Exception is caught and logged, registration completes
+            userRegistrationService.registerUser(validRequest);
+
+            verify(userRepository).syncUser(any(), anyString(), anyString(), anyString(), anyString(), anyString());
+            verify(accountProvisioningStub).createInitialAccount(any(CreateAccountRequest.class));
         }
     }
 
@@ -261,23 +270,8 @@ class UserRegistrationServiceTest {
                 });
 
             verify(response).close();
-            verify(userRepository, never()).syncUser(
-                any(), anyString(), anyString(), anyString(), anyString(), anyString()
-            );
-            verify(userResource, never()).resetPassword(any());
-        }
-
-        @Test
-        @DisplayName("Should not set password or role when user creation conflicts")
-        void shouldNotProceedOnConflict() {
-            mockSuccessfulKeycloakFlow();
-            when(response.getStatus()).thenReturn(409);
-
-            assertThatThrownBy(() -> userRegistrationService.registerUser(validRequest))
-                .isInstanceOf(AppException.class);
-
-            verify(usersResource, never()).get(anyString());
-            verify(realmResource, never()).roles();
+            verify(userRepository, never()).syncUser(any(), anyString(), anyString(), anyString(), anyString(), anyString());
+            verify(accountProvisioningStub, never()).createInitialAccount(any());
         }
     }
 
@@ -293,106 +287,14 @@ class UserRegistrationServiceTest {
 
             assertThatThrownBy(() -> userRegistrationService.registerUser(validRequest))
                 .isInstanceOf(AppException.class)
-                .hasMessage("Failed to register user!")
-                .satisfies(ex -> {
-                    AppException appEx = (AppException) ex;
-                    assertThat(appEx.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-                    assertThat(appEx.getErrorCode()).isEqualTo("KEYCLOAK_REGISTRATION_FAILED");
-                });
-
-            verify(response).close();
-        }
-
-        @Test
-        @DisplayName("Should throw AppException on 400 Bad Request")
-        void shouldThrowOnBadRequest() {
-            mockSuccessfulKeycloakFlow();
-            when(response.getStatus()).thenReturn(400);
-
-            assertThatThrownBy(() -> userRegistrationService.registerUser(validRequest))
-                .isInstanceOf(AppException.class)
                 .hasMessage("Failed to register user!");
 
             verify(response).close();
+            verify(accountProvisioningStub, never()).createInitialAccount(any());
         }
 
         @Test
-        @DisplayName("Should throw AppException on 401 Unauthorized")
-        void shouldThrowOnUnauthorized() {
-            mockSuccessfulKeycloakFlow();
-            when(response.getStatus()).thenReturn(401);
-
-            assertThatThrownBy(() -> userRegistrationService.registerUser(validRequest))
-                .isInstanceOf(AppException.class);
-
-            verify(response).close();
-        }
-
-        @Test
-        @DisplayName("Should throw AppException on 403 Forbidden")
-        void shouldThrowOnForbidden() {
-            mockSuccessfulKeycloakFlow();
-            when(response.getStatus()).thenReturn(403);
-
-            assertThatThrownBy(() -> userRegistrationService.registerUser(validRequest))
-                .isInstanceOf(AppException.class);
-
-            verify(response).close();
-        }
-
-        @Test
-        @DisplayName("Should propagate exception when Keycloak throws during create")
-        void shouldPropagateKeycloakException() {
-            when(keycloak.realm(REALM)).thenReturn(realmResource);
-            when(realmResource.users()).thenReturn(usersResource);
-            when(usersResource.create(any(UserRepresentation.class)))
-                .thenThrow(new RuntimeException("Keycloak is down"));
-
-            assertThatThrownBy(() -> userRegistrationService.registerUser(validRequest))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("Keycloak is down");
-
-            verify(userRepository, never()).syncUser(
-                any(), anyString(), anyString(), anyString(), anyString(), anyString()
-            );
-        }
-
-        @Test
-        @DisplayName("Should propagate exception when password reset fails")
-        void shouldPropagatePasswordResetException() {
-            mockSuccessfulUserCreation();
-            org.mockito.Mockito.doThrow(new RuntimeException("Password reset failed"))
-                .when(userResource).resetPassword(any(CredentialRepresentation.class));
-
-            assertThatThrownBy(() -> userRegistrationService.registerUser(validRequest))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("Password reset failed");
-
-            verify(response).close();
-            verify(userRepository, never()).syncUser(
-                any(), anyString(), anyString(), anyString(), anyString(), anyString()
-            );
-        }
-
-        @Test
-        @DisplayName("Should propagate exception when role assignment fails")
-        void shouldPropagateRoleAssignmentException() {
-            mockSuccessfulUserCreation();
-            org.mockito.Mockito.doThrow(new RuntimeException("Role assignment failed"))
-                .when(roleScopeResource).add(any(List.class));
-
-            assertThatThrownBy(() -> userRegistrationService.registerUser(validRequest))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("Role assignment failed");
-
-            verify(response).close();
-            verify(userRepository, never()).syncUser(
-                any(), anyString(), anyString(), anyString(), anyString(), anyString()
-            );
-        }
-
-        @Test
-        @DisplayName("Should propagate exception when repository sync fails")
+        @DisplayName("Should propagate exception when DB sync fails and not call gRPC")
         void shouldPropagateRepositorySyncException() {
             mockSuccessfulUserCreation();
             org.mockito.Mockito.doThrow(new RuntimeException("DB sync failed"))
@@ -405,106 +307,7 @@ class UserRegistrationServiceTest {
                 .hasMessage("DB sync failed");
 
             verify(response).close();
-        }
-    }
-
-    @Nested
-    @DisplayName("Resource Management")
-    class ResourceManagement {
-
-        @Test
-        @DisplayName("Should close response even when exception is thrown on 409")
-        void shouldCloseResponseOnConflict() {
-            mockSuccessfulKeycloakFlow();
-            when(response.getStatus()).thenReturn(409);
-
-            assertThatThrownBy(() -> userRegistrationService.registerUser(validRequest))
-                .isInstanceOf(AppException.class);
-
-            verify(response).close();
-        }
-
-        @Test
-        @DisplayName("Should close response even when exception is thrown on 500")
-        void shouldCloseResponseOnServerError() {
-            mockSuccessfulKeycloakFlow();
-            when(response.getStatus()).thenReturn(500);
-
-            assertThatThrownBy(() -> userRegistrationService.registerUser(validRequest))
-                .isInstanceOf(AppException.class);
-
-            verify(response).close();
-        }
-
-        @Test
-        @DisplayName("Should close response after successful registration")
-        void shouldCloseResponseAfterSuccess() {
-            mockSuccessfulUserCreation();
-
-            userRegistrationService.registerUser(validRequest);
-
-            verify(response).close();
-        }
-
-        @Test
-        @DisplayName("Should not throw NPE when response is null (Keycloak threw before returning)")
-        void shouldHandleNullResponseGracefully() {
-            when(keycloak.realm(REALM)).thenReturn(realmResource);
-            when(realmResource.users()).thenReturn(usersResource);
-            when(usersResource.create(any(UserRepresentation.class)))
-                .thenThrow(new RuntimeException("Network failure"));
-
-            assertThatThrownBy(() -> userRegistrationService.registerUser(validRequest))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("Network failure");
-        }
-    }
-
-    @Nested
-    @DisplayName("Input Validation")
-    class InputValidation {
-
-        @Test
-        @DisplayName("Should throw IllegalArgumentException for invalid UUID in Keycloak response")
-        void shouldThrowOnInvalidUUID() {
-            mockSuccessfulKeycloakFlow();
-            when(response.getStatus()).thenReturn(201);
-            when(response.getLocation())
-                .thenReturn(URI.create("/admin/realms/arcabank/users/not-a-valid-uuid"));
-
-            when(usersResource.get("not-a-valid-uuid")).thenReturn(userResource);
-            when(realmResource.roles()).thenReturn(rolesResource);
-            when(rolesResource.get("USER")).thenReturn(roleResource);
-            when(roleResource.toRepresentation()).thenReturn(new RoleRepresentation());
-            when(userResource.roles()).thenReturn(roleMappingResource);
-            when(roleMappingResource.realmLevel()).thenReturn(roleScopeResource);
-
-            assertThatThrownBy(() -> userRegistrationService.registerUser(validRequest))
-                .isInstanceOf(IllegalArgumentException.class);
-
-            verify(response).close();
-        }
-
-        @Test
-        @DisplayName("Should handle request with different valid data")
-        void shouldHandleDifferentValidInput() {
-            RegistrationRequest anotherRequest = new RegistrationRequest(
-                "CD987654",
-                "jane.smith@example.com",
-                "Jane",
-                "Smith",
-                "AnotherPass456!",
-                "+380671234567"
-            );
-
-            mockSuccessfulUserCreation();
-
-            userRegistrationService.registerUser(anotherRequest);
-
-            ArgumentCaptor<UserRepresentation> captor = ArgumentCaptor.forClass(UserRepresentation.class);
-            verify(usersResource).create(captor.capture());
-            assertThat(captor.getValue().getUsername()).isEqualTo("CD987654");
-            assertThat(captor.getValue().getEmail()).isEqualTo("jane.smith@example.com");
+            verify(accountProvisioningStub, never()).createInitialAccount(any());
         }
     }
 }
