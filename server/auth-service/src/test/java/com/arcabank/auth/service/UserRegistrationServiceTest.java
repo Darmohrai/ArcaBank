@@ -97,6 +97,9 @@ class UserRegistrationServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(userRegistrationService, "realm", REALM);
+
+        ReflectionTestUtils.setField(userRegistrationService, "accountProvisioningStub", accountProvisioningStub);
+
         validRequest = new RegistrationRequest(
             "AB123456",
             "john.doe@example.com",
@@ -199,16 +202,17 @@ class UserRegistrationServiceTest {
             userRegistrationService.registerUser(validRequest);
 
             var inOrder = org.mockito.Mockito.inOrder(
-                usersResource, userResource, roleScopeResource, userRepository, accountProvisioningStub, response
+                usersResource, response, userResource, roleScopeResource, userRepository, accountProvisioningStub
             );
+
             inOrder.verify(usersResource).create(any(UserRepresentation.class));
+            inOrder.verify(response).close();
             inOrder.verify(userResource).resetPassword(any(CredentialRepresentation.class));
             inOrder.verify(roleScopeResource).add(any(List.class));
             inOrder.verify(userRepository).syncUser(
                 any(UUID.class), anyString(), anyString(), anyString(), anyString(), anyString()
             );
             inOrder.verify(accountProvisioningStub).createInitialAccount(any(CreateAccountRequest.class));
-            inOrder.verify(response).close();
         }
     }
 
