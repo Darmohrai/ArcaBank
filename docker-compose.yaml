@@ -55,6 +55,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "8094:8094"
     networks:
       - arcabank_net
 
@@ -139,6 +141,9 @@ services:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
     networks:
       - arcabank_net
+    ports:
+      - "8088:8088"
+      - "9098:9098"
     depends_on:
       config-server:
         condition: service_healthy
@@ -179,6 +184,8 @@ services:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
     networks:
       - arcabank_net
+    ports:
+      - "8082:8082"
     depends_on:
       config-server:
         condition: service_healthy
