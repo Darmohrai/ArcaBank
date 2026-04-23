@@ -2,6 +2,8 @@ package com.arcabank.core_finance.controller;
 
 import com.arcabank.core_finance.dto.AccountDto;
 import com.arcabank.core_finance.service.AccountService;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
