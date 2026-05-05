@@ -6,7 +6,7 @@ CREATE SEQUENCE IF NOT EXISTS seq_account_internal_number
     CACHE 1;
 
 
-CREATE OR REPLACE FUNCTION fn_create_account_with_card(
+CREATE OR REPLACE FUNCTION sp_create_account_with_card(
     p_user_id UUID,
     p_account_type VARCHAR,
     p_currency VARCHAR,
