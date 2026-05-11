@@ -1,16 +1,16 @@
 package com.arcabank.core_finance.controller;
 
+import com.arcabank.core_finance.dto.AccountCreationRequest;
 import com.arcabank.core_finance.dto.AccountDto;
+import com.arcabank.core_finance.dto.AccountResponse;
 import com.arcabank.core_finance.service.AccountService;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,5 +30,17 @@ public class AccountController {
         List<AccountDto> accounts = accountService.getAccountsByUserId(userId);
 
         return ResponseEntity.ok(accounts);
+    }
+
+    @PostMapping
+    public ResponseEntity<AccountResponse> createAccount(
+        @Valid @RequestBody AccountCreationRequest request,
+        @AuthenticationPrincipal Jwt jwt) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        AccountResponse response = accountService.createAccountWithCard(userId, request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

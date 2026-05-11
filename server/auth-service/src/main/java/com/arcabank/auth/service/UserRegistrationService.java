@@ -46,7 +46,7 @@ public class UserRegistrationService {
 
         syncUserToLocalDatabase(userId, request);
 
-        provisionInitialBankAccount(userId);
+        provisionInitialBankAccount(userId, request);
 
         log.info("Registration process completely finished for passport_id: {}", request.passport_id());
     }
@@ -93,12 +93,14 @@ public class UserRegistrationService {
         log.info("User synced to local Database. Passport_id: {}", request.passport_id());
     }
 
-    private void provisionInitialBankAccount(String userId) {
+    private void provisionInitialBankAccount(String userId, RegistrationRequest request) {
         try {
             log.info("Requesting Core Finance to create an initial account...");
             CreateAccountRequest accountRequest = CreateAccountRequest.newBuilder()
                 .setUserId(userId)
                 .setCurrency(ProtoCurrency.CURRENCY_UAH)
+                .setFirstName(request.firstName())
+                .setLastName(request.lastName())
                 .build();
 
             CreateAccountResponse accountResponse = accountProvisioningStub.createInitialAccount(accountRequest);
