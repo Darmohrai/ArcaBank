@@ -39,7 +39,7 @@ class AccountControllerTest {
     void createAccount_ShouldPassValidationAndPrintLogs() throws Exception {
         // 1. ПІДГОТОВКА ДАНИХ (Arrange)
         UUID mockUserId = UUID.randomUUID();
-        AccountCreationRequest request = new AccountCreationRequest("UAH", AccountType.SAVINGS);
+        AccountCreationRequest request = new AccountCreationRequest("UAH", AccountType.SAVINGS, "0000");
 
         // Навчаємо нашого "фейкового" клієнта:
         // "Коли тебе попросять дані за цим ID, поверни Тараса Шевченка"
@@ -58,7 +58,7 @@ class AccountControllerTest {
 
     @Test
     void createAccount_ShouldReturn400_WhenCurrencyIsInvalid() throws Exception {
-        AccountCreationRequest request = new AccountCreationRequest("PLN", AccountType.SAVINGS);
+        AccountCreationRequest request = new AccountCreationRequest("PLN", AccountType.SAVINGS, "0000");
 
         mockMvc.perform(post("/api/v1/accounts")
                 // Задаємо валідний UUID, щоб тест не падав через нього

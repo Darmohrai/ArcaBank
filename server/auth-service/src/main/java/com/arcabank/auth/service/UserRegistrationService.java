@@ -101,6 +101,7 @@ public class UserRegistrationService {
                 .setCurrency(ProtoCurrency.CURRENCY_UAH)
                 .setFirstName(request.firstName())
                 .setLastName(request.lastName())
+                .setPin(request.pin())
                 .build();
 
             CreateAccountResponse accountResponse = accountProvisioningStub.createInitialAccount(accountRequest);

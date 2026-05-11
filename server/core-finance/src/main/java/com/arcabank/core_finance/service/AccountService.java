@@ -2,10 +2,7 @@ package com.arcabank.core_finance.service;
 
 import com.arcabank.core_finance.client.UserClient;
 import com.arcabank.core_finance.convertor.AccountMapper;
-import com.arcabank.core_finance.dto.AccountCreationRequest;
-import com.arcabank.core_finance.dto.AccountDto;
-import com.arcabank.core_finance.dto.AccountResponse;
-import com.arcabank.core_finance.dto.UserResponse;
+import com.arcabank.core_finance.dto.*;
 import com.arcabank.core_finance.exception.AppException;
 import com.arcabank.core_finance.repository.AccountRepository;
 import com.arcabank.core_finance.model.util.BankDataGenerator;
@@ -69,11 +66,13 @@ public class AccountService {
                 String rawCvv = BankDataGenerator.generateCvv();
                 String cvvHash = passwordEncoder.encode(rawCvv);
 
+                String pinHash = passwordEncoder.encode(request.pin());
+
                 log.info("Try {}: Let's create a card for {}", attempt, cardHolderName);
 
                 Map<String, UUID> ids = accountRepository.callCreateAccountWithCard(
                     userId, request.type().name(), request.currency(),
-                    iban, pan, cardHolderName, expDate, cvvHash
+                    iban, pan, cardHolderName, expDate, cvvHash, pinHash
                 );
 
                 UUID accountId = ids.get("account_id");
@@ -103,5 +102,29 @@ public class AccountService {
         }
 
         throw new AppException("An unexpected error", "UNKNOWN_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    public CardDto getCardById(UUID cardId, UUID userId) {
+        CardDto card = accountRepository.findCardByIdAndUserId(cardId, userId);
+
+        if (card == null) {
+            throw new AppException("Card not found or access denied", "CARD_NOT_FOUND", HttpStatus.NOT_FOUND);
+        }
+
+        return card;
+    }
+
+    public List<CardDto> getAllCardsByUserId(UUID userId) {
+        return accountRepository.findAllCardsByUserId(userId);
+    }
+
+    public AccountDto getAccountById(UUID accountId, UUID userId) {
+        return accountRepository.findByIdAndUserId(accountId, userId)
+            .map(accountMapper::toDto)
+            .orElseThrow(() -> new AppException(
+                "Account not found or access denied",
+                "ACCOUNT_NOT_FOUND",
+                HttpStatus.NOT_FOUND
+            ));
     }
 }

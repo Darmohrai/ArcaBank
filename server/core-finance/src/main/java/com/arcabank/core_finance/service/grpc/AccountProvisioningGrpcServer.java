@@ -33,7 +33,11 @@ public class AccountProvisioningGrpcServer extends AccountProvisioningServiceGrp
                 currencyCode = "UAH";
             }
 
-            AccountCreationRequest creationRequest = new AccountCreationRequest(currencyCode, AccountType.CHECKING);
+            AccountCreationRequest creationRequest = new AccountCreationRequest(
+                currencyCode,
+                AccountType.CHECKING,
+                request.getPin()
+            );
 
             AccountResponse newAccount = accountService.createAccountWithCard(
                 userId,

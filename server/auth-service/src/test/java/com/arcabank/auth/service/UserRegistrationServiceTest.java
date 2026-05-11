@@ -106,7 +106,8 @@ class UserRegistrationServiceTest {
             "John",
             "Doe",
             "StrongPassword123!",
-            "+380501234567"
+            "+380501234567",
+            "0000"
         );
     }
 

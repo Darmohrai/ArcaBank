@@ -43,4 +43,15 @@ public class AccountController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AccountDto> getAccountById(
+        @PathVariable("id") UUID id,
+        @AuthenticationPrincipal Jwt jwt) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+        AccountDto account = accountService.getAccountById(id, userId);
+
+        return ResponseEntity.ok(account);
+    }
 }

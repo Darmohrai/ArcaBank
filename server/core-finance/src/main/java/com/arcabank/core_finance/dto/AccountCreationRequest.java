@@ -11,5 +11,9 @@ public record AccountCreationRequest(
     String currency,
 
     @NotNull(message = "Account type is required")
-    AccountType type
+    AccountType type,
+
+    @NotBlank(message = "PIN code is required")
+    @Pattern(regexp = "^\\d{4}$", message = "PIN must be exactly 4 digits")
+    String pin
 ) {}
