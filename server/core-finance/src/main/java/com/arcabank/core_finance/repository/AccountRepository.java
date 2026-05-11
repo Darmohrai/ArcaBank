@@ -18,7 +18,7 @@ import java.util.UUID;
 @Repository
 public class AccountRepository extends BaseRepository<Account> {
 
-    private final static String SP_CREATE_NEW_ACCOUNT_FUNCTION = "sp_create_new_account";
+    private final static String SP_CREATE_NEW_ACCOUNT_FUNCTION = "sp_create_account_with_card";
     private final static String SP_GET_ALL_ACCOUNTS_BY_USER_ID = "sp_get_all_accounts_by_user_id";
 
     public AccountRepository(JdbcTemplate jdbcTemplate) {

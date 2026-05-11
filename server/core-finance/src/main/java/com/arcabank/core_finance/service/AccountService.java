@@ -40,7 +40,7 @@ public class AccountService {
         );
     }
 
-    // 1. Метод для gRPC: Дані вже є, Feign не потрібен!
+    // 1. Method for gRPC: The data is already there—no need for Feign!
     public AccountResponse createAccountWithCard(UUID userId, AccountCreationRequest request, String firstName, String lastName) {
 
         String cardHolderName = TransliterationUtil.formatCardHolderName(firstName, lastName);
@@ -48,7 +48,7 @@ public class AccountService {
         return generateAndSaveAccount(userId, request, cardHolderName);
     }
 
-    // 2. Старий метод: Використовується для REST Controller (коли юзер сам створює 2-гу картку)
+    // 2. Old method: Used for the REST Controller (when the user creates the second card themselves)
     public AccountResponse createAccountWithCard(UUID userId, AccountCreationRequest request) {
 
         UserResponse user = userClient.getUserById(userId);
