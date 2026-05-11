@@ -13,6 +13,9 @@ service AccountProvisioningService {
 message CreateAccountRequest {
   string user_id = 1;
   ProtoCurrency currency = 2; // like UAH USD EUR etc
+  string first_name = 3;
+  string last_name = 4;
+  string pin = 5;
 }
 
 message CreateAccountResponse {
