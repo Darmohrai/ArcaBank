@@ -9,4 +9,11 @@ public class TemplateTitleCreator {
         return "🎉 Рахунок успішно відкрито!";
     }
 
+    public static String generateAccountBlockedTitle() {
+        return "";
+    }
+
+    public static String generateAccountUnblockedTitle() {
+        return "";
+    }
 }

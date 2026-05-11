@@ -1,7 +1,7 @@
-package com.arcabank.core_finance.notificator.model;
+package com.arcabank.notification.model;
 
-import com.arcabank.core_finance.notificator.model.type.ActionType;
-import com.arcabank.core_finance.notificator.model.type.NotificationType;
+import com.arcabank.notification.model.type.ActionType;
+import com.arcabank.notification.model.type.NotificationType;
 import lombok.Getter;
 import lombok.Setter;
 

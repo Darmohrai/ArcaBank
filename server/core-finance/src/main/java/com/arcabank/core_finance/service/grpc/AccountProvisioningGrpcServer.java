@@ -3,6 +3,7 @@ package com.arcabank.core_finance.service.grpc;
 import com.arcabank.core_finance.convertor.ProtoCurrencyMapper;
 import com.arcabank.core_finance.model.Account;
 import com.arcabank.core_finance.model.util.AccountType;
+import com.arcabank.core_finance.notificator.engine.Notificator;
 import com.arcabank.core_finance.repository.AccountRepository;
 import com.arcabank.grpc.AccountProvisioningServiceGrpc;
 import com.arcabank.grpc.CreateAccountRequest;
@@ -11,6 +12,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
 import java.util.UUID;
@@ -21,8 +23,10 @@ import java.util.UUID;
 public class AccountProvisioningGrpcServer extends AccountProvisioningServiceGrpc.AccountProvisioningServiceImplBase {
 
     private final AccountRepository accountRepository;
+    private final Notificator notificator;
 
     @Override
+    @Transactional
     public void createInitialAccount(CreateAccountRequest request, StreamObserver<CreateAccountResponse> responseObserver) {
         log.info("Provisioning initial account for User ID: {}", request.getUserId());
 
@@ -35,7 +39,10 @@ public class AccountProvisioningGrpcServer extends AccountProvisioningServiceGrp
             .currency(ProtoCurrencyMapper.mapCurrency(request.getCurrency()))
             .build();
 
-        accountRepository.createAccount(newAccount);
+        UUID generatedAccountId = accountRepository.createAccount(newAccount);
+        newAccount.setId(generatedAccountId);
+
+        notificator.notifyAccountCreated(newAccount);
 
         CreateAccountResponse response = CreateAccountResponse.newBuilder()
             .setAccountId(newAccount.getId().toString())

@@ -7,13 +7,22 @@ public class TemplateTextCreator {
     private TemplateTextCreator() {
     }
 
-    public static String generateCardCreatedText(Currency currency) {
+    public static String generateAccountCreatedText(Currency currency) {
         return String.format(
-            "Вітаємо! Ваш новий рахунок у валюті %s успішно активовано в ArcaBank. " +
-                "Тепер ви можете вільно отримувати перекази, зберігати заощадження " +
-                "та керувати своїми коштами.",
-            currency != null ? currency : "UAH"
+                "Вітаємо! Ваш новий рахунок у валюті %s успішно активовано в ArcaBank. " +
+                        "Тепер ви можете вільно отримувати перекази, зберігати заощадження " +
+                        "та керувати своїми коштами.",
+                currency != null ? currency : "UAH"
         );
 
     }
+
+    public static String generateAccountBlockedText(String iban) {
+        return "";
+    }
+
+    public static String generateAccountUnblockedText(String iban) {
+        return "";
+    }
+
 }

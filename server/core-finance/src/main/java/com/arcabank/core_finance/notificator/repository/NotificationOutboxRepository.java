@@ -50,6 +50,7 @@ public class NotificationOutboxRepository extends BaseRepository<NotificationOut
             WHERE status IN ('PENDING', 'FAILED')
               AND retry_count < ?
             ORDER BY created_at ASC
+            FOR UPDATE SKIP LOCKED
             """;
         return queryList(sql, rowMapper, maxRetries);
     }
