@@ -24,6 +24,7 @@ export class PasswordInputComponent implements ControlValueAccessor {
   @Input() inputId?: string;
   /** Back-compat for templates that used `id` on the host in older screens */
   @Input() id?: string;
+  @Input() showFeedback?: boolean = true;
   @Input() placeholder: string = '';
   @Input() autocomplete: string = 'new-password';
   @Input({ transform: booleanAttribute }) disabled: boolean = false;

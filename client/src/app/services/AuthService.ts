@@ -10,7 +10,7 @@ import {Router} from "@angular/router";
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:80/api/v1/auth/public';
+  private apiUrl = 'http://localhost/api/v1/auth/public';
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
 
