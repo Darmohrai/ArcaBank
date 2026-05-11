@@ -11,7 +11,6 @@ import {MessageService} from "primeng/api";
   selector: 'app-balances',
   standalone: true,
   imports: [
-    Button,
     DialogModule,
     ReactiveFormsModule,
     ToastModule
