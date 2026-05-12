@@ -16,7 +16,7 @@
         <label for="passwordInput">Введіть пароль</label>
         <a href="#" (click)="$event.preventDefault(); goToForgotPassword()">Забули пароль?</a>
       </div>
-      <app-password-input inputId="passwordInput" formControlName="password" autocomplete="current-password"/>
+      <app-password-input [showFeedback]="false" inputId="passwordInput" formControlName="password" autocomplete="current-password"/>
     </div>
 
     <div class="login__checkbox-container">

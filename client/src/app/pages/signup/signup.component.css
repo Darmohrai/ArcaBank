@@ -77,4 +77,8 @@
       }
     }
   }
+
+  .signup__inputs-msg {
+    color: var(--special-red);
+  }
 }

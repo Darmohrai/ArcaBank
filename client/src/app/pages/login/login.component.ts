@@ -8,6 +8,7 @@ import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AuthService} from '../../services/AuthService';
 import {NgIf} from '@angular/common';
 import {finalize} from 'rxjs';
+import {PasswordModule} from "primeng/password";
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,7 @@ import {finalize} from 'rxjs';
     PrimaryBtnComponent,
     ReactiveFormsModule,
     NgIf,
+    PasswordModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'

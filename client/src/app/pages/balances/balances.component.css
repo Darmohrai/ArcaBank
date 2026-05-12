@@ -1,0 +1,129 @@
+.balances {
+  padding: 40px;
+
+  .balances__create-account-btn {
+    width: 300px;
+    height: 200px;
+    border: 2px solid var(--app-primary-color);
+    border-radius: 20px;
+    outline: none;
+    cursor: pointer;
+    background-color: transparent;
+    color: var(--app-primary-color);
+    font-size: 45px;
+    transition: color 0.3s ease-out, background-color 0.3s ease-out;
+  }
+
+  .balances__create-account-btn:hover {
+    background-color: var(--app-primary-color);
+    color: var(--default-white);
+  }
+
+  .balances__form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 8px;
+
+    .balances__form-select-container {
+      width: 100%;
+
+      .balances__form-select {
+        width: 100%;
+        height: 48px;
+        padding: 0 14px;
+
+        border: 1px solid var(--gray05);
+        border-radius: 12px;
+
+        background: var(--default-white);
+        color: var(--default-black);
+
+        font-size: 14px;
+        font-weight: 500;
+
+        outline: none;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease,
+          background-color 0.2s ease;
+
+        cursor: pointer;
+
+        &:focus {
+          border-color: var(--app-primary-color);
+          box-shadow: 0 0 0 4px rgba(41, 157, 145, 0.12);
+        }
+
+        &:hover {
+          border-color: var(--app-primary-color);
+        }
+      }
+    }
+
+    .balances__form-submit-btn,
+    .balances__form-cancel-btn {
+      width: 100%;
+      height: 48px;
+
+      border: none;
+      border-radius: 12px;
+
+      font-size: 14px;
+      font-weight: 600;
+
+      cursor: pointer;
+      transition:
+        transform 0.15s ease,
+        opacity 0.2s ease,
+        background-color 0.2s ease;
+    }
+
+    .balances__form-submit-btn {
+      background: var(--app-primary-color);
+      color: var(--default-white);
+
+      &:hover {
+        opacity: 0.92;
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+
+    .balances__form-cancel-btn {
+      background: var(--gray06);
+      color: var(--gray01);
+
+      &:hover {
+        background: var(--gray05);
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+  }
+
+  :host ::ng-deep .p-dialog {
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  :host ::ng-deep .p-dialog-header {
+    padding: 20px 24px 10px;
+    border-bottom: 1px solid var(--gray05);
+
+    color: var(--default-black);
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  :host ::ng-deep .p-dialog-content {
+    padding: 20px 24px 24px;
+    background: var(--default-white);
+  }
+
+
+}
