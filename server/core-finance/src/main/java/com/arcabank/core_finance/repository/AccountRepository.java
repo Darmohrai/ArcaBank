@@ -155,4 +155,17 @@ public class AccountRepository extends BaseRepository<Account> {
         Map<String, Object> result = executeFunction("sp_process_transfer", inParams);
         return (UUID) result.get("returnvalue");
     }
+
+    public UUID processExchangeProcedure(UUID senderId, UUID receiverId, BigDecimal amountFrom, BigDecimal amountTo, BigDecimal exchangeRate) {
+        Map<String, Object> inParams = new HashMap<>();
+        inParams.put("p_sender_id", senderId);
+        inParams.put("p_receiver_id", receiverId);
+        inParams.put("p_amount_from", amountFrom);
+        inParams.put("p_amount_to", amountTo);
+        inParams.put("p_exchange_rate", exchangeRate);
+
+        Map<String, Object> result = executeFunction("sp_process_exchange", inParams);
+
+        return (UUID) result.get("returnvalue");
+    }
 }
