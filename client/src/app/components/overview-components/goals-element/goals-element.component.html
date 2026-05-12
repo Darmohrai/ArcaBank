@@ -1,0 +1,78 @@
+<div class="goals-widget">
+
+  <div class="goals-widget__top-container">
+    <div class="goals-widget__top-container-inner">
+      <p class="goals-widget__top-container-goal">${{ this.max }}</p>
+      <i class="pi pi-pencil"></i>
+    </div>
+
+    <p class="goals-widget__top-container-goal-month">Червень, 2026</p>
+  </div>
+
+  <div class="goals-widget__bottom-container">
+
+    <div class="goals-widget__targets-container">
+
+      <div class="goals-widget__target-achieved">
+        <p class="target-text">Поточний дохід:</p>
+        <p class="target-text-value">${{ this.value }}</p>
+      </div>
+
+      <div class="goals-widget__target">
+        <p class="target-text">Ціль:</p>
+        <p class="target-text-value">${{ this.max }}</p>
+      </div>
+
+    </div>
+
+    <div class="goals-widget__target-chart-continer">
+      <div class="gauge">
+
+        <svg viewBox="0 0 200 120">
+
+          <!-- background arc -->
+          <path
+            class="gauge__bg"
+            d="M20 100 A80 80 0 0 1 180 100"
+          />
+
+          <!-- progress arc -->
+          <path
+            class="gauge__progress"
+            d="M20 100 A80 80 0 0 1 180 100"
+            [style.stroke-dashoffset]="dashOffset"
+          />
+
+          <!-- needle -->
+          <g
+            class="gauge__needle"
+            [style.transform]="'rotate(' + angle + 'deg)'"
+          >
+            <line
+              x1="100"
+              y1="100"
+              x2="145"
+              y2="55"
+            />
+
+            <circle
+              cx="100"
+              cy="100"
+              r="6"
+            />
+          </g>
+
+        </svg>
+
+        <div class="gauge__labels">
+          <span>$0</span>
+          <strong>{{ valueLabel }}</strong>
+          <span>$20k</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,14 @@
+.overview {
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .overview__top-content {
+    display: flex;
+    gap: 16px;
+  }
+
+  .overview__bottom-content {
+  }
+}
