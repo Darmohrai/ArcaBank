@@ -36,5 +36,9 @@ public record RegistrationRequest(
         message = "Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character"
     )
     String password
+//
+//    @NotBlank(message = "PIN code is required")
+//    @Pattern(regexp = "^\\d{4}$", message = "PIN must be exactly 4 digits")
+//    String pin
 ) {
 }

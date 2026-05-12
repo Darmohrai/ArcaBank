@@ -8,6 +8,8 @@ import {PageNotFoundComponent} from "./pages/page-not-found/page-not-found.compo
 import {MainLayoutComponent} from "./layout/main-layout";
 import {AuthLayoutComponent} from "./layout/auth-layout";
 import {authGuard} from "./guard/auth.guard";
+import {BalancesComponent} from "./pages/balances/balances.component";
+import {BalanceDetailComponent} from "./pages/balance-detail/balance-detail.component";
 
 export const routes: Routes = [
   {
@@ -16,6 +18,8 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {path: '', component: OverviewComponent},
+      {path: 'balances', component: BalancesComponent},
+      {path: 'balances-detail/:id', component: BalanceDetailComponent},
     ]
   },
   {

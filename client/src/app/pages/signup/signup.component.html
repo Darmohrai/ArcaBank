@@ -9,6 +9,7 @@
 
       <div class="signup__input-container">
         <label for="passportIdInput">Номер паспорта (10 цифр)</label>
+
         <app-regular-input
           inputId="passportIdInput"
           formControlName="passport_id"
@@ -16,6 +17,22 @@
           inputMode="numeric"
           autocomplete="off"
         />
+
+        <small
+          class="signup__error"
+          *ngIf="
+      form.controls.passport_id.invalid &&
+      (form.controls.passport_id.touched || form.controls.passport_id.dirty)
+    "
+        >
+    <span *ngIf="form.controls.passport_id.errors?.['required']" class="signup__inputs-msg">
+      Поле обов'язкове
+    </span>
+
+          <span *ngIf="form.controls.passport_id.errors?.['pattern']" class="signup__inputs-msg">
+      Паспорт має містити від 10 цифр
+    </span>
+        </small>
       </div>
 
       <div class="signup__input-container">
@@ -26,6 +43,22 @@
           type="text"
           autocomplete="given-name"
         />
+
+        <small
+          class="signup__error"
+          *ngIf="
+    form.controls.firstName.invalid &&
+    (form.controls.firstName.touched || form.controls.firstName.dirty)
+  "
+        >
+  <span *ngIf="form.controls.firstName.errors?.['required']" class="signup__inputs-msg">
+    Введіть ім'я
+  </span>
+
+          <span *ngIf="form.controls.firstName.errors?.['minlength']" class="signup__inputs-msg">
+    Мінімум 2 символи
+  </span>
+        </small>
       </div>
 
       <div class="signup__input-container">
@@ -36,6 +69,17 @@
           type="text"
           autocomplete="family-name"
         />
+        <small
+          class="signup__error"
+          *ngIf="
+    form.controls.lastName.invalid &&
+    (form.controls.lastName.touched || form.controls.lastName.dirty)
+  "
+        >
+  <span *ngIf="form.controls.lastName.errors?.['required']" class="signup__inputs-msg">
+    Введіть прізвище
+  </span>
+        </small>
       </div>
 
       <div class="signup__input-container">
@@ -45,6 +89,21 @@
           formControlName="email"
           autocomplete="email"
         />
+        <small
+          class="signup__error"
+          *ngIf="
+    form.controls.email.invalid &&
+    (form.controls.email.touched || form.controls.email.dirty)
+  "
+        >
+  <span *ngIf="form.controls.email.errors?.['required']" class="signup__inputs-msg">
+    Введіть email
+  </span>
+
+          <span *ngIf="form.controls.email.errors?.['email']" class="signup__inputs-msg">
+    Невірний формат email
+  </span>
+        </small>
       </div>
 
       <div class="signup__input-container">
@@ -56,6 +115,21 @@
           placeholder="+380XXXXXXXXX"
           autocomplete="tel"
         />
+        <small
+          class="signup__error"
+          *ngIf="
+    form.controls.phoneNumber.invalid &&
+    (form.controls.phoneNumber.touched || form.controls.phoneNumber.dirty)
+  "
+        >
+  <span *ngIf="form.controls.phoneNumber.errors?.['required']" class="signup__inputs-msg">
+    Введіть номер телефону
+  </span>
+
+          <span *ngIf="form.controls.phoneNumber.errors?.['pattern']" class="signup__inputs-msg">
+    Формат: +380XXXXXXXXX
+  </span>
+        </small>
       </div>
 
       <div class="signup__input-container">
@@ -70,6 +144,21 @@
         <p class="signup__hint">
           Мінімум 8 символів, 1 велика, 1 мала, 1 цифра, 1 спецсимвол з: &#64; # $ % ^ & + = !
         </p>
+        <small
+          class="signup__error"
+          *ngIf="
+    form.controls.password.invalid &&
+    (form.controls.password.touched || form.controls.password.dirty)
+  "
+        >
+  <span *ngIf="form.controls.password.errors?.['required']" class="signup__inputs-msg">
+    Введіть пароль
+  </span>
+
+          <span *ngIf="form.controls.password.errors?.['pattern']" class="signup__inputs-msg">
+    Пароль не відповідає вимогам
+  </span>
+        </small>
       </div>
 
       <p *ngIf="submitError" style="color: #b00020; font-size: 14px; line-height: 20px; margin: 0;">
@@ -85,7 +174,7 @@
     </form>
 
     <div class="signup__to-login-container">
-      <p>Вже маєте акаунт? <span (click)="goToLogin()" >Увійти</span></p>
+      <p>Вже маєте акаунт? <span (click)="goToLogin()">Увійти</span></p>
     </div>
 
   </div>

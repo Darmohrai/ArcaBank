@@ -1,1 +1,55 @@
-<p>recent-transactions works!</p>
+<div class="recent-transaction">
+
+  <div class="recent-transaction__tabs">
+
+    <button
+      class="recent-transaction__tab"
+      [class.active]="activeTab === 'all'"
+      (click)="setTab('all')"
+    >
+      All
+    </button>
+
+    <button
+      class="recent-transaction__tab"
+      [class.active]="activeTab === 'income'"
+      (click)="setTab('income')"
+    >
+      Income
+    </button>
+
+    <button
+      class="recent-transaction__tab"
+      [class.active]="activeTab === 'expense'"
+      (click)="setTab('expense')"
+    >
+      Expense
+    </button>
+
+  </div>
+
+  <ng-container *ngFor="let el of currentData">
+
+    <div class="recent-transaction__transaction">
+
+      <div class="transaction-inner-main-container">
+
+        <i class="pi pi-amazon"></i>
+
+        <div class="transaction-inner-inner-container">
+          <p class="transaction-name">{{ el.name }}</p>
+          <p class="transaction-description">{{ el.description }}</p>
+        </div>
+
+      </div>
+
+      <div class="transaction-inner-container">
+        <p class="transaction-amount">${{ el.amount }}</p>
+        <p class="transaction-date">{{ el.date }}</p>
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

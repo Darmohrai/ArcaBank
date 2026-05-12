@@ -5,3 +5,7 @@ spring:
     import: "optional:configserver:http://localhost:8888"
   profiles:
     active: dev
+
+bank:
+  system:
+    account-id: "00000000-0000-0000-0000-000000000000"

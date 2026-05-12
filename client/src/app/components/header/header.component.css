@@ -1,0 +1,15 @@
+.header {
+  height: 88px;
+  width: 100%;
+  display: flex;
+  padding: 20px 24px;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--special-bg-opacity-25);
+
+  h1 {
+    font-size: 28px;
+  }
+
+  .header__btns-container {}
+}

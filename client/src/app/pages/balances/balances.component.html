@@ -1,0 +1,32 @@
+<section class="balances">
+  <button class="balances__create-account-btn" (click)="showDialog()"  type="button">+</button>
+
+
+
+
+  <p-dialog draggable="false" header="Створити рахунок" [modal]="true" [(visible)]="visible" [style]="{ width: '25rem' }">
+    <form class="balances__form" [formGroup]="createAccountForm" (ngSubmit)="submitForm()">
+      <div class="balances__form-select-container">
+        <select class="balances__form-select" formControlName="currency" name="currency">
+          <option selected value="UAH">UAH</option>
+          <option value="EUR">EUR</option>
+          <option value="USD">USD</option>
+        </select>
+      </div>
+
+      <div class="balances__form-select-container">
+        <select class="balances__form-select" formControlName="type" name="type">
+          <option selected value="DEBIT">DEBIT</option>
+          <option value="CREDIT">CREDIT</option>
+          <option value="VIRTUAL">VIRTUAL</option>
+        </select>
+      </div>
+
+      <button class="balances__form-submit-btn" type="submit">створити</button>
+      <button class="balances__form-cancel-btn" type="button" (click)="visible = false">відміна</button>
+    </form>
+
+  </p-dialog>
+  <p-toast />
+
+</section>
