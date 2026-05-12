@@ -4,16 +4,13 @@ import com.arcabank.core_finance.dto.DepositRequest;
 import com.arcabank.core_finance.exception.AppException;
 import com.arcabank.core_finance.model.Account;
 import com.arcabank.core_finance.repository.AccountRepository;
-import com.arcabank.core_finance.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -21,10 +18,6 @@ import java.util.UUID;
 public class TransactionSystemService {
 
     private final AccountRepository accountRepository;
-    private final TransactionRepository transactionRepository;
-
-    @Value("${bank.system.account-id}")
-    private UUID systemAccountId;
 
     @Transactional
     public void processDeposit(DepositRequest request, String userId) {
@@ -41,14 +34,6 @@ public class TransactionSystemService {
         BigDecimal newBalance = targetAccount.getBalance().add(request.amount());
 
         accountRepository.updateBalance(targetAccount.getId(), newBalance);
-
-        transactionRepository.createTransaction(
-            systemAccountId,
-            targetAccount.getId(),
-            request.amount(),
-            targetAccount.getCurrency().name(),
-            "SUCCESS"
-        );
 
         log.info("Deposit successful. Account {} new balance: {}", targetAccount.getId(), newBalance);
     }
