@@ -1,15 +1,15 @@
 package com.arcabank.core_finance.controller;
 
+import com.arcabank.core_finance.dto.CardCreationRequest;
 import com.arcabank.core_finance.dto.CardDto;
 import com.arcabank.core_finance.service.AccountService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 import java.util.List;
@@ -39,5 +39,15 @@ public class CardController {
         List<CardDto> cards = accountService.getAllCardsByUserId(userId);
 
         return ResponseEntity.ok(cards);
+    }
+
+    @PostMapping("/{accountId}/create")
+    public ResponseEntity<CardDto> createCard(
+        @PathVariable UUID accountId,
+        @Valid @RequestBody CardCreationRequest request,
+        @AuthenticationPrincipal Jwt jwt) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        CardDto card = accountService.issueCardForAccount(userId, accountId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(card);
     }
 }

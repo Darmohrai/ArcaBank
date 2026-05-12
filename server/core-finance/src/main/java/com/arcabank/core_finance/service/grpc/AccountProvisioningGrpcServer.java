@@ -1,7 +1,7 @@
 package com.arcabank.core_finance.service.grpc;
 
-import com.arcabank.core_finance.dto.AccountCreationRequest;
-import com.arcabank.core_finance.dto.AccountResponse;
+import com.arcabank.core_finance.dto.AccountDto;
+import com.arcabank.core_finance.dto.AccountOnlyRequest;
 import com.arcabank.core_finance.model.util.AccountType;
 import com.arcabank.core_finance.service.AccountService;
 import com.arcabank.grpc.AccountProvisioningServiceGrpc;
@@ -24,7 +24,7 @@ public class AccountProvisioningGrpcServer extends AccountProvisioningServiceGrp
     @Override
     public void createInitialAccount(CreateAccountRequest request, StreamObserver<CreateAccountResponse> responseObserver) {
         try {
-            log.info("gRPC: Creating an initial account for User ID: {}", request.getUserId());
+            log.info("gRPC: Creating an initial account (WITHOUT CARD) for User ID: {}", request.getUserId());
 
             UUID userId = UUID.fromString(request.getUserId());
 
@@ -33,20 +33,15 @@ public class AccountProvisioningGrpcServer extends AccountProvisioningServiceGrp
                 currencyCode = "UAH";
             }
 
-            AccountCreationRequest creationRequest = new AccountCreationRequest(
+            AccountOnlyRequest creationRequest = new AccountOnlyRequest(
                 currencyCode,
-                AccountType.CHECKING,
-                request.getPin()
+                AccountType.CHECKING
             );
 
-            AccountResponse newAccount = accountService.createAccountWithCard(
-                userId,
-                creationRequest,
-                request.getFirstName(),
-                request.getLastName());
+            AccountDto newAccount = accountService.openNewAccount(userId, creationRequest);
 
             CreateAccountResponse response = CreateAccountResponse.newBuilder()
-                .setAccountId(newAccount.accountId().toString())
+                .setAccountId(newAccount.getId().toString())
                 .setSuccess(true)
                 .build();
 
@@ -55,7 +50,7 @@ public class AccountProvisioningGrpcServer extends AccountProvisioningServiceGrp
             log.info("gRPC: The account has been successfully generated and saved!");
 
         } catch (Exception e) {
-            log.error("gRPC: Invoice generation error: ", e);
+            log.error("gRPC: Account generation error: ", e);
             responseObserver.onNext(CreateAccountResponse.newBuilder().setSuccess(false).build());
             responseObserver.onCompleted();
         }
