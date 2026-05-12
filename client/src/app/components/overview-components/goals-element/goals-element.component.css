@@ -1,0 +1,136 @@
+
+.goals-widget {
+  width: 352px;
+  height: 242px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-sizing: border-box;
+
+  .goals-widget__top-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--special-bg-opacity-25);
+    padding-bottom: 10px;
+    .goals-widget__top-container-inner {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .goals-widget__top-container-goal {
+        font-size: 22px;
+      }
+
+      i {
+        background-color: var(--special-bg-opacity-25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+    }
+
+    .goals-widget__top-container-goal-month {}
+
+  }
+
+  .goals-widget__bottom-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .goals-widget__targets-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      .goals-widget__target-achieved {}
+
+      .goals-widget__target {}
+    }
+    .target-text {
+      font-size: 16px;
+      color: var(--gray02);
+    }
+    .target-text-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+  }
+
+}
+
+
+/*стилі для прогрес бару*/
+.gauge {
+  width: 128px;
+
+
+  svg {
+    width: 100%;
+    overflow: visible;
+  }
+}
+
+.gauge__bg,
+.gauge__progress {
+  fill: none;
+
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+.gauge__bg {
+  stroke: #e5e5e5;
+}
+
+.gauge__progress {
+  stroke: #299d91;
+
+  stroke-dasharray: 251.2;
+  stroke-dashoffset: 0;
+
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.gauge__needle {
+  transform-origin: 100px 100px;
+
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+
+  line {
+    stroke: #299d91;
+    stroke-width: 4;
+
+    stroke-linecap: round;
+  }
+
+  circle {
+    fill: #299d91;
+  }
+}
+
+.gauge__labels {
+  margin-top: -10px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  span {
+    font-size: 14px;
+    color: #c2c2c2;
+  }
+
+  strong {
+    font-size: 24px;
+    font-weight: 700;
+    color: #191919;
+  }
+}
