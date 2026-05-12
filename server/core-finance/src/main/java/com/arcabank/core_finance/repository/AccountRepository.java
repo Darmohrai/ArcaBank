@@ -44,9 +44,9 @@ public class AccountRepository extends BaseRepository<Account> {
     }
 
     public Map<String, UUID> callCreateAccountWithCard(UUID userId, String type, String currency,
-                                            String iban, String cardNumber,
-                                            String cardHolderName, String expirationDate,
-                                            String cvvHash, String pinHash) {
+                                                       String iban, String cardNumber,
+                                                       String cardHolderName, String expirationDate,
+                                                       String cvvHash, String pinHash) {
 
         Map<String, Object> inParams = new HashMap<>();
         inParams.put("p_user_id", userId);
@@ -154,5 +154,16 @@ public class AccountRepository extends BaseRepository<Account> {
 
         Map<String, Object> result = executeFunction("sp_process_transfer", inParams);
         return (UUID) result.get("returnvalue");
+    }
+
+    public void updateBalance(UUID accountId, BigDecimal newBalance) {
+        String sql = "UPDATE accounts SET balance = ? WHERE id = ?";
+        jdbcTemplate.update(sql, newBalance, accountId);
+    }
+
+    public Optional<Account> findById(UUID id) {
+        String sql = "SELECT * FROM accounts WHERE id = ?";
+        List<Account> results = queryList(sql, accountRowMapper, id);
+        return results.stream().findFirst();
     }
 }
