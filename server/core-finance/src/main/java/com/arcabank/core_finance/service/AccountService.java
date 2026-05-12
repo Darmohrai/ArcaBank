@@ -4,6 +4,9 @@ import com.arcabank.core_finance.client.UserClient;
 import com.arcabank.core_finance.convertor.AccountMapper;
 import com.arcabank.core_finance.dto.*;
 import com.arcabank.core_finance.exception.AppException;
+import com.arcabank.core_finance.model.Account;
+import com.arcabank.core_finance.model.util.AccountStatus;
+import com.arcabank.core_finance.model.util.Currency;
 import com.arcabank.core_finance.repository.AccountRepository;
 import com.arcabank.core_finance.model.util.BankDataGenerator;
 import com.arcabank.core_finance.model.util.TransliterationUtil;
@@ -126,5 +129,48 @@ public class AccountService {
                 "ACCOUNT_NOT_FOUND",
                 HttpStatus.NOT_FOUND
             ));
+    }
+
+    public AccountDto openNewAccount(UUID userId, AccountOnlyRequest request) {
+        String iban = BankDataGenerator.generateIban();
+
+        Account account = Account.builder()
+            .userId(userId)
+            .iban(iban)
+            .type(request.type())
+            .currency(Currency.valueOf(request.currency()))
+            .status(AccountStatus.ACTIVE)
+            .build();
+
+        UUID accountId = accountRepository.createJustAccount(account);
+        account.setId(accountId);
+
+        return accountMapper.toDto(account);
+    }
+
+    public CardDto issueCardForAccount(UUID userId, UUID accountId, CardCreationRequest request) {
+        accountRepository.findByIdAndUserId(accountId, userId)
+            .orElseThrow(() -> new AppException("Account not found", "NOT_FOUND", HttpStatus.NOT_FOUND));
+
+        UserResponse user = userClient.getUserById(userId);
+        String cardHolderName = TransliterationUtil.formatCardHolderName(user.firstName(), user.lastName());
+
+        String pan = BankDataGenerator.generatePan();
+        String expDate = BankDataGenerator.generateExpirationDate();
+        String cvvHash = passwordEncoder.encode(BankDataGenerator.generateCvv());
+        String pinHash = passwordEncoder.encode(request.pin());
+
+        UUID cardId = accountRepository.createJustCard(
+            accountId, pan, cardHolderName, expDate, cvvHash, pinHash
+        );
+
+        return CardDto.builder()
+            .id(cardId)
+            .accountId(accountId)
+            .cardNumber(pan)
+            .cardHolderName(cardHolderName)
+            .expirationDate(expDate)
+            .status("ACTIVE")
+            .build();
     }
 }

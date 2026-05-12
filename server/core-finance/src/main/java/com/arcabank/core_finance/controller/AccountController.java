@@ -2,6 +2,7 @@ package com.arcabank.core_finance.controller;
 
 import com.arcabank.core_finance.dto.AccountCreationRequest;
 import com.arcabank.core_finance.dto.AccountDto;
+import com.arcabank.core_finance.dto.AccountOnlyRequest;
 import com.arcabank.core_finance.dto.AccountResponse;
 import com.arcabank.core_finance.service.AccountService;
 import jakarta.validation.Valid;
@@ -32,7 +33,7 @@ public class AccountController {
         return ResponseEntity.ok(accounts);
     }
 
-    @PostMapping
+    @PostMapping("/with-card")
     public ResponseEntity<AccountResponse> createAccount(
         @Valid @RequestBody AccountCreationRequest request,
         @AuthenticationPrincipal Jwt jwt) {
@@ -42,6 +43,15 @@ public class AccountController {
         AccountResponse response = accountService.createAccountWithCard(userId, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping
+    public ResponseEntity<AccountDto> createAccount(
+        @Valid @RequestBody AccountOnlyRequest request,
+        @AuthenticationPrincipal Jwt jwt) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        AccountDto account = accountService.openNewAccount(userId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(account);
     }
 
     @GetMapping("/{id}")

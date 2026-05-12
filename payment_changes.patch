@@ -1,0 +1,522 @@
+diff --git a/server/auth-service/src/main/java/com/arcabank/auth/dto/RegistrationRequest.java b/server/auth-service/src/main/java/com/arcabank/auth/dto/RegistrationRequest.java
+index f164ac1..5188a46 100644
+--- a/server/auth-service/src/main/java/com/arcabank/auth/dto/RegistrationRequest.java
++++ b/server/auth-service/src/main/java/com/arcabank/auth/dto/RegistrationRequest.java
+@@ -35,10 +35,10 @@ public record RegistrationRequest(
+         regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$",
+         message = "Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character"
+     )
+-    String password,
+-
+-    @NotBlank(message = "PIN code is required")
+-    @Pattern(regexp = "^\\d{4}$", message = "PIN must be exactly 4 digits")
+-    String pin
++    String password
++//
++//    @NotBlank(message = "PIN code is required")
++//    @Pattern(regexp = "^\\d{4}$", message = "PIN must be exactly 4 digits")
++//    String pin
+ ) {
+ }
+diff --git a/server/auth-service/src/main/java/com/arcabank/auth/service/UserRegistrationService.java b/server/auth-service/src/main/java/com/arcabank/auth/service/UserRegistrationService.java
+index fe0a228..5dfa48d 100644
+--- a/server/auth-service/src/main/java/com/arcabank/auth/service/UserRegistrationService.java
++++ b/server/auth-service/src/main/java/com/arcabank/auth/service/UserRegistrationService.java
+@@ -101,7 +101,6 @@ public class UserRegistrationService {
+                 .setCurrency(ProtoCurrency.CURRENCY_UAH)
+                 .setFirstName(request.firstName())
+                 .setLastName(request.lastName())
+-                .setPin(request.pin())
+                 .build();
+ 
+             CreateAccountResponse accountResponse = accountProvisioningStub.createInitialAccount(accountRequest);
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/controller/AccountController.java b/server/core-finance/src/main/java/com/arcabank/core_finance/controller/AccountController.java
+index 5d67b14..f19c984 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/controller/AccountController.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/controller/AccountController.java
+@@ -2,6 +2,7 @@ package com.arcabank.core_finance.controller;
+ 
+ import com.arcabank.core_finance.dto.AccountCreationRequest;
+ import com.arcabank.core_finance.dto.AccountDto;
++import com.arcabank.core_finance.dto.AccountOnlyRequest;
+ import com.arcabank.core_finance.dto.AccountResponse;
+ import com.arcabank.core_finance.service.AccountService;
+ import jakarta.validation.Valid;
+@@ -32,7 +33,7 @@ public class AccountController {
+         return ResponseEntity.ok(accounts);
+     }
+ 
+-    @PostMapping
++    @PostMapping("/with-card")
+     public ResponseEntity<AccountResponse> createAccount(
+         @Valid @RequestBody AccountCreationRequest request,
+         @AuthenticationPrincipal Jwt jwt) {
+@@ -44,6 +45,15 @@ public class AccountController {
+         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+     }
+ 
++    @PostMapping
++    public ResponseEntity<AccountDto> createAccount(
++        @Valid @RequestBody AccountOnlyRequest request,
++        @AuthenticationPrincipal Jwt jwt) {
++        UUID userId = UUID.fromString(jwt.getSubject());
++        AccountDto account = accountService.openNewAccount(userId, request);
++        return ResponseEntity.status(HttpStatus.CREATED).body(account);
++    }
++
+     @GetMapping("/{id}")
+     public ResponseEntity<AccountDto> getAccountById(
+         @PathVariable("id") UUID id,
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/controller/CardController.java b/server/core-finance/src/main/java/com/arcabank/core_finance/controller/CardController.java
+index 8e1a6c1..6ada2da 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/controller/CardController.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/controller/CardController.java
+@@ -1,15 +1,15 @@
+ package com.arcabank.core_finance.controller;
+ 
++import com.arcabank.core_finance.dto.CardCreationRequest;
+ import com.arcabank.core_finance.dto.CardDto;
+ import com.arcabank.core_finance.service.AccountService;
++import jakarta.validation.Valid;
+ import lombok.RequiredArgsConstructor;
++import org.springframework.http.HttpStatus;
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.security.core.annotation.AuthenticationPrincipal;
+ import org.springframework.security.oauth2.jwt.Jwt;
+-import org.springframework.web.bind.annotation.GetMapping;
+-import org.springframework.web.bind.annotation.PathVariable;
+-import org.springframework.web.bind.annotation.RequestMapping;
+-import org.springframework.web.bind.annotation.RestController;
++import org.springframework.web.bind.annotation.*;
+ 
+ import java.util.UUID;
+ import java.util.List;
+@@ -40,4 +40,14 @@ public class CardController {
+ 
+         return ResponseEntity.ok(cards);
+     }
++
++    @PostMapping("/{accountId}/create")
++    public ResponseEntity<CardDto> createCard(
++        @PathVariable UUID accountId,
++        @Valid @RequestBody CardCreationRequest request,
++        @AuthenticationPrincipal Jwt jwt) {
++        UUID userId = UUID.fromString(jwt.getSubject());
++        CardDto card = accountService.issueCardForAccount(userId, accountId, request);
++        return ResponseEntity.status(HttpStatus.CREATED).body(card);
++    }
+ }
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/controller/TransactionController.java b/server/core-finance/src/main/java/com/arcabank/core_finance/controller/TransactionController.java
+index 0495042..9adcfd3 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/controller/TransactionController.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/controller/TransactionController.java
+@@ -1,4 +1,36 @@
+ package com.arcabank.core_finance.controller;
+ 
++import com.arcabank.core_finance.dto.TransferRequest;
++import com.arcabank.core_finance.service.TransactionService;
++import jakarta.validation.Valid;
++import lombok.RequiredArgsConstructor;
++import org.springframework.http.ResponseEntity;
++import org.springframework.security.core.annotation.AuthenticationPrincipal;
++import org.springframework.security.oauth2.jwt.Jwt;
++import org.springframework.web.bind.annotation.*;
++
++import java.util.Map;
++import java.util.UUID;
++
++@RestController
++@RequestMapping("/api/v1/transfers")
++@RequiredArgsConstructor
+ public class TransactionController {
++
++    private final TransactionService transactionService;
++
++    @PostMapping("/transaction")
++    public ResponseEntity<Map<String, String>> makeTransfer(
++        @Valid @RequestBody TransferRequest request,
++        @AuthenticationPrincipal Jwt jwt) {
++
++        UUID userId = UUID.fromString(jwt.getSubject());
++
++        UUID transactionId = transactionService.processInternalTransfer(userId, request);
++
++        return ResponseEntity.ok(Map.of(
++            "message", "Transfer successful",
++            "transactionId", transactionId.toString()
++        ));
++    }
+ }
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/dto/AccountOnlyRequest.java b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/AccountOnlyRequest.java
+index b0254c9..ca336c8 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/dto/AccountOnlyRequest.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/AccountOnlyRequest.java
+@@ -1,4 +1,11 @@
+ package com.arcabank.core_finance.dto;
+ 
+-public class AccountOnlyRequest {
+-}
++import com.arcabank.core_finance.model.util.AccountType;
++import jakarta.validation.constraints.NotBlank;
++import jakarta.validation.constraints.NotNull;
++import jakarta.validation.constraints.Pattern;
++
++public record AccountOnlyRequest(
++    @NotBlank @Pattern(regexp = "UAH|USD|EUR") String currency,
++    @NotNull AccountType type
++) {}
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/dto/CardCreationRequest.java b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/CardCreationRequest.java
+index 2aa2b06..04aa8df 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/dto/CardCreationRequest.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/CardCreationRequest.java
+@@ -1,4 +1,8 @@
+ package com.arcabank.core_finance.dto;
+ 
+-public record CardCreationRequest() {
+-}
++import jakarta.validation.constraints.NotBlank;
++import jakarta.validation.constraints.Pattern;
++
++public record CardCreationRequest(
++    @NotBlank @Pattern(regexp = "^\\d{4}$") String pin
++) {}
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/dto/SourceType.java b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/SourceType.java
+index ecd9a6a..0ddee94 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/dto/SourceType.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/SourceType.java
+@@ -1,4 +1,6 @@
+ package com.arcabank.core_finance.dto;
+ 
+-public class SourceType {
++public enum SourceType {
++    ACCOUNT,
++    CARD
+ }
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/dto/TransferRequest.java b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/TransferRequest.java
+index af73b0d..38f3f73 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/dto/TransferRequest.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/TransferRequest.java
+@@ -1,4 +1,22 @@
+ package com.arcabank.core_finance.dto;
+ 
+-public class TransferRequest {
+-}
++import jakarta.validation.constraints.DecimalMin;
++import jakarta.validation.constraints.NotBlank;
++import jakarta.validation.constraints.NotNull;
++import java.math.BigDecimal;
++import java.util.UUID;
++
++public record TransferRequest(
++    @NotNull(message = "Sender Source ID is required")
++    UUID senderSourceId,
++
++    @NotNull(message = "Source Type is required")
++    SourceType sourceType,
++
++    @NotBlank(message = "Destination is required")
++    String destination,
++
++    @NotNull(message = "Amount is required")
++    @DecimalMin(value = "0.01", message = "Amount must be greater than zero")
++    BigDecimal amount
++) {}
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/repository/AccountRepository.java b/server/core-finance/src/main/java/com/arcabank/core_finance/repository/AccountRepository.java
+index e345eca..1e8246e 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/repository/AccountRepository.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/repository/AccountRepository.java
+@@ -11,14 +11,17 @@ import org.springframework.stereotype.Repository;
+ import org.springframework.dao.EmptyResultDataAccessException;
+ import com.arcabank.core_finance.dto.CardDto;
+ 
++import java.math.BigDecimal;
+ import java.util.*;
+ 
+ @Slf4j
+ @Repository
+ public class AccountRepository extends BaseRepository<Account> {
+ 
+-    private final static String SP_CREATE_NEW_ACCOUNT_FUNCTION = "sp_create_account_with_card";
++    private final static String SP_CREATE_NEW_ACCOUNT_WITH_CARD = "sp_create_account_with_card";
+     private final static String SP_GET_ALL_ACCOUNTS_BY_USER_ID = "sp_get_all_accounts_by_user_id";
++    private final static String SP_CREATE_NEW_ACCOUNT = "sp_create_new_account";
++    private final static String SP_CREATE_CARD = "fn_create_card";
+ 
+     public AccountRepository(JdbcTemplate jdbcTemplate) {
+         super(jdbcTemplate);
+@@ -56,7 +59,7 @@ public class AccountRepository extends BaseRepository<Account> {
+         inParams.put("p_cvv_hash", cvvHash);
+         inParams.put("p_pin_hash", pinHash);
+ 
+-        Map<String, Object> result = executeFunction(SP_CREATE_NEW_ACCOUNT_FUNCTION, inParams);
++        Map<String, Object> result = executeFunction(SP_CREATE_NEW_ACCOUNT_WITH_CARD, inParams);
+ 
+         Map<String, UUID> ids = new HashMap<>();
+         ids.put("account_id", (UUID) result.get("new_account_id"));
+@@ -98,4 +101,58 @@ public class AccountRepository extends BaseRepository<Account> {
+             .stream()
+             .findFirst();
+     }
++
++    public UUID createJustAccount(Account account) {
++        Map<String, Object> inParams = new HashMap<>();
++        inParams.put("p_user_id", account.getUserId());
++        inParams.put("p_iban", account.getIban());
++        inParams.put("p_type", account.getType().name());
++        inParams.put("p_currency", account.getCurrency().name());
++
++        Map<String, Object> result = executeFunction(SP_CREATE_NEW_ACCOUNT, inParams);
++        return (UUID) result.get("returnvalue");
++    }
++
++    public UUID createJustCard(UUID accountId, String pan, String holder, String exp, String cvv, String pin) {
++        Map<String, Object> inParams = new HashMap<>();
++        inParams.put("p_account_id", accountId);
++        inParams.put("p_card_number", pan);
++        inParams.put("p_card_holder_name", holder);
++        inParams.put("p_expiration_date", exp);
++        inParams.put("p_cvv_hash", cvv);
++        inParams.put("p_pin_hash", pin);
++
++        Map<String, Object> result = executeFunction(SP_CREATE_CARD, inParams);
++        return (UUID) result.get("returnvalue");
++    }
++
++    public Optional<UUID> findAccountIdByCardNumber(String cardNumber) {
++        String sql = "SELECT account_id FROM cards WHERE card_number = ? AND status = 'ACTIVE'";
++        try {
++            UUID accountId = jdbcTemplate.queryForObject(sql, UUID.class, cardNumber);
++            return Optional.ofNullable(accountId);
++        } catch (EmptyResultDataAccessException e) {
++            return Optional.empty();
++        }
++    }
++
++    public Optional<UUID> findAccountIdByIban(String iban) {
++        String sql = "SELECT id FROM accounts WHERE iban = ? AND status = 'ACTIVE'";
++        try {
++            UUID accountId = jdbcTemplate.queryForObject(sql, UUID.class, iban);
++            return Optional.ofNullable(accountId);
++        } catch (EmptyResultDataAccessException e) {
++            return Optional.empty();
++        }
++    }
++
++    public UUID processTransfer(UUID senderId, UUID receiverId, BigDecimal amount) {
++        Map<String, Object> inParams = new HashMap<>();
++        inParams.put("p_sender_id", senderId);
++        inParams.put("p_receiver_id", receiverId);
++        inParams.put("p_amount", amount);
++
++        Map<String, Object> result = executeFunction("sp_process_transfer", inParams);
++        return (UUID) result.get("returnvalue");
++    }
+ }
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/service/AccountService.java b/server/core-finance/src/main/java/com/arcabank/core_finance/service/AccountService.java
+index 9ca2ec5..cdd01bc 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/service/AccountService.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/service/AccountService.java
+@@ -4,6 +4,9 @@ import com.arcabank.core_finance.client.UserClient;
+ import com.arcabank.core_finance.convertor.AccountMapper;
+ import com.arcabank.core_finance.dto.*;
+ import com.arcabank.core_finance.exception.AppException;
++import com.arcabank.core_finance.model.Account;
++import com.arcabank.core_finance.model.util.AccountStatus;
++import com.arcabank.core_finance.model.util.Currency;
+ import com.arcabank.core_finance.repository.AccountRepository;
+ import com.arcabank.core_finance.model.util.BankDataGenerator;
+ import com.arcabank.core_finance.model.util.TransliterationUtil;
+@@ -127,4 +130,48 @@ public class AccountService {
+                 HttpStatus.NOT_FOUND
+             ));
+     }
++
++    public AccountDto openNewAccount(UUID userId, AccountOnlyRequest request) {
++        String iban = BankDataGenerator.generateIban(); //
++
++        Account account = Account.builder()
++            .userId(userId)
++            .iban(iban)
++            .type(request.type())
++            .currency(Currency.valueOf(request.currency()))
++            .status(AccountStatus.ACTIVE)
++            .build();
++
++        UUID accountId = accountRepository.createJustAccount(account);
++        account.setId(accountId);
++
++        return accountMapper.toDto(account); //
++    }
++
++    // Логіка випуску картки
++    public CardDto issueCardForAccount(UUID userId, UUID accountId, CardCreationRequest request) {
++        accountRepository.findByIdAndUserId(accountId, userId)
++            .orElseThrow(() -> new AppException("Account not found", "NOT_FOUND", HttpStatus.NOT_FOUND));
++
++        UserResponse user = userClient.getUserById(userId); //
++        String cardHolderName = TransliterationUtil.formatCardHolderName(user.firstName(), user.lastName());
++
++        String pan = BankDataGenerator.generatePan(); //
++        String expDate = BankDataGenerator.generateExpirationDate();
++        String cvvHash = passwordEncoder.encode(BankDataGenerator.generateCvv());
++        String pinHash = passwordEncoder.encode(request.pin());
++
++        UUID cardId = accountRepository.createJustCard(
++            accountId, pan, cardHolderName, expDate, cvvHash, pinHash
++        );
++
++        return CardDto.builder()
++            .id(cardId)
++            .accountId(accountId)
++            .cardNumber(pan)
++            .cardHolderName(cardHolderName)
++            .expirationDate(expDate)
++            .status("ACTIVE")
++            .build();
++    }
+ }
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/service/TransactionService.java b/server/core-finance/src/main/java/com/arcabank/core_finance/service/TransactionService.java
+index fe4286d..0cd3101 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/service/TransactionService.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/service/TransactionService.java
+@@ -1,4 +1,83 @@
+ package com.arcabank.core_finance.service;
+ 
++import com.arcabank.core_finance.dto.CardDto;
++import com.arcabank.core_finance.dto.SourceType;
++import com.arcabank.core_finance.dto.TransferRequest;
++import com.arcabank.core_finance.exception.AppException;
++import com.arcabank.core_finance.model.Account;
++import com.arcabank.core_finance.repository.AccountRepository;
++import lombok.RequiredArgsConstructor;
++import lombok.extern.slf4j.Slf4j;
++import org.springframework.http.HttpStatus;
++import org.springframework.stereotype.Service;
++import org.springframework.transaction.annotation.Transactional;
++
++import java.util.UUID;
++
++@Slf4j
++@Service
++@RequiredArgsConstructor
+ public class TransactionService {
++
++    private final AccountRepository accountRepository;
++
++    @Transactional
++    public UUID processInternalTransfer(UUID userId, TransferRequest request) {
++
++        String cleanDestination = request.destination().replaceAll("\\s+", "");
++
++        if (request.sourceType() == SourceType.ACCOUNT && isCardFormat(cleanDestination)) {
++            throw new AppException(
++                "З прямого рахунку не можна переказувати на картку. Використовуйте IBAN.",
++                "RESTRICTED_TRANSFER_ROUTE",
++                HttpStatus.BAD_REQUEST
++            );
++        }
++
++        UUID senderAccountId = resolveSenderAccountId(userId, request);
++
++        UUID receiverAccountId = resolveDestinationToAccountId(cleanDestination);
++
++        try {
++            log.info("Process transfer: SourceAccount: {}, TargetAccount: {}, Amount: {}", senderAccountId, receiverAccountId, request.amount());
++            return accountRepository.processTransfer(senderAccountId, receiverAccountId, request.amount());
++        } catch (Exception e) {
++            log.error("Transfer failed: {}", e.getMessage());
++            throw new AppException("Transfer failed: " + e.getMessage(), "TRANSFER_ERROR", HttpStatus.BAD_REQUEST);
++        }
++    }
++
++    private UUID resolveSenderAccountId(UUID userId, TransferRequest request) {
++        if (request.sourceType() == SourceType.CARD) {
++            CardDto card = accountRepository.findCardByIdAndUserId(request.senderSourceId(), userId);
++            if (card == null) {
++                throw new AppException("Картку відправника не знайдено або доступ заборонено", "CARD_NOT_FOUND", HttpStatus.NOT_FOUND);
++            }
++            return card.accountId();
++        } else {
++            Account account = accountRepository.findByIdAndUserId(request.senderSourceId(), userId)
++                .orElseThrow(() -> new AppException("Рахунок відправника не знайдено", "ACCOUNT_NOT_FOUND", HttpStatus.NOT_FOUND));
++            return account.getId();
++        }
++    }
++
++    private UUID resolveDestinationToAccountId(String destination) {
++        if (isCardFormat(destination)) {
++            return accountRepository.findAccountIdByCardNumber(destination)
++                .orElseThrow(() -> new AppException("Картку отримувача не знайдено", "RECEIVER_CARD_NOT_FOUND", HttpStatus.NOT_FOUND));
++        } else if (isIbanFormat(destination)) {
++            return accountRepository.findAccountIdByIban(destination)
++                .orElseThrow(() -> new AppException("IBAN отримувача не знайдено", "RECEIVER_IBAN_NOT_FOUND", HttpStatus.NOT_FOUND));
++        } else {
++            throw new AppException("Невірний формат призначення. Використовуйте 16 цифр картки або IBAN.", "INVALID_DESTINATION", HttpStatus.BAD_REQUEST);
++        }
++    }
++
++    private boolean isCardFormat(String text) {
++        return text.matches("^\\d{16}$");
++    }
++
++    private boolean isIbanFormat(String text) {
++        return text.matches("^UA\\d{27}$");
++    }
+ }
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/service/grpc/AccountProvisioningGrpcServer.java b/server/core-finance/src/main/java/com/arcabank/core_finance/service/grpc/AccountProvisioningGrpcServer.java
+index 3de008d..bfa2b76 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/service/grpc/AccountProvisioningGrpcServer.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/service/grpc/AccountProvisioningGrpcServer.java
+@@ -1,7 +1,7 @@
+ package com.arcabank.core_finance.service.grpc;
+ 
+-import com.arcabank.core_finance.dto.AccountCreationRequest;
+-import com.arcabank.core_finance.dto.AccountResponse;
++import com.arcabank.core_finance.dto.AccountDto;
++import com.arcabank.core_finance.dto.AccountOnlyRequest;
+ import com.arcabank.core_finance.model.util.AccountType;
+ import com.arcabank.core_finance.service.AccountService;
+ import com.arcabank.grpc.AccountProvisioningServiceGrpc;
+@@ -24,7 +24,7 @@ public class AccountProvisioningGrpcServer extends AccountProvisioningServiceGrp
+     @Override
+     public void createInitialAccount(CreateAccountRequest request, StreamObserver<CreateAccountResponse> responseObserver) {
+         try {
+-            log.info("gRPC: Creating an initial account for User ID: {}", request.getUserId());
++            log.info("gRPC: Creating an initial account (WITHOUT CARD) for User ID: {}", request.getUserId());
+ 
+             UUID userId = UUID.fromString(request.getUserId());
+ 
+@@ -33,20 +33,15 @@ public class AccountProvisioningGrpcServer extends AccountProvisioningServiceGrp
+                 currencyCode = "UAH";
+             }
+ 
+-            AccountCreationRequest creationRequest = new AccountCreationRequest(
++            AccountOnlyRequest creationRequest = new AccountOnlyRequest(
+                 currencyCode,
+-                AccountType.CHECKING,
+-                request.getPin()
++                AccountType.CHECKING
+             );
+ 
+-            AccountResponse newAccount = accountService.createAccountWithCard(
+-                userId,
+-                creationRequest,
+-                request.getFirstName(),
+-                request.getLastName());
++            AccountDto newAccount = accountService.openNewAccount(userId, creationRequest);
+ 
+             CreateAccountResponse response = CreateAccountResponse.newBuilder()
+-                .setAccountId(newAccount.accountId().toString())
++                .setAccountId(newAccount.getId().toString())
+                 .setSuccess(true)
+                 .build();
+ 
+@@ -55,7 +50,7 @@ public class AccountProvisioningGrpcServer extends AccountProvisioningServiceGrp
+             log.info("gRPC: The account has been successfully generated and saved!");
+ 
+         } catch (Exception e) {
+-            log.error("gRPC: Invoice generation error: ", e);
++            log.error("gRPC: Account generation error: ", e);
+             responseObserver.onNext(CreateAccountResponse.newBuilder().setSuccess(false).build());
+             responseObserver.onCompleted();
+         }

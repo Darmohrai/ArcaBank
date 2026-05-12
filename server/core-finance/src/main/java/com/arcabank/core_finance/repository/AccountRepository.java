@@ -11,14 +11,17 @@ import org.springframework.stereotype.Repository;
 import org.springframework.dao.EmptyResultDataAccessException;
 import com.arcabank.core_finance.dto.CardDto;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Slf4j
 @Repository
 public class AccountRepository extends BaseRepository<Account> {
 
-    private final static String SP_CREATE_NEW_ACCOUNT_FUNCTION = "sp_create_account_with_card";
+    private final static String SP_CREATE_NEW_ACCOUNT_WITH_CARD = "sp_create_account_with_card";
     private final static String SP_GET_ALL_ACCOUNTS_BY_USER_ID = "sp_get_all_accounts_by_user_id";
+    private final static String SP_CREATE_NEW_ACCOUNT = "sp_create_new_account";
+    private final static String SP_CREATE_CARD = "fn_create_card";
 
     public AccountRepository(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate);
@@ -56,7 +59,7 @@ public class AccountRepository extends BaseRepository<Account> {
         inParams.put("p_cvv_hash", cvvHash);
         inParams.put("p_pin_hash", pinHash);
 
-        Map<String, Object> result = executeFunction(SP_CREATE_NEW_ACCOUNT_FUNCTION, inParams);
+        Map<String, Object> result = executeFunction(SP_CREATE_NEW_ACCOUNT_WITH_CARD, inParams);
 
         Map<String, UUID> ids = new HashMap<>();
         ids.put("account_id", (UUID) result.get("new_account_id"));
@@ -97,5 +100,59 @@ public class AccountRepository extends BaseRepository<Account> {
         return queryList(sql, accountRowMapper, id, userId)
             .stream()
             .findFirst();
+    }
+
+    public UUID createJustAccount(Account account) {
+        Map<String, Object> inParams = new HashMap<>();
+        inParams.put("p_user_id", account.getUserId());
+        inParams.put("p_iban", account.getIban());
+        inParams.put("p_type", account.getType().name());
+        inParams.put("p_currency", account.getCurrency().name());
+
+        Map<String, Object> result = executeFunction(SP_CREATE_NEW_ACCOUNT, inParams);
+        return (UUID) result.get("returnvalue");
+    }
+
+    public UUID createJustCard(UUID accountId, String pan, String holder, String exp, String cvv, String pin) {
+        Map<String, Object> inParams = new HashMap<>();
+        inParams.put("p_account_id", accountId);
+        inParams.put("p_card_number", pan);
+        inParams.put("p_card_holder_name", holder);
+        inParams.put("p_expiration_date", exp);
+        inParams.put("p_cvv_hash", cvv);
+        inParams.put("p_pin_hash", pin);
+
+        Map<String, Object> result = executeFunction(SP_CREATE_CARD, inParams);
+        return (UUID) result.get("returnvalue");
+    }
+
+    public Optional<UUID> findAccountIdByCardNumber(String cardNumber) {
+        String sql = "SELECT account_id FROM cards WHERE card_number = ? AND status = 'ACTIVE'";
+        try {
+            UUID accountId = jdbcTemplate.queryForObject(sql, UUID.class, cardNumber);
+            return Optional.ofNullable(accountId);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<UUID> findAccountIdByIban(String iban) {
+        String sql = "SELECT id FROM accounts WHERE iban = ? AND status = 'ACTIVE'";
+        try {
+            UUID accountId = jdbcTemplate.queryForObject(sql, UUID.class, iban);
+            return Optional.ofNullable(accountId);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public UUID processTransfer(UUID senderId, UUID receiverId, BigDecimal amount) {
+        Map<String, Object> inParams = new HashMap<>();
+        inParams.put("p_sender_id", senderId);
+        inParams.put("p_receiver_id", receiverId);
+        inParams.put("p_amount", amount);
+
+        Map<String, Object> result = executeFunction("sp_process_transfer", inParams);
+        return (UUID) result.get("returnvalue");
     }
 }
