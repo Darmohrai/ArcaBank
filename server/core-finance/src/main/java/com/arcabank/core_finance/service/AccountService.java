@@ -87,6 +87,8 @@ public class AccountService {
                 UUID accountId = ids.get("account_id");
                 UUID cardId = ids.get("cardId");
 
+                notificator.notifyCardCreated(userId, cardId, pan);
+
                 return AccountResponse.builder()
                     .accountId(accountId)
                     .cardId(cardId)
@@ -174,6 +176,8 @@ public class AccountService {
             accountId, pan, cardHolderName, expDate, cvvHash, pinHash
         );
 
+        notificator.notifyCardCreated(userId, cardId, pan);
+
         return CardDto.builder()
             .id(cardId)
             .accountId(accountId)
@@ -182,5 +186,16 @@ public class AccountService {
             .expirationDate(expDate)
             .status("ACTIVE")
             .build();
+    }
+
+    public List<CardDto> getCardsByAccountId(UUID accountId, UUID userId) {
+        accountRepository.findByIdAndUserId(accountId, userId)
+            .orElseThrow(() -> new AppException(
+                "Рахунок не знайдено або доступ заборонено",
+                "ACCOUNT_NOT_FOUND",
+                HttpStatus.NOT_FOUND
+            ));
+
+        return accountRepository.findAllCardsByAccountId(accountId);
     }
 }

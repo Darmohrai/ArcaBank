@@ -16,4 +16,16 @@ public class TemplateTitleCreator {
     public static String generateAccountUnblockedTitle() {
         return "";
     }
+
+    public static String generateCardCreatedTitle() {
+        return "💳 Нову картку випущено!";
+    }
+
+    public static String generateTransferIncomeTitle() {
+        return "💸 Надходження коштів!";
+    }
+
+    public static String generateTransferExpenseTitle() {
+        return "📤 Переказ надіслано";
+    }
 }

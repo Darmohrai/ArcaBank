@@ -25,4 +25,19 @@ public class TemplateTextCreator {
         return "";
     }
 
+    public static String generateCardCreatedText(String maskedPan) {
+        return String.format(
+            "Ваша нова платіжна картка %s успішно випущена та готова до використання. " +
+                "Ви можете переглянути її деталі та налаштувати ліміти у своєму кабінеті.",
+            maskedPan
+        );
+    }
+
+    public static String generateTransferIncomeText(java.math.BigDecimal amount, String currency) {
+        return String.format("На ваш рахунок зараховано %s %s.", amount.toPlainString(), currency);
+    }
+
+    public static String generateTransferExpenseText(java.math.BigDecimal amount, String currency) {
+        return String.format("З вашого рахунку успішно списано %s %s.", amount.toPlainString(), currency);
+    }
 }

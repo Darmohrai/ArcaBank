@@ -5,6 +5,7 @@ import com.arcabank.core_finance.dto.NbuRateResponse;
 import com.arcabank.core_finance.repository.ExchangeRateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +22,13 @@ public class ExchangeRateUpdateService {
     private final NbuClient nbuClient;
     private final ExchangeRateRepository exchangeRateRepository;
 
-    private static final Set<String> SUPPORTED_CURRENCIES = Set.of("USD", "EUR");
+    @Value("${bank.exchange.supported-currencies}")
+    private Set<String> supportedCurrencies;
 
-    private static final BigDecimal BANK_MARGIN = new BigDecimal("0.015");
+    @Value("${bank.exchange.margin}")
+    private BigDecimal bankMargin;
 
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "${bank.exchange.cron}")
     public void fetchAndUpdateRates() {
         log.info("Starting scheduled task: Fetching exchange rates from NBU...");
 
@@ -33,14 +36,14 @@ public class ExchangeRateUpdateService {
             List<NbuRateResponse> nbuRates = nbuClient.getExchangeRates();
 
             for (NbuRateResponse nbuRate : nbuRates) {
-                if (SUPPORTED_CURRENCIES.contains(nbuRate.cc())) {
+                if (supportedCurrencies.contains(nbuRate.cc())) {
 
                     BigDecimal officialRate = nbuRate.rate();
 
-                    BigDecimal buyRate = officialRate.subtract(officialRate.multiply(BANK_MARGIN))
+                    BigDecimal buyRate = officialRate.subtract(officialRate.multiply(bankMargin))
                         .setScale(4, RoundingMode.HALF_UP);
 
-                    BigDecimal sellRate = officialRate.add(officialRate.multiply(BANK_MARGIN))
+                    BigDecimal sellRate = officialRate.add(officialRate.multiply(bankMargin))
                         .setScale(4, RoundingMode.HALF_UP);
 
                     exchangeRateRepository.upsertRate(nbuRate.cc(), buyRate, sellRate);

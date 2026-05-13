@@ -179,4 +179,9 @@ public class AccountRepository extends BaseRepository<Account> {
         List<Account> results = queryList(sql, accountRowMapper, id);
         return results.stream().findFirst();
     }
+
+    public List<CardDto> findAllCardsByAccountId(UUID accountId) {
+        String sql = "SELECT * FROM cards WHERE account_id = ? ORDER BY created_at DESC";
+        return jdbcTemplate.query(sql, cardRowMapper, accountId);
+    }
 }

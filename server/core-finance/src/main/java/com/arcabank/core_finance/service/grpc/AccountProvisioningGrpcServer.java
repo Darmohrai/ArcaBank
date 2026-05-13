@@ -3,8 +3,6 @@ package com.arcabank.core_finance.service.grpc;
 import com.arcabank.core_finance.dto.AccountDto;
 import com.arcabank.core_finance.dto.AccountOnlyRequest;
 import com.arcabank.core_finance.model.util.AccountType;
-import com.arcabank.core_finance.notificator.engine.Notificator;
-import com.arcabank.core_finance.repository.AccountRepository;
 import com.arcabank.core_finance.service.AccountService;
 import com.arcabank.grpc.AccountProvisioningServiceGrpc;
 import com.arcabank.grpc.CreateAccountRequest;
