@@ -40,9 +40,9 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public List<AccountDto> getAccountsByUserId(UUID userId) {
-        return accountMapper.toDtoList(
-            accountRepository.findAllByUserId(userId)
-        );
+        return accountRepository.findAllByUserId(userId).stream()
+            .map(accountMapper::toDto)
+            .toList();
     }
 
     // 1. Method for gRPC: The data is already there—no need for Feign!
