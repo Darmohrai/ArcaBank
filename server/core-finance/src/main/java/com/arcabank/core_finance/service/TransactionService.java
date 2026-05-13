@@ -65,8 +65,9 @@ public class TransactionService {
     private UUID resolveSenderAccountId(UUID userId, TransferRequest request) {
         if (request.sourceType() == SourceType.CARD) {
             CardDto card = accountRepository.findCardByIdAndUserId(request.senderSourceId(), userId);
-            if (card == null) {
-                throw new AppException("Картку відправника не знайдено або доступ заборонено", "CARD_NOT_FOUND", HttpStatus.NOT_FOUND);
+
+            if (card == null || !"ACTIVE".equals(card.status())) {
+                throw new AppException("Картку відправника не знайдено або вона неактивна", "CARD_NOT_ACTIVE", HttpStatus.BAD_REQUEST);
             }
             return card.accountId();
         } else {
