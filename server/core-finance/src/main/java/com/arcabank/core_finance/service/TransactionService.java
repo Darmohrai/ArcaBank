@@ -74,7 +74,7 @@ public class TransactionService {
     private UUID resolveSenderAccountId(UUID userId, TransferRequest request) {
         if (request.sourceType() == SourceType.CARD) {
             CardDto card = accountRepository.findCardByIdAndUserId(request.senderSourceId(), userId);
-            if (card == null) {
+            if (card == null || !"ACTIVE".equals(card.status())) {
                 throw new AppException(ErrorCode.CARD_NOT_FOUND, "Картку відправника не знайдено або доступ заборонено");
             }
             return card.accountId();
