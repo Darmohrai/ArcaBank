@@ -16,6 +16,7 @@ import java.util.UUID;
 public class AccountDto {
     private UUID id;
     private UUID userId;
+    private String iban;
     private String currency;
     private BigDecimal balance;
     private String status;

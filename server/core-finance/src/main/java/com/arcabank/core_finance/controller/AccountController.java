@@ -2,6 +2,7 @@ package com.arcabank.core_finance.controller;
 
 import com.arcabank.core_finance.dto.*;
 import com.arcabank.core_finance.service.AccountService;
+import com.arcabank.core_finance.service.PdfService;
 import com.arcabank.core_finance.service.TransactionService;
 import com.arcabank.core_finance.utils.RoutingRegistry;
 import jakarta.validation.Valid;
@@ -23,6 +24,7 @@ public class AccountController {
 
     private final AccountService accountService;
     private final TransactionService transactionService;
+    private final PdfService pdfService;
 
     @GetMapping(RoutingRegistry.Api.Accounts.ALL)
     public ResponseEntity<List<AccountDto>> getMyAccounts(@AuthenticationPrincipal Jwt jwt) {
@@ -112,5 +114,34 @@ public class AccountController {
         accountService.unblockAccount(accountId, userId);
 
         return ResponseEntity.ok(Map.of("message", "Account successfully unblocked"));
+    }
+
+    @GetMapping(value = RoutingRegistry.Api.Accounts.STATEMENT_PDF, produces = org.springframework.http.MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> getAccountStatementPdf(
+        @PathVariable UUID accountId,
+        @AuthenticationPrincipal Jwt jwt) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        AccountDto account = accountService.getAccountById(accountId, userId);
+        PageResponse<TransactionDto> history = transactionService.getTransactionHistory(accountId, userId, 0, 100);
+
+        Map<String, Object> variables = Map.of(
+            "userName", jwt.getClaimAsString("preferred_username"),
+            "iban", account.getIban(),
+            "balance", account.getBalance(),
+            "currency", account.getCurrency(),
+            "transactions", history.content()
+        );
+
+        byte[] pdfBytes = pdfService.generatePdfFromHtml("statement", variables);
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=statement_" + account.getIban() + ".pdf");
+
+        return ResponseEntity
+            .ok()
+            .headers(headers)
+            .body(pdfBytes);
     }
 }
