@@ -156,7 +156,7 @@ services:
     build:
       context: ./server
       dockerfile: auth-service/Dockerfile
-    container_name: arcabank_auth
+    container_name: arcabank-auth
     restart: unless-stopped
     environment:
       - SPRING_PROFILES_ACTIVE=docker
