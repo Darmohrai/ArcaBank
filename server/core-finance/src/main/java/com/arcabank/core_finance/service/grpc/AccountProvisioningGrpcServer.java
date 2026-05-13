@@ -11,6 +11,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -22,6 +23,7 @@ public class AccountProvisioningGrpcServer extends AccountProvisioningServiceGrp
     private final AccountService accountService;
 
     @Override
+    @Transactional
     public void createInitialAccount(CreateAccountRequest request, StreamObserver<CreateAccountResponse> responseObserver) {
         try {
             log.info("gRPC: Creating an initial account (WITHOUT CARD) for User ID: {}", request.getUserId());

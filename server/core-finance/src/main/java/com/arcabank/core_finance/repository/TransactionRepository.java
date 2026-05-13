@@ -1,19 +1,32 @@
 package com.arcabank.core_finance.repository;
 
+import com.arcabank.core_finance.dto.TransactionDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Repository
-public class TransactionRepository extends BaseRepository<Object> {
+public class TransactionRepository extends BaseRepository<TransactionDto> {
 
     public TransactionRepository(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate);
     }
+
+    private final RowMapper<TransactionDto> transactionRowMapper = (rs, rowNum) -> TransactionDto.builder()
+        .id(UUID.fromString(rs.getString("id")))
+        .senderAccountId(UUID.fromString(rs.getString("sender_account_id")))
+        .receiverAccountId(rs.getString("receiver_account_id") != null ? UUID.fromString(rs.getString("receiver_account_id")) : null)
+        .amount(rs.getBigDecimal("amount"))
+        .currency(rs.getString("currency"))
+        .status(rs.getString("status"))
+        .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
+        .build();
 
     public void createTransaction(UUID senderId, UUID receiverId, BigDecimal amount, String currency, String status) {
         String sql = "INSERT INTO transactions (id, sender_account_id, receiver_account_id, amount, currency, status, created_at) " +
@@ -23,4 +36,20 @@ public class TransactionRepository extends BaseRepository<Object> {
 
         update(sql, transactionId, senderId, receiverId, amount, currency, status);
     }
+
+    public List<TransactionDto> findTransactionsByAccountId(UUID accountId, int limit, int offset) {
+        String sql = """
+            SELECT * FROM transactions
+            WHERE sender_account_id = ? OR receiver_account_id = ?
+            ORDER BY created_at DESC
+            LIMIT ? OFFSET ?
+            """;
+        return queryList(sql, transactionRowMapper, accountId, accountId, limit, offset);
+    }
+
+    public long countTransactionsByAccountId(UUID accountId) {
+        String sql = "SELECT COUNT(*) FROM transactions WHERE sender_account_id = ? OR receiver_account_id = ?";
+        return jdbcTemplate.queryForObject(sql, Long.class, accountId, accountId);
+    }
+
 }

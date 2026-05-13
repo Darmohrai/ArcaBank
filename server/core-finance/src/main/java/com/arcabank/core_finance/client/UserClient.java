@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
-@FeignClient(name = "auth-service", url = "${auth-service.url:http://localhost:8081}")
+@FeignClient(name = "auth-service", url = "${bank.integration.auth-service.url:http://localhost:8081}")
 public interface UserClient {
 
     @GetMapping("api/v1/users/{id}")

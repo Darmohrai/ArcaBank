@@ -1,5 +1,6 @@
 package com.arcabank.core_finance.controller;
 
+import com.arcabank.core_finance.utils.RoutingRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HealthController {
     private final JdbcTemplate jdbcTemplate;
 
-    @GetMapping("/health")
+    @GetMapping(RoutingRegistry.Api.System.HEALTH)
     public ResponseEntity<String> healthCheck() {
         try {
             jdbcTemplate.queryForObject("SELECT 1", Integer.class);

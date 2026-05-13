@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
-@FeignClient(name = "nbu-client", url = "https://bank.gov.ua/NBUStatService/v1/statdirectory")
+@FeignClient(name = "nbu-client", url = "${bank.integration.nbu.url}")
 public interface NbuClient {
 
-    @GetMapping("/exchange?json")
+    @GetMapping("${bank.integration.nbu.json}")
     List<NbuRateResponse> getExchangeRates();
 }

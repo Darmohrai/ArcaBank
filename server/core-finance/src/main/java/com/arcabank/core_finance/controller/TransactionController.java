@@ -4,6 +4,7 @@ import com.arcabank.core_finance.dto.ExchangeRequest;
 import com.arcabank.core_finance.dto.TransferRequest;
 import com.arcabank.core_finance.service.ExchangeService;
 import com.arcabank.core_finance.service.TransactionService;
+import com.arcabank.core_finance.utils.RoutingRegistry;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,39 +16,39 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/transfers")
+@RequestMapping(RoutingRegistry.Api.Transfers.BASE)
 @RequiredArgsConstructor
 public class TransactionController {
 
     private final TransactionService transactionService;
     private final ExchangeService exchangeService;
 
-    @PostMapping("/transaction")
+    @PostMapping(RoutingRegistry.Api.Transfers.TRANSACTION)
     public ResponseEntity<Map<String, String>> makeTransfer(
-        @Valid @RequestBody TransferRequest request,
-        @AuthenticationPrincipal Jwt jwt) {
+            @Valid @RequestBody TransferRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
 
         UUID transactionId = transactionService.processInternalTransfer(userId, request);
 
         return ResponseEntity.ok(Map.of(
-            "message", "Transfer successful",
-            "transactionId", transactionId.toString()
+                "message", "Transfer successful",
+                "transactionId", transactionId.toString()
         ));
     }
 
-    @PostMapping("/exchange")
+    @PostMapping(RoutingRegistry.Api.Transfers.EXCHANGE)
     public ResponseEntity<Map<String, String>> exchangeCurrency(
-        @Valid @RequestBody ExchangeRequest request,
-        @AuthenticationPrincipal Jwt jwt) {
+            @Valid @RequestBody ExchangeRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
         UUID transactionId = exchangeService.processExchange(userId, request);
 
         return ResponseEntity.ok(Map.of(
-            "message", "Exchange successful",
-            "transactionId", transactionId.toString()
+                "message", "Exchange successful",
+                "transactionId", transactionId.toString()
         ));
     }
 }

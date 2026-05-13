@@ -1,0 +1,24 @@
+package com.arcabank.core_finance.notificator.model.type;
+
+public enum NotificationType {
+    PASSWORD_CHANGED,
+
+    TRANSFER_INCOME,
+    TRANSFER_EXPENSE,
+    PAYMENT_FAILED,
+    NOT_ENOUGH_MONEY,
+
+    ACCOUNT_CREATED,
+    ACCOUNT_BLOCKED,
+    ACCOUNT_UNBLOCKED,
+
+    CARD_CREATED,
+    CARD_BLOCKED,
+    CARD_UNBLOCKED,
+    LIMIT_EXCEEDED,
+
+    VOTING_STARTED,
+    VOTING_COMPLETED,
+    EXPENSE_SPLIT_ADDED,
+    EXPENSE_SETTLED
+}

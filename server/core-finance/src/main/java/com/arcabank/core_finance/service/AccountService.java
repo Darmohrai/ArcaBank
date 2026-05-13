@@ -7,6 +7,7 @@ import com.arcabank.core_finance.exception.AppException;
 import com.arcabank.core_finance.model.Account;
 import com.arcabank.core_finance.model.util.AccountStatus;
 import com.arcabank.core_finance.model.util.Currency;
+import com.arcabank.core_finance.notificator.engine.Notificator;
 import com.arcabank.core_finance.repository.AccountRepository;
 import com.arcabank.core_finance.model.util.BankDataGenerator;
 import com.arcabank.core_finance.model.util.TransliterationUtil;
@@ -16,6 +17,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,6 +34,8 @@ public class AccountService {
     private final UserClient userClient;
     private final PasswordEncoder passwordEncoder;
 
+    private final Notificator notificator;
+
     private static final int MAX_RETRIES = 3;
 
     public List<AccountDto> getAccountsByUserId(UUID userId) {
@@ -41,6 +45,7 @@ public class AccountService {
     }
 
     // 1. Method for gRPC: The data is already there—no need for Feign!
+    @Transactional
     public AccountResponse createAccountWithCard(UUID userId, AccountCreationRequest request, String firstName, String lastName) {
 
         String cardHolderName = TransliterationUtil.formatCardHolderName(firstName, lastName);
@@ -49,6 +54,7 @@ public class AccountService {
     }
 
     // 2. Old method: Used for the REST Controller (when the user creates the second card themselves)
+    @Transactional
     public AccountResponse createAccountWithCard(UUID userId, AccountCreationRequest request) {
 
         UserResponse user = userClient.getUserById(userId);
@@ -80,6 +86,8 @@ public class AccountService {
 
                 UUID accountId = ids.get("account_id");
                 UUID cardId = ids.get("cardId");
+
+                notificator.notifyCardCreated(userId, cardId, pan);
 
                 return AccountResponse.builder()
                     .accountId(accountId)
@@ -131,6 +139,7 @@ public class AccountService {
             ));
     }
 
+    @Transactional
     public AccountDto openNewAccount(UUID userId, AccountOnlyRequest request) {
         String iban = BankDataGenerator.generateIban();
 
@@ -145,9 +154,12 @@ public class AccountService {
         UUID accountId = accountRepository.createJustAccount(account);
         account.setId(accountId);
 
+        notificator.notifyAccountCreated(account);
+
         return accountMapper.toDto(account);
     }
 
+    @Transactional
     public CardDto issueCardForAccount(UUID userId, UUID accountId, CardCreationRequest request) {
         accountRepository.findByIdAndUserId(accountId, userId)
             .orElseThrow(() -> new AppException("Account not found", "NOT_FOUND", HttpStatus.NOT_FOUND));
@@ -164,6 +176,8 @@ public class AccountService {
             accountId, pan, cardHolderName, expDate, cvvHash, pinHash
         );
 
+        notificator.notifyCardCreated(userId, cardId, pan);
+
         return CardDto.builder()
             .id(cardId)
             .accountId(accountId)
@@ -172,5 +186,16 @@ public class AccountService {
             .expirationDate(expDate)
             .status("ACTIVE")
             .build();
+    }
+
+    public List<CardDto> getCardsByAccountId(UUID accountId, UUID userId) {
+        accountRepository.findByIdAndUserId(accountId, userId)
+            .orElseThrow(() -> new AppException(
+                "Рахунок не знайдено або доступ заборонено",
+                "ACCOUNT_NOT_FOUND",
+                HttpStatus.NOT_FOUND
+            ));
+
+        return accountRepository.findAllCardsByAccountId(accountId);
     }
 }

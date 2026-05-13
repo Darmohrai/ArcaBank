@@ -2,6 +2,7 @@ package com.arcabank.core_finance.controller;
 
 import com.arcabank.core_finance.dto.DepositRequest;
 import com.arcabank.core_finance.service.TransactionSystemService;
+import com.arcabank.core_finance.utils.RoutingRegistry;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/transactions")
+@RequestMapping(RoutingRegistry.Api.Transactions.BASE)
 @RequiredArgsConstructor
 public class TransactionSystemController {
 
     private final TransactionSystemService transactionSystemService;
 
-    @PostMapping("/deposit")
+    @PostMapping(RoutingRegistry.Api.Transactions.DEPOSIT)
     public ResponseEntity<String> deposit(
         @Valid @RequestBody DepositRequest request,
         @AuthenticationPrincipal Jwt jwt

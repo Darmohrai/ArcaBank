@@ -1,17 +1,18 @@
 package com.arcabank.core_finance.service;
 
-import com.arcabank.core_finance.dto.CardDto;
-import com.arcabank.core_finance.dto.SourceType;
-import com.arcabank.core_finance.dto.TransferRequest;
+import com.arcabank.core_finance.dto.*;
 import com.arcabank.core_finance.exception.AppException;
 import com.arcabank.core_finance.model.Account;
+import com.arcabank.core_finance.notificator.engine.Notificator;
 import com.arcabank.core_finance.repository.AccountRepository;
+import com.arcabank.core_finance.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -20,6 +21,8 @@ import java.util.UUID;
 public class TransactionService {
 
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
+    private final Notificator notificator;
 
     @Transactional
     public UUID processInternalTransfer(UUID userId, TransferRequest request) {
@@ -39,6 +42,18 @@ public class TransactionService {
         UUID receiverAccountId = resolveDestinationToAccountId(cleanDestination);
 
         try {
+            UUID transactionId = accountRepository.processTransfer(senderAccountId, receiverAccountId, request.amount());
+
+            Account senderAccount = accountRepository.findById(senderAccountId).orElseThrow();
+            Account receiverAccount = accountRepository.findById(receiverAccountId).orElseThrow();
+
+            notificator.notifyTransferSuccess(
+                senderAccount.getUserId(),
+                receiverAccount.getUserId(),
+                request.amount(),
+                senderAccount.getCurrency().name()
+            );
+
             log.info("Process transfer: SourceAccount: {}, TargetAccount: {}, Amount: {}", senderAccountId, receiverAccountId, request.amount());
             return accountRepository.processTransfer(senderAccountId, receiverAccountId, request.amount());
         } catch (Exception e) {
@@ -79,5 +94,34 @@ public class TransactionService {
 
     private boolean isIbanFormat(String text) {
         return text.matches("^UA\\d{27}$");
+    }
+
+    public PageResponse<TransactionDto> getTransactionHistory(UUID accountId, UUID userId, int page, int size) {
+
+        accountRepository.findByIdAndUserId(accountId, userId)
+            .orElseThrow(() -> new AppException("Рахунок не знайдено або доступ заборонено", "ACCOUNT_NOT_FOUND", HttpStatus.NOT_FOUND));
+
+        int offset = page * size;
+        List<TransactionDto> rawTransactions = transactionRepository.findTransactionsByAccountId(accountId, size, offset);
+        long totalElements = transactionRepository.countTransactionsByAccountId(accountId);
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+
+        List<TransactionDto> enrichedTransactions = rawTransactions.stream()
+            .map(t -> {
+                String type = accountId.equals(t.senderAccountId()) ? "EXPENSE" : "INCOME";
+                return TransactionDto.builder()
+                    .id(t.id())
+                    .senderAccountId(t.senderAccountId())
+                    .receiverAccountId(t.receiverAccountId())
+                    .amount(t.amount())
+                    .currency(t.currency())
+                    .status(t.status())
+                    .createdAt(t.createdAt())
+                    .type(type)
+                    .build();
+            })
+            .toList();
+
+        return new PageResponse<>(enrichedTransactions, page, size, totalElements, totalPages);
     }
 }
