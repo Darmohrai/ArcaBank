@@ -52,4 +52,26 @@ public class TransactionRepository extends BaseRepository<TransactionDto> {
         return jdbcTemplate.queryForObject(sql, Long.class, accountId, accountId);
     }
 
+    public List<TransactionDto> findAllTransactionsByUserId(UUID userId, int limit, int offset) {
+        String sql = """
+            SELECT DISTINCT t.* FROM transactions t
+            LEFT JOIN accounts sender_acc ON t.sender_account_id = sender_acc.id
+            LEFT JOIN accounts receiver_acc ON t.receiver_account_id = receiver_acc.id
+            WHERE sender_acc.user_id = ? OR receiver_acc.user_id = ?
+            ORDER BY t.created_at DESC
+            LIMIT ? OFFSET ?
+            """;
+        return queryList(sql, transactionRowMapper, userId, userId, limit, offset);
+    }
+
+    public long countAllTransactionsByUserId(UUID userId) {
+        String sql = """
+            SELECT COUNT(DISTINCT t.id) FROM transactions t
+            LEFT JOIN accounts sender_acc ON t.sender_account_id = sender_acc.id
+            LEFT JOIN accounts receiver_acc ON t.receiver_account_id = receiver_acc.id
+            WHERE sender_acc.user_id = ? OR receiver_acc.user_id = ?
+            """;
+        return jdbcTemplate.queryForObject(sql, Long.class, userId, userId);
+    }
+
 }

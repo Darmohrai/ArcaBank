@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.List;
 
@@ -50,5 +51,27 @@ public class CardController {
         UUID userId = UUID.fromString(jwt.getSubject());
         CardDto card = accountService.issueCardForAccount(userId, accountId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(card);
+    }
+
+    @PatchMapping(RoutingRegistry.Api.Cards.BLOCK)
+    public ResponseEntity<Map<String, String>> blockCard(
+        @PathVariable("cardId") UUID cardId,
+        @AuthenticationPrincipal Jwt jwt) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+        accountService.blockCard(cardId, userId);
+
+        return ResponseEntity.ok(Map.of("message", "Card successfully blocked"));
+    }
+
+    @PatchMapping(RoutingRegistry.Api.Cards.UNBLOCK)
+    public ResponseEntity<Map<String, String>> unblockCard(
+        @PathVariable("cardId") UUID cardId,
+        @AuthenticationPrincipal Jwt jwt) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+        accountService.unblockCard(cardId, userId);
+
+        return ResponseEntity.ok(Map.of("message", "Card successfully unblocked"));
     }
 }

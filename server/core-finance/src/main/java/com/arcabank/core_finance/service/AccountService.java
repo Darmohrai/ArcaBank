@@ -11,10 +11,10 @@ import com.arcabank.core_finance.notificator.engine.Notificator;
 import com.arcabank.core_finance.repository.AccountRepository;
 import com.arcabank.core_finance.model.util.BankDataGenerator;
 import com.arcabank.core_finance.model.util.TransliterationUtil;
+import com.arcabank.core_finance.utils.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +38,7 @@ public class AccountService {
 
     private static final int MAX_RETRIES = 3;
 
+    @Transactional(readOnly = true)
     public List<AccountDto> getAccountsByUserId(UUID userId) {
         return accountMapper.toDtoList(
             accountRepository.findAllByUserId(userId)
@@ -104,39 +105,38 @@ public class AccountService {
             } catch (DataIntegrityViolationException ex) {
                 log.warn("The card number or IBAN already exists. Let's try again... (Attempt {}/{})", attempt, MAX_RETRIES);
                 if (attempt == MAX_RETRIES) {
-                    throw new AppException("Unable to create a unique card after 3 attempts", "CARD_GENERATION_FAILED", HttpStatus.INTERNAL_SERVER_ERROR);
+                    throw new AppException(ErrorCode.CARD_GENERATION_FAILED);
                 }
             } catch (Exception ex) {
                 log.error("An error occurred while creating the account", ex);
-                throw new AppException("Internal server error while creating an account", "INTERNAL_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+                throw new AppException(ErrorCode.INTERNAL_ERROR, "Internal server error while creating an account");
             }
         }
 
-        throw new AppException("An unexpected error", "UNKNOWN_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new AppException(ErrorCode.INTERNAL_ERROR, "An unexpected error");
     }
 
+    @Transactional(readOnly = true)
     public CardDto getCardById(UUID cardId, UUID userId) {
         CardDto card = accountRepository.findCardByIdAndUserId(cardId, userId);
 
         if (card == null) {
-            throw new AppException("Card not found or access denied", "CARD_NOT_FOUND", HttpStatus.NOT_FOUND);
+            throw new AppException(ErrorCode.CARD_NOT_FOUND);
         }
 
         return card;
     }
 
+    @Transactional(readOnly = true)
     public List<CardDto> getAllCardsByUserId(UUID userId) {
         return accountRepository.findAllCardsByUserId(userId);
     }
 
+    @Transactional(readOnly = true)
     public AccountDto getAccountById(UUID accountId, UUID userId) {
         return accountRepository.findByIdAndUserId(accountId, userId)
             .map(accountMapper::toDto)
-            .orElseThrow(() -> new AppException(
-                "Account not found or access denied",
-                "ACCOUNT_NOT_FOUND",
-                HttpStatus.NOT_FOUND
-            ));
+            .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
     }
 
     @Transactional
@@ -162,7 +162,7 @@ public class AccountService {
     @Transactional
     public CardDto issueCardForAccount(UUID userId, UUID accountId, CardCreationRequest request) {
         accountRepository.findByIdAndUserId(accountId, userId)
-            .orElseThrow(() -> new AppException("Account not found", "NOT_FOUND", HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         UserResponse user = userClient.getUserById(userId);
         String cardHolderName = TransliterationUtil.formatCardHolderName(user.firstName(), user.lastName());
@@ -188,14 +188,71 @@ public class AccountService {
             .build();
     }
 
+    @Transactional(readOnly = true)
     public List<CardDto> getCardsByAccountId(UUID accountId, UUID userId) {
         accountRepository.findByIdAndUserId(accountId, userId)
-            .orElseThrow(() -> new AppException(
-                "Рахунок не знайдено або доступ заборонено",
-                "ACCOUNT_NOT_FOUND",
-                HttpStatus.NOT_FOUND
-            ));
+            .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         return accountRepository.findAllCardsByAccountId(accountId);
+    }
+
+    @Transactional
+    public void blockAccount(UUID accountId, UUID userId) {
+        Account account = accountRepository.findByIdAndUserId(accountId, userId)
+            .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        if (account.getStatus() == AccountStatus.BLOCKED) {
+            throw new AppException(ErrorCode.ALREADY_BLOCKED);
+        }
+
+        accountRepository.updateAccountStatus(accountId, AccountStatus.BLOCKED);
+        account.setStatus(AccountStatus.BLOCKED);
+
+        notificator.notifyAccountBlocked(account);
+        log.info("Account {} was BLOCKED by user {}", accountId, userId);
+    }
+
+    @Transactional
+    public void unblockAccount(UUID accountId, UUID userId) {
+        Account account = accountRepository.findByIdAndUserId(accountId, userId)
+            .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        if (account.getStatus() == AccountStatus.ACTIVE) {
+            throw new AppException(ErrorCode.ALREADY_ACTIVE);
+        }
+
+        accountRepository.updateAccountStatus(accountId, AccountStatus.ACTIVE);
+        account.setStatus(AccountStatus.ACTIVE);
+
+        notificator.notifyAccountUnblocked(account);
+        log.info("Account {} was UNBLOCKED by user {}", accountId, userId);
+    }
+
+    @Transactional
+    public void blockCard(UUID cardId, UUID userId) {
+        CardDto card = getCardById(cardId, userId);
+
+        if ("BLOCKED".equals(card.status())) {
+            throw new AppException(ErrorCode.ALREADY_BLOCKED);
+        }
+
+        accountRepository.updateCardStatus(cardId, "BLOCKED");
+
+        notificator.notifyCardBlocked(userId, cardId, card.cardNumber());
+        log.info("Card {} was BLOCKED by user {}", cardId, userId);
+    }
+
+    @Transactional
+    public void unblockCard(UUID cardId, UUID userId) {
+        CardDto card = getCardById(cardId, userId);
+
+        if ("ACTIVE".equals(card.status())) {
+            throw new AppException(ErrorCode.ALREADY_ACTIVE);
+        }
+
+        accountRepository.updateCardStatus(cardId, "ACTIVE");
+
+        notificator.notifyCardUnblocked(userId, cardId, card.cardNumber());
+        log.info("Card {} was UNBLOCKED by user {}", cardId, userId);
     }
 }

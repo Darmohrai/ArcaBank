@@ -1,6 +1,7 @@
 package com.arcabank.core_finance.notificator.service;
 
 import com.arcabank.core_finance.notificator.annotation.NotificationHandler;
+import com.arcabank.core_finance.notificator.event.FailedNotificationEvent;
 import com.arcabank.core_finance.notificator.event.NotificationEvent;
 import com.arcabank.core_finance.notificator.model.BaseNotification;
 import com.arcabank.core_finance.notificator.model.outbox.NotificationOutbox;
@@ -9,9 +10,12 @@ import com.arcabank.core_finance.notificator.service.strategy.NotificationStrate
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -72,6 +76,30 @@ public class NotificationDispatcher {
         } catch (JsonProcessingException e) {
             log.error("Serialization failed", e);
             return null;
+        }
+    }
+
+    @EventListener
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveFailedToOutbox(FailedNotificationEvent event) {
+        NotificationStrategy<?> strategy = strategyRegistry.get(event.getClass());
+        if (strategy == null) return;
+
+        @SuppressWarnings("unchecked")
+        BaseNotification notification = ((NotificationStrategy<NotificationEvent>) strategy).buildNotification(event);
+
+        try {
+            NotificationOutbox outboxMessage = NotificationOutbox.builder()
+                .id(UUID.randomUUID())
+                .topic("system.notifications")
+                .payload(objectMapper.writeValueAsString(notification))
+                .status(NotificationOutbox.OutboxStatus.PENDING)
+                .retryCount(0)
+                .build();
+
+            outboxRepository.insert(outboxMessage);
+        } catch (JsonProcessingException e) {
+            log.error("Failed serialization", e);
         }
     }
 

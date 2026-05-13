@@ -1,6 +1,8 @@
 package com.arcabank.core_finance.controller;
 
 import com.arcabank.core_finance.dto.ExchangeRequest;
+import com.arcabank.core_finance.dto.PageResponse;
+import com.arcabank.core_finance.dto.TransactionDto;
 import com.arcabank.core_finance.dto.TransferRequest;
 import com.arcabank.core_finance.service.ExchangeService;
 import com.arcabank.core_finance.service.TransactionService;
@@ -50,5 +52,18 @@ public class TransactionController {
                 "message", "Exchange successful",
                 "transactionId", transactionId.toString()
         ));
+    }
+
+    @GetMapping(RoutingRegistry.Api.Transfers.HISTORY)
+    public ResponseEntity<PageResponse<TransactionDto>> getAllTransactionsHistory(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size,
+        @AuthenticationPrincipal Jwt jwt) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        PageResponse<TransactionDto> response = transactionService.getAllUserTransactionHistory(userId, page, size);
+
+        return ResponseEntity.ok(response);
     }
 }

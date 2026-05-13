@@ -184,4 +184,14 @@ public class AccountRepository extends BaseRepository<Account> {
         String sql = "SELECT * FROM cards WHERE account_id = ? ORDER BY created_at DESC";
         return jdbcTemplate.query(sql, cardRowMapper, accountId);
     }
+
+    public void updateAccountStatus(UUID accountId, AccountStatus newStatus) {
+        String sql = "UPDATE accounts SET status = ? WHERE id = ?";
+        jdbcTemplate.update(sql, newStatus.name(), accountId);
+    }
+
+    public void updateCardStatus(UUID cardId, String newStatus) {
+        String sql = "UPDATE cards SET status = ? WHERE id = ?";
+        jdbcTemplate.update(sql, newStatus, cardId);
+    }
 }

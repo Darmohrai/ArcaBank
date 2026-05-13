@@ -40,4 +40,32 @@ public class TemplateTextCreator {
     public static String generateTransferExpenseText(java.math.BigDecimal amount, String currency) {
         return String.format("З вашого рахунку успішно списано %s %s.", amount.toPlainString(), currency);
     }
+
+    public static String generateCardBlockedText(String maskedPan) {
+        return String.format(
+                "Вашу картку %s було тимчасово заблоковано. Операції з нею наразі недоступні.",
+                maskedPan
+        );
+    }
+
+    public static String generateCardUnblockedText(String maskedPan) {
+        return String.format(
+                "Вашу картку %s успішно розблоковано. Ви знову можете здійснювати операції.",
+                maskedPan
+        );
+    }
+
+    public static String generateNotEnoughMoneyText(java.math.BigDecimal amount, String currency) {
+        return String.format(
+                "Спроба переказу на суму %s %s відхилена. На вашому рахунку недостатньо коштів для здійснення цієї операції.",
+                amount.toPlainString(), currency
+        );
+    }
+
+    public static String generatePaymentFailedText(java.math.BigDecimal amount, String currency, String reason) {
+        return String.format(
+                "Ваш переказ на суму %s %s не було виконано. Причина: %s. Будь ласка, перевірте реквізити або спробуйте пізніше.",
+                amount.toPlainString(), currency, reason
+        );
+    }
 }
