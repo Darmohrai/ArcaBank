@@ -71,4 +71,34 @@ public class Notificator {
         );
         eventPublisher.publishEvent(incomeEvent);
     }
+
+    public void notifyCardBlocked(UUID userId, UUID cardId, String pan) {
+        String maskedPan = "**** " + pan.substring(pan.length() - 4);
+        CardBlockedEvent event = new CardBlockedEvent(
+                userId, cardId, maskedPan, "email@email" // todo:
+        );
+        eventPublisher.publishEvent(event);
+    }
+
+    public void notifyCardUnblocked(UUID userId, UUID cardId, String pan) {
+        String maskedPan = "**** " + pan.substring(pan.length() - 4);
+        CardUnblockedEvent event = new CardUnblockedEvent(
+                userId, cardId, maskedPan, "email@email" // todo:
+        );
+        eventPublisher.publishEvent(event);
+    }
+
+    public void notifyNotEnoughMoney(UUID userId, java.math.BigDecimal amount, String currency) {
+        NotEnoughMoneyEvent event = new NotEnoughMoneyEvent(
+                userId, amount, currency, "email@email"
+        );
+        eventPublisher.publishEvent(event);
+    }
+
+    public void notifyPaymentFailed(UUID userId, java.math.BigDecimal amount, String currency, String reason) {
+        PaymentFailedEvent event = new PaymentFailedEvent(
+                userId, amount, currency, reason, "email@email"
+        );
+        eventPublisher.publishEvent(event);
+    }
 }

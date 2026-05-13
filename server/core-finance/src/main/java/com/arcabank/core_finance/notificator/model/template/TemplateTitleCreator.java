@@ -28,4 +28,20 @@ public class TemplateTitleCreator {
     public static String generateTransferExpenseTitle() {
         return "📤 Переказ надіслано";
     }
+
+    public static String generateCardBlockedTitle() {
+        return "🔒 Картку заблоковано";
+    }
+
+    public static String generateCardUnblockedTitle() {
+        return "🔓 Картку розблоковано";
+    }
+
+    public static String generateNotEnoughMoneyTitle() {
+        return "❌ Відмова: Недостатньо коштів";
+    }
+
+    public static String generatePaymentFailedTitle() {
+        return "⚠️ Помилка переказу";
+    }
 }

@@ -23,6 +23,8 @@ public class RoutingRegistry {
             public static final String BY_ID = "/{id}";
             public static final String ACCOUNT_TRANSACTIONS = "/{accountId}/transactions";
             public static final String ACCOUNT_CARDS = "/{accountId}/cards";
+            public static final String BLOCK = "/{accountId}/block";
+            public static final String UNBLOCK = "/{accountId}/unblock";
         }
 
         public static final class Cards {
@@ -30,12 +32,15 @@ public class RoutingRegistry {
             public static final String ALL = "/all";
             public static final String BY_ID = "/{cardId}";
             public static final String CREATE = "/{accountId}/create";
+            public static final String BLOCK = "/{cardId}/block";
+            public static final String UNBLOCK = "/{cardId}/unblock";
         }
 
         public static final class Transfers {
             public static final String BASE = V1 + TRANSFERS_RESOURCE;
             public static final String TRANSACTION = "/transaction";
             public static final String EXCHANGE = "/exchange";
+            public static final String HISTORY = "/history";
         }
 
         public static final class Transactions {

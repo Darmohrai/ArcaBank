@@ -114,6 +114,28 @@
 **Запит:** Параметр шляху `accountId` (UUID рахунку).
 **Відповідь (200 OK):** Список об'єктів карток (див. п. 2.1).
 
+### 1.7 Блокування рахунку
+**Ендпойнт:** `PATCH /{accountId}/block`
+**Бізнес-логіка:** Тимчасово блокує рахунок. Заблокований рахунок не може бути джерелом для переказів. Відправляє push-сповіщення клієнту.
+**Запит:** Параметр шляху `accountId` (UUID рахунку).
+**Відповідь (200 OK):**
+```json
+{
+  "message": "Account successfully blocked"
+}
+```
+
+### 1.8 Розблокування рахунку
+**Ендпойнт:** `PATCH /{accountId}/unblock`
+**Бізнес-логіка:** Відновлює роботу заблокованого рахунку. Відправляє push-сповіщення клієнту.
+**Запит:** Параметр шляху `accountId` (UUID рахунку).
+**Відповідь (200 OK):**
+```json
+{
+  "message": "Account successfully unblocked"
+}
+```
+
 ---
 
 ## 2. Картки (Cards)
@@ -154,6 +176,34 @@
 }
 ```
 **Відповідь (201 Created):** Об'єкт новоствореної картки (формат аналогічний п. 2.1).
+
+### 2.4 Блокування картки
+**Ендпойнт:** `PATCH /{cardId}/block`
+**Бізнес-логіка:** Тимчасово блокує картку. Операції за цією карткою будуть відхилятися, але сам рахунок залишається активним.
+**Запит:** Параметр шляху `cardId` (UUID картки).
+**Відповідь (200 OK):**
+```json
+{
+  "message": "Card successfully blocked"
+}
+```
+
+### 2.5 Розблокування картки
+**Ендпойнт:** `PATCH /{cardId}/unblock`
+**Бізнес-логіка:** Відновлює роботу заблокованої картки.
+**Запит:** Параметр шляху `cardId` (UUID картки).
+**Відповідь (200 OK):**
+```json
+{
+  "message": "Card successfully unblocked"
+}
+```
+
+### 2.6 Отримання історії транзакцій за карткою
+**Ендпойнт:** `GET /{cardId}/transactions`
+**Бізнес-логіка:** Повертає пагіновану історію транзакцій (INCOME/EXPENSE) для конкретної картки (на основі прив'язаного до неї рахунку).
+**Параметри запиту (Query):** `page` (за замовчуванням 0), `size` (за замовчуванням 20).
+**Відповідь (200 OK):** Формат ідентичний відповіді в п. 1.5 (PageResponse).
 
 ---
 
@@ -197,6 +247,32 @@
 {
   "message": "Exchange successful",
   "transactionId": "a1b2c3d4-e5f6-7890-abcd-1234567890ab"
+}
+```
+
+### 3.3 Загальна історія транзакцій користувача (Глобальна виписка)
+**Ендпойнт:** `GET /history`
+**Бізнес-логіка:** Повертає глобальну стрічку транзакцій по **всіх** рахунках та картках авторизованого користувача. Включає визначення внутрішніх переказів (INTERNAL).
+**Параметри запиту (Query):** `page` (за замовчуванням 0), `size` (за замовчуванням 20).
+**Відповідь (200 OK):**
+```json
+{
+  "content": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab",
+      "senderAccountId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "receiverAccountId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+      "amount": 100.00,
+      "currency": "USD",
+      "status": "COMPLETED",
+      "createdAt": "2026-05-13T12:00:00",
+      "type": "INTERNAL"
+    }
+  ],
+  "pageNumber": 0,
+  "pageSize": 20,
+  "totalElements": 150,
+  "totalPages": 8
 }
 ```
 
@@ -258,25 +334,34 @@
 ---
 
 ## Глобальна обробка помилок (Error Handling)
-Якщо виникає помилка бізнес-логіки (AppException), система повертає стандартизований JSON `ErrorResponse`.
+Система використовує індустріальний стандарт **RFC 7807 (Problem Details for HTTP APIs)** для обробки помилок. Всі помилки (400, 403, 404, 500) повертаються у єдиному стандартизованому форматі.
 
-**Приклад бізнес-помилки (400, 403, 404):**
+**Приклад бізнес-помилки (наприклад, недостатньо коштів - 400 Bad Request):**
 ```json
 {
-  "timestamp": "2026-05-13T10:37:00",
-  "errorCode": "ACCOUNT_NOT_FOUND", // Код помилки для фронтенду
-  "message": "Account not found or access denied" // Людяний опис
+  "type": "[https://api.arcabank.com/errors/insufficient_funds](https://api.arcabank.com/errors/insufficient_funds)",
+  "title": "INSUFFICIENT_FUNDS",
+  "status": 400,
+  "detail": "Недостатньо коштів на рахунку для здійснення переказу.",
+  "instance": "/api/v1/transfers/transaction",
+  "timestamp": "2026-05-13T10:37:00.123Z"
 }
 ```
 
 **Приклад помилки валідації вхідних даних (400 Bad Request):**
+Якщо користувач відправив невалідні дані (наприклад, порожній номер картки або від'ємну суму), поле `title` завжди буде `VALIDATION_ERROR`, а в об'єкті з'явиться поле `invalid_fields` з деталями по кожному інпуту.
 ```json
 {
-  "errorCode": "VALIDATION_ERROR",
-  "message": "Validation failed for one or more fields",
-  "errors": {
-    "pin": "PIN must be exactly 4 digits",
-    "currency": "Only UAH, USD, or EUR are accepted"
+  "type": "[https://api.arcabank.com/errors/validation_error](https://api.arcabank.com/errors/validation_error)",
+  "title": "VALIDATION_ERROR",
+  "status": 400,
+  "detail": "Помилка валідації вхідних даних",
+  "instance": "/api/v1/transfers/transaction",
+  "timestamp": "2026-05-13T10:38:00.123Z",
+  "invalid_fields": {
+    "amount": "Сума має бути більшою за нуль",
+    "destination": "Реквізити отримувача обов'язкові"
   }
 }
+```
 ```
