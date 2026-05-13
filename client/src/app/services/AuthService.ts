@@ -6,6 +6,8 @@ import { LoginRequest } from '../request/LoginRequest';
 import { LoginResponse } from '../response/LoginResponse';
 import { isPlatformBrowser } from '@angular/common';
 import {Router} from "@angular/router";
+import {AccountService} from "./AccountService";
+import {CardService} from "./CardService";
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -13,6 +15,8 @@ export class AuthService {
   private apiUrl = 'http://localhost/api/v1/auth/public';
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
+  private AccountService = inject(AccountService)
+  private CardService = inject(CardService)
 
   private readonly ACCESS_KEY = 'auth_token';
   private readonly REFRESH_KEY = 'auth_refresh_token';
@@ -49,6 +53,15 @@ export class AuthService {
           storage.setItem(this.ACCESS_KEY, res.access_token);
           storage.setItem(this.REFRESH_KEY, res.refresh_token);
           storage.setItem(this.EXPIRES_AT_KEY, String(expiresAt));
+          this.AccountService.getAllAccounts().subscribe(accounts => {
+            this.AccountService.userAccounts.set(accounts);
+            console.log(this.AccountService.userAccounts());
+          })
+
+          this.CardService.getAllCards().subscribe(cards => {
+            this.CardService.userCards.set(cards);
+            console.log(this.CardService.userCards());
+          })
         }
         this.loggedIn.next(true);
         console.log(this.loggedIn.value);
