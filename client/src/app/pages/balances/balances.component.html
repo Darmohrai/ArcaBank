@@ -1,21 +1,24 @@
 <section class="balances">
 
   <div class="balances__create-account-container">
-    <p>Потрібен рахунок? <span (click)="showAccountCreationDialog()">Створіть його!</span> </p>
+    <p>Потрібен рахунок? <span (click)="showAccountCreationDialog()">Створіть його!</span></p>
   </div>
 
   <div class="balances__tabs-container">
-    <p-tabView>
-      <p-tabPanel *ngFor="let tab of testTabs" [header]="tab.title">
+    <p-tabView [(activeIndex)]="activeTabIndex">
+      <p-tabPanel
+        *ngFor="let tab of accountTabs"
+        [header]="tab.account.currency + ' · ' + tab.account.balance">
+
         <div class="balances__cards-grid">
 
-          <div class="balances__card" *ngFor="let card of tab.content">
+          <div class="balances__card" *ngFor="let card of tab.cards">
             <p class="balances__card-title">arcabank</p>
-            <p class="balances__card-number">{{ card.cardNumber }}</p>
+            <p class="balances__card-number">{{ formatCardNumber(card.cardNumber) }}</p>
             <p class="balances__card-holder">{{ card.cardHolderName }}</p>
           </div>
 
-          <button class="balances__create-account-btn" (click)="showCardCreationDialog()"  type="button">+</button>
+          <button class="balances__create-account-btn" (click)="showCardCreationDialog()" type="button">+</button>
 
         </div>
       </p-tabPanel>
@@ -23,46 +26,63 @@
   </div>
 
 
-
-
-
-  <p-dialog draggable="false" header="Створити рахунок" [modal]="true" [(visible)]="visibleAccountCreation" [style]="{ width: '25rem' }">
+  <!-- Діалог створення рахунку -->
+  <p-dialog draggable="false" header="Створити рахунок" [modal]="true"
+            [(visible)]="visibleAccountCreation" [style]="{ width: '25rem' }">
     <form class="balances__form" [formGroup]="createAccountForm" (ngSubmit)="submitAccountCreationForm()">
       <div class="balances__form-select-container">
-        <select class="balances__form-select" formControlName="currency" name="currency">
-          <option selected value="UAH">UAH</option>
+        <select class="balances__form-select" formControlName="currency">
+          <option value="UAH">UAH</option>
           <option value="EUR">EUR</option>
           <option value="USD">USD</option>
         </select>
       </div>
-
       <div class="balances__form-select-container">
-        <select class="balances__form-select" formControlName="type" name="type">
-          <option selected value="DEBIT">DEBIT</option>
+        <select class="balances__form-select" formControlName="type">
+          <option value="DEBIT">DEBIT</option>
           <option value="CREDIT">CREDIT</option>
           <option value="VIRTUAL">VIRTUAL</option>
           <option value="CHECKING">CHECKING</option>
           <option value="SAVINGS">SAVINGS</option>
         </select>
       </div>
-
       <button class="balances__form-submit-btn" type="submit">створити</button>
       <button class="balances__form-cancel-btn" type="button" (click)="visibleAccountCreation = false">відміна</button>
     </form>
-
   </p-dialog>
 
-  <p-dialog draggable="false" header="Створити карту" [modal]="true" [(visible)]="visibleCardCreation" [style]="{ width: '25rem' }">
+
+  <!-- Діалог створення картки -->
+  <p-dialog draggable="false" header="Створити картку" [modal]="true"
+            [(visible)]="visibleCardCreation" [style]="{ width: '25rem' }">
     <form class="balances__form" [formGroup]="createCardForm" (ngSubmit)="submitCardCreationForm()">
 
+      <div class="balances__form-input-container">
+        <input
+          class="balances__form-input"
+          type="password"
+          formControlName="pin"
+          placeholder="Введіть PIN-код (4 цифри)"
+          maxlength="4"
+          inputmode="numeric"
+        />
+        <small
+          *ngIf="createCardForm.controls.pin.invalid && createCardForm.controls.pin.touched">
+          PIN-код має містити рівно 4 цифри
+        </small>
+      </div>
 
-      <button class="balances__form-submit-btn" type="submit">створити</button>
+      <button
+        class="balances__form-submit-btn"
+        type="submit"
+        [disabled]="createCardForm.invalid">
+        створити
+      </button>
       <button class="balances__form-cancel-btn" type="button" (click)="visibleCardCreation = false">відміна</button>
     </form>
-
   </p-dialog>
 
 
-  <p-toast />
+  <p-toast/>
 
 </section>

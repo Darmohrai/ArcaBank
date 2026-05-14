@@ -1,13 +1,20 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {AccountService} from "../../services/AccountService";
+import {CardService} from "../../services/CardService";
 import {DialogModule} from "primeng/dialog";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {CreateAccountRequest} from "../../request/AccountRequest";
 import {ToastModule} from "primeng/toast";
 import {MessageService} from "primeng/api";
 import {TabViewModule} from "primeng/tabview";
-import {tabs} from "../../models/BalancesTabsInterface";
-import {NgForOf} from "@angular/common";
+import {NgForOf, NgIf} from "@angular/common";
+import {CreateAccountResponse} from "../../response/AccountResponse";
+import {getAllCardsResponse} from "../../response/CardsResponse";
+
+interface AccountTab {
+  account: CreateAccountResponse;
+  cards: getAllCardsResponse[];
+}
 
 @Component({
   selector: 'app-balances',
@@ -17,7 +24,8 @@ import {NgForOf} from "@angular/common";
     ReactiveFormsModule,
     ToastModule,
     TabViewModule,
-    NgForOf
+    NgForOf,
+    NgIf
   ],
   providers: [MessageService],
   templateUrl: './balances.component.html',
@@ -25,127 +33,113 @@ import {NgForOf} from "@angular/common";
 })
 export class BalancesComponent implements OnInit {
 
+  private accountService = inject(AccountService);
+  private cardService = inject(CardService);
+  private messageService = inject(MessageService);
 
-  private AccountService = inject(AccountService)
-  private messageService = inject(MessageService)
-  visibleAccountCreation: boolean = false;
-  visibleCardCreation: boolean = false;
-  testTabs: tabs[] = []
+  visibleAccountCreation = false;
+  visibleCardCreation = false;
+
+  accountTabs: AccountTab[] = [];
+  activeTabIndex = 0;
 
   createAccountForm = new FormGroup({
-    currency: new FormControl<'UAH' | 'USD' | 'EUR'>('UAH', {
-      nonNullable: true
-    }),
-    type: new FormControl<'DEBIT' | 'CREDIT' | 'VIRTUAL' | 'CHECKING' | 'SAVINGS'>('DEBIT', {
-      nonNullable: true
-    }),
-  })
+    currency: new FormControl<'UAH' | 'USD' | 'EUR'>('UAH', {nonNullable: true}),
+    type: new FormControl<'DEBIT' | 'CREDIT' | 'VIRTUAL' | 'CHECKING' | 'SAVINGS'>('DEBIT', {nonNullable: true}),
+  });
 
-  createCardForm = new FormGroup({})
+  createCardForm = new FormGroup({
+    pin: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.pattern(/^\d{4}$/)
+      ]
+    })
+  });
 
-  submitAccountCreationForm() {
+  ngOnInit(): void {
+    this.loadAccountsWithCards();
+  }
 
-    const payloadData: CreateAccountRequest = {
+  loadAccountsWithCards(): void {
+    this.accountService.getAllAccounts().subscribe({
+      next: (accounts) => {
+        this.accountTabs = accounts.map(account => ({
+          account,
+          cards: []
+        }));
+        this.loadAllCards();
+      },
+      error: () => this.showError('Помилка!', 'Не вдалося завантажити рахунки.')
+    });
+  }
+
+  loadAllCards(): void {
+    this.cardService.getAllCards().subscribe({
+      next: (allCards) => {
+        this.accountTabs = this.accountTabs.map(tab => ({
+          ...tab,
+          cards: allCards.filter(card => card.accountId === tab.account.id)
+        }));
+      },
+      error: () => this.showError('Помилка!', 'Не вдалося завантажити картки.')
+    });
+  }
+
+  get activeAccountId(): string | null {
+    return this.accountTabs[this.activeTabIndex]?.account?.id ?? null;
+  }
+
+  submitAccountCreationForm(): void {
+    const payload: CreateAccountRequest = {
       currency: this.createAccountForm.controls.currency.value,
       type: this.createAccountForm.controls.type.value
-    }
+    };
 
-    this.AccountService.createAccount(payloadData)
-      .subscribe({
-        next: (response) => {
-          console.log('SUCCESS', response);
-          this.showSuccess('Успіх!', 'Рахунок створено.')
-          this.visibleAccountCreation = false;
-        },
-        error: (error) => {
-          this.showError('Помилка!', 'Не вдалося відкрити рахунок. Спробуйте пізніше.')
-          console.log('ERROR', error);
-        }
-      })
+    this.accountService.createAccount(payload).subscribe({
+      next: () => {
+        this.showSuccess('Успіх!', 'Рахунок створено.');
+        this.visibleAccountCreation = false;
+        this.loadAccountsWithCards();
+      },
+      error: () => this.showError('Помилка!', 'Не вдалося відкрити рахунок. Спробуйте пізніше.')
+    });
   }
 
-  submitCardCreationForm() {
-    console.log('ok')
+  submitCardCreationForm(): void {
+    if (this.createCardForm.invalid || !this.activeAccountId) return;
+
+    const payload = {pin: Number(this.createCardForm.controls.pin.value)};
+
+    this.cardService.createCardByAccount(payload, this.activeAccountId).subscribe({
+      next: () => {
+        this.showSuccess('Успіх!', 'Картку створено.');
+        this.visibleCardCreation = false;
+        this.createCardForm.reset();
+        this.loadAllCards();
+      },
+      error: () => this.showError('Помилка!', 'Не вдалося створити картку. Спробуйте пізніше.')
+    });
   }
 
-
-  showAccountCreationDialog() {
+  showAccountCreationDialog(): void {
     this.visibleAccountCreation = true;
   }
 
-  showCardCreationDialog() {
+  showCardCreationDialog(): void {
     this.visibleCardCreation = true;
   }
 
-  showSuccess(summary: string, detail: string) {
-    this.messageService.add({ severity: 'success', summary: summary, detail: detail });
+  showSuccess(summary: string, detail: string): void {
+    this.messageService.add({severity: 'success', summary, detail});
   }
 
-  showError(summary: string, detail: string) {
-    this.messageService.add({ severity: 'error', summary: summary, detail: detail });
+  showError(summary: string, detail: string): void {
+    this.messageService.add({severity: 'error', summary, detail});
   }
 
-  ngOnInit(): void {
-      this.testTabs = [
-        {
-          title: 'account 1',
-          content: [
-            {
-              "id": '123',
-              "accountId": 'acc123',
-              "cardNumber": '1111 5555 4444 2222',
-              "cardHolderName": 'Redko Arsenii',
-              "expirationDate": '05.10.2027',
-              "status": 'ACTIVE'
-            },
-            {
-              "id": '333',
-              "accountId": 'acc333',
-              "cardNumber": '9999 5555 0000 2222',
-              "cardHolderName": 'Redko Arsenii',
-              "expirationDate": '05.10.2027',
-              "status": 'ACTIVE'
-            }
-          ]
-        },
-        {
-          title: 'account 2',
-          content: [
-            {
-              id: '8f3a21c4-91d2-4b7a-9c11-6e2d8f1a4c55',
-              accountId: 'acc781',
-              cardNumber: '4532 1987 6543 1098',
-              cardHolderName: 'Ivan Petrenko',
-              expirationDate: '11.09.2028',
-              status: 'ACTIVE'
-            },
-            {
-              id: 'c19d5a2e-7b6f-4a88-9f32-2d91c0e7b6aa',
-              accountId: 'acc902',
-              cardNumber: '5500 1234 9876 3321',
-              cardHolderName: 'Oleh Kovalenko',
-              expirationDate: '03.06.2029',
-              status: 'ACTIVE'
-            },
-            {
-              id: 'c19d5a2e-7b6f-4a88-9f32-2d91c0e7b6aa',
-              accountId: 'acc902',
-              cardNumber: '5500 1234 9876 3321',
-              cardHolderName: 'Oleh Kovalenko',
-              expirationDate: '03.06.2029',
-              status: 'ACTIVE'
-            },
-            {
-              id: 'c19d5a2e-7b6f-4a88-9f32-2d91c0e7b6aa',
-              accountId: 'acc902',
-              cardNumber: '5500 1234 9876 3321',
-              cardHolderName: 'Oleh Kovalenko',
-              expirationDate: '03.06.2029',
-              status: 'ACTIVE'
-            }
-          ]
-        }
-      ]
+  formatCardNumber(cardNumber: string): string {
+    return cardNumber.replace(/(.{4})/g, '$1 ').trim();
   }
-
 }

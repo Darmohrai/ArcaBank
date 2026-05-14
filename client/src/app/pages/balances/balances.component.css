@@ -112,6 +112,17 @@
       }
     }
 
+    .balances__form-input-container {
+
+      .balances__form-input {
+        width: 100%;
+        border: 1px solid var(--app-primary-color);
+        border-radius: 8px;
+        outline: none;
+        padding: 6px 14px;
+      }
+    }
+
     .balances__form-submit-btn,
     .balances__form-cancel-btn {
       width: 100%;
