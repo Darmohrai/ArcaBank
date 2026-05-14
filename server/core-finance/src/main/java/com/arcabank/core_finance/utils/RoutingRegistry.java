@@ -25,6 +25,7 @@ public class RoutingRegistry {
             public static final String ACCOUNT_CARDS = "/{accountId}/cards";
             public static final String BLOCK = "/{accountId}/block";
             public static final String UNBLOCK = "/{accountId}/unblock";
+            public static final String STATEMENT_PDF = "/{accountId}/statement/pdf";
         }
 
         public static final class Cards {

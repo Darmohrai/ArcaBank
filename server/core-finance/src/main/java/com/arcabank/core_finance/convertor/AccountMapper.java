@@ -20,6 +20,7 @@ public class AccountMapper {
         return AccountDto.builder()
             .id(account.getId())
             .userId(account.getUserId())
+            .iban(account.getIban())
             .currency(account.getCurrency() != null ? account.getCurrency().name() : null)
             .balance(account.getBalance())
             .status(account.getStatus() != null ? account.getStatus().name() : null)
@@ -35,6 +36,7 @@ public class AccountMapper {
         Account.AccountBuilder accountBuilder = Account.builder()
             .id(dto.getId())
             .userId(dto.getUserId())
+            .iban(dto.getIban())
             .balance(dto.getBalance())
             .createdAt(dto.getCreatedAt());
 
@@ -57,11 +59,11 @@ public class AccountMapper {
 
     public List<AccountDto> toDtoList(List<Account> accounts) {
         if (accounts == null) {
-            return null;
+            return java.util.Collections.emptyList();
         }
 
         return accounts.stream()
             .map(this::toDto)
-            .collect(Collectors.toList());
+            .collect(java.util.stream.Collectors.toList());
     }
 }
