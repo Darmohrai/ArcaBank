@@ -1,13 +1,14 @@
 package com.arcabank.core_finance.convertor;
 
 import com.arcabank.core_finance.dto.AccountDto;
+import com.arcabank.core_finance.exception.AppException;
 import com.arcabank.core_finance.model.Account;
 import com.arcabank.core_finance.model.util.AccountStatus;
 import com.arcabank.core_finance.model.util.Currency;
+import com.arcabank.core_finance.utils.ErrorCode;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class AccountMapper {
@@ -44,6 +45,10 @@ public class AccountMapper {
             try {
                 accountBuilder.currency(Currency.valueOf(dto.getCurrency().toUpperCase()));
             } catch (IllegalArgumentException e) {
+                throw new AppException(
+                    ErrorCode.VALIDATION_ERROR,
+                    "Unsupported currency: " +  dto.getCurrency()
+                );
             }
         }
 
@@ -51,6 +56,10 @@ public class AccountMapper {
             try {
                 accountBuilder.status(AccountStatus.valueOf(dto.getStatus().toUpperCase()));
             } catch (IllegalArgumentException e) {
+                throw new AppException(
+                    ErrorCode.VALIDATION_ERROR,
+                    "Unsupported status: " + dto.getStatus()
+                );
             }
         }
 
