@@ -1,5 +1,5 @@
 import {inject, Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpParams} from "@angular/common/http";
 import {TransferExchangeRequest, TransferFundsRequest} from "../request/TransferRequest";
 import {catchError, Observable, throwError} from "rxjs";
 import {TransferHistoryResponse, TransferResponse} from "../response/TransferResponse";
@@ -22,9 +22,10 @@ export class TransfersService {
       .pipe(catchError((error) => throwError(() => error)));
   }
 
-  getUserTransactionHistory(): Observable<TransferHistoryResponse> {
+  getUserTransactionHistory(page: number = 0, size: number = 20): Observable<TransferHistoryResponse> {
+    const params = new HttpParams().set('page', page).set('size', size);
     return this.http
-      .get<TransferHistoryResponse>(`${this.apiUrl}/history`)
+      .get<TransferHistoryResponse>(`${this.apiUrl}/history`, { params })
       .pipe(catchError((error) => throwError(() => error)));
   }
 

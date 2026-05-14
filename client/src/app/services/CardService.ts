@@ -1,7 +1,12 @@
 import {inject, Injectable, signal} from "@angular/core";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {catchError, Observable, throwError} from "rxjs";
-import {cardBlockUnblockMessageResponse, createdCardResponse, getAllCardsResponse} from "../response/CardsResponse";
+import {
+  cardBlockUnblockMessageResponse,
+  createdCardResponse,
+  getAllCardsResponse,
+  getCardTransactionsResponse
+} from "../response/CardsResponse";
 import {createCardRequest} from "../request/CardRequest";
 
 
@@ -44,14 +49,13 @@ export class CardService {
       .pipe(catchError((error) => throwError(() => error)));
   }
 
-  getCardTransactions(cardId: string, page: number = 0, size: number = 20): Observable<getAllCardsResponse> {
-    
+  getCardTransactions(cardId: string, page: number = 0, size: number = 20): Observable<getCardTransactionsResponse> {
     const params = new HttpParams()
       .set('page', page)
-      .set('size', size)
+      .set('size', size);
 
     return this.http
-      .get<getAllCardsResponse>(`${this.apiUrl}/${cardId}/transactions`, { params })
+      .get<getCardTransactionsResponse>(`${this.apiUrl}/${cardId}/transactions`, { params })
       .pipe(catchError((error) => throwError(() => error)));
   }
 

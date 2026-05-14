@@ -1,110 +1,103 @@
-import {Component} from '@angular/core';
-import {NgForOf} from "@angular/common";
-import {TabViewModule} from "primeng/tabview";
+import { Component, inject, OnInit } from '@angular/core';
+import { NgForOf, NgIf, CurrencyPipe, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 
-interface ITransactionElement {
-  name: string,
-  description: string,
-  amount: number,
-  date: string
+import { TransfersService } from '../../../services/TransfersService';
+import { AccountService } from '../../../services/AccountService';
+import { Transaction } from '../../../response/TransferResponse';
+import {
+  classifyTransaction,
+  humanizeTransactionType,
+  transactionSubtitle,
+  TransactionDirection,
+} from '../../../util/transaction-helpers';
+
+type TabKey = 'all' | 'income' | 'expense';
+
+interface TransactionListItem {
+  id: string;
+  title: string;
+  description: string;
+  amount: number;
+  currency: string;
+  createdAt: string;
+  direction: TransactionDirection;
+  iconClass: string;
 }
-
-type Tabs = 'all' | 'income' | 'expense';
 
 @Component({
   selector: 'app-recent-transactions',
   standalone: true,
-  imports: [
-    NgForOf,
-    TabViewModule
-  ],
+  imports: [NgForOf, NgIf, CurrencyPipe, DatePipe, RouterLink],
   templateUrl: './recent-transactions.component.html',
-  styleUrl: './recent-transactions.component.css'
+  styleUrl: './recent-transactions.component.css',
 })
+export class RecentTransactionsComponent implements OnInit {
+  private transfersService = inject(TransfersService);
+  private accountService = inject(AccountService);
 
-export class RecentTransactionsComponent {
-  data: ITransactionElement[] = [
-    {
-      name: 'transaction 1',
-      description: 'description 1',
-      amount: 144,
-      date: '15 Dec 2025'
-    },
-    {
-      name: 'transaction 2',
-      description: 'description 2',
-      amount: 244,
-      date: '16 Dec 2025'
-    },
-    {
-      name: 'transaction 3',
-      description: 'description 3',
-      amount: 344,
-      date: '17 Dec 2025'
-    },
-    {
-      name: 'transaction 4',
-      description: 'description 4',
-      amount: 444,
-      date: '18 Dec 2025'
-    },
-    {
-      name: 'transaction 5',
-      description: 'description 5',
-      amount: 544,
-      date: '19 Dec 2025'
-    }
-  ]
+  private allSorted: TransactionListItem[] = [];
+  private myAccountIds = new Set<string>();
 
-  data2: ITransactionElement[] = [
-    {
-      name: 'transaction 11',
-      description: 'description 11',
-      amount: 5000,
-      date: '15 Dec 2025'
-    },
-    {
-      name: 'transaction 22',
-      description: 'description 22',
-      amount: 3600,
-      date: '16 Dec 2025'
-    }
-  ]
+  activeTab: TabKey = 'all';
+  currentData: TransactionListItem[] = [];
+  isLoading = true;
+  loadError = false;
 
-  data3: ITransactionElement[] = [
-    {
-      name: 'transaction 111',
-      description: 'description 111',
-      amount: 15000,
-      date: '15 Dec 2025'
-    }
-  ]
-
-
-  activeTab: Tabs = 'all';
-
-  currentData: ITransactionElement[] = this.data;
-
-  setTab(tab: Tabs) {
-
-    this.activeTab = tab;
-
-    switch (tab) {
-
-      case 'all':
-        this.currentData = this.data;
-        break;
-
-      case 'income':
-        this.currentData = this.data2;
-        break;
-
-      case 'expense':
-        this.currentData = this.data3;
-        break;
-    }
+  ngOnInit(): void {
+    forkJoin({
+      accounts: this.accountService.getAllAccounts(),
+      history: this.transfersService.getUserTransactionHistory(0, 40),
+    }).subscribe({
+      next: ({ accounts, history }) => {
+        this.myAccountIds = new Set(accounts.map((a) => a.id));
+        const sorted = [...history.content].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        this.allSorted = sorted.map((t) => this.mapToItem(t));
+        this.setTab(this.activeTab);
+        this.isLoading = false;
+      },
+      error: () => {
+        this.loadError = true;
+        this.isLoading = false;
+        this.currentData = [];
+      },
+    });
   }
 
+  private mapToItem(t: Transaction): TransactionListItem {
+    const direction = classifyTransaction(t, this.myAccountIds);
+    return {
+      id: t.id,
+      title: humanizeTransactionType(t.type),
+      description: transactionSubtitle(t, this.myAccountIds),
+      amount: t.amount,
+      currency: t.currency,
+      createdAt: t.createdAt,
+      direction,
+      iconClass: this.iconForType(t.type),
+    };
+  }
 
+  private iconForType(type: string): string {
+    const u = (type ?? '').toUpperCase();
+    if (u.includes('DEPOSIT')) return 'pi pi-plus-circle';
+    if (u.includes('EXCHANGE')) return 'pi pi-sync';
+    if (u.includes('WITHDRAW')) return 'pi pi-minus-circle';
+    return 'pi pi-arrow-right-arrow-left';
+  }
 
+  setTab(tab: TabKey): void {
+    this.activeTab = tab;
+    const filtered =
+      tab === 'all'
+        ? this.allSorted
+        : tab === 'income'
+          ? this.allSorted.filter((x) => x.direction === 'income')
+          : this.allSorted.filter((x) => x.direction === 'expense');
+    this.currentData = filtered.slice(0, 5);
+  }
 }

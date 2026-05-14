@@ -1,20 +1,23 @@
-<!-- wallet-widget.component.html -->
-
 <div class="wallet-widget">
 
   <div class="wallet-widget__header">
-    <h2>$ {{currentTotalBalance}}</h2>
-    <p (click)="redirectToAccounts()">All Accounts</p>
+    <h2 *ngIf="!isLoading">{{ balanceSummary }}</h2>
+    <h2 *ngIf="isLoading" class="wallet-widget__loading">…</h2>
+    <p (click)="redirectToAccounts()">Усі рахунки</p>
   </div>
 
-  <div class="wallet-widget__slider">
+  <div *ngIf="!isLoading && slides.length === 0" class="wallet-widget__empty">
+    Карток ще немає. Додайте їх у розділі «Рахунки».
+  </div>
+
+  <div *ngIf="!isLoading && slides.length > 0" class="wallet-widget__slider">
 
     <div
       class="wallet-widget__track"
       [style.transform]="'translateX(-' + currentIndex * 100 + '%)'"
     >
 
-      @for (card of cards; track $index) {
+      @for (card of slides; track $index) {
 
         <div class="wallet-widget__slide">
 
@@ -22,8 +25,8 @@
 
             <div class="wallet-card__top">
               <div>
-                <p class="wallet-card__label">Account Type</p>
-                <h3>{{ card.type }}</h3>
+                <p class="wallet-card__label">Власник</p>
+                <h3>{{ card.cardHolderName }}</h3>
               </div>
 
               <div class="wallet-card__circles">
@@ -33,13 +36,12 @@
             </div>
 
             <div class="wallet-card__bottom">
-              <p>{{ card.number }}</p>
-              <h4>{{ card.balance }}</h4>
-
-              <div class="wallet-card__arrow">
-                ↗
-              </div>
+              <p>{{ card.maskedNumber }}</p>
+              <h4>{{ card.balance | currency:card.currency:'symbol':'1.2-2' }}</h4>
+              
             </div>
+
+            <p class="wallet-card__meta">{{ card.status }} · до {{ card.expirationDate }}</p>
 
           </div>
 
@@ -51,18 +53,19 @@
 
   </div>
 
-  <div class="wallet-widget__pagination">
+  <div *ngIf="!isLoading && slides.length > 0" class="wallet-widget__pagination">
 
     <button
+      type="button"
       (click)="prev()"
       [disabled]="currentIndex === 0"
     >
-      ‹ Previous
+      ‹ Назад
     </button>
 
     <div class="wallet-widget__dots">
 
-      @for (card of cards; track $index) {
+      @for (card of slides; track $index) {
         <span
           class="wallet-widget__dot"
           [class.active]="currentIndex === $index"
@@ -73,12 +76,12 @@
     </div>
 
     <button
+      type="button"
       (click)="next()"
-      [disabled]="currentIndex === cards.length - 1"
+      [disabled]="currentIndex === slides.length - 1"
     >
-      Next ›
+      Далі ›
     </button>
 
   </div>
-
 </div>

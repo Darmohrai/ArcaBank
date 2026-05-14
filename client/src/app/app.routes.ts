@@ -13,6 +13,7 @@ import {BalanceDetailComponent} from "./pages/balance-detail/balance-detail.comp
 import {TransfersPageComponent} from "./pages/transfers-page/transfers-page.component";
 import {ExchangePageComponent} from "./pages/exchange-page/exchange-page.component";
 import {DepositPageComponent} from "./pages/deposit-page/deposit-page.component";
+import {TransactionsPageComponent} from "./pages/transactions-page/transactions-page.component";
 
 export const routes: Routes = [
   {
@@ -26,6 +27,7 @@ export const routes: Routes = [
       {path: 'transfer', component: TransfersPageComponent},
       {path: 'exchange', component: ExchangePageComponent},
       {path: 'deposit', component: DepositPageComponent},
+      {path: 'transactions', component: TransactionsPageComponent},
     ]
   },
   {
