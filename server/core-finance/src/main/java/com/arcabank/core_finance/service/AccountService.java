@@ -18,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -141,22 +142,36 @@ public class AccountService {
 
     @Transactional
     public AccountDto openNewAccount(UUID userId, AccountOnlyRequest request) {
-        String iban = BankDataGenerator.generateIban();
+        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                String iban = BankDataGenerator.generateIban();
 
-        Account account = Account.builder()
-            .userId(userId)
-            .iban(iban)
-            .type(request.type())
-            .currency(Currency.valueOf(request.currency()))
-            .status(AccountStatus.ACTIVE)
-            .build();
+                Account account = Account.builder()
+                    .userId(userId)
+                    .iban(iban)
+                    .type(request.type())
+                    .currency(Currency.valueOf(request.currency()))
+                    .status(AccountStatus.ACTIVE)
+                    .build();
 
-        UUID accountId = accountRepository.createJustAccount(account);
-        account.setId(accountId);
+                UUID accountId = accountRepository.createJustAccount(account);
+                account.setId(accountId);
 
-        notificator.notifyAccountCreated(account);
+                notificator.notifyAccountCreated(account);
 
-        return accountMapper.toDto(account);
+                return accountMapper.toDto(account);
+
+            } catch (DuplicateKeyException ex) {
+                log.warn("IBAN already exists. Let's try again... (Attempt {}/{})", attempt, MAX_RETRIES);
+                if (attempt == MAX_RETRIES) {
+                    throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to generate unique IBAN");
+                }
+            } catch (Exception ex) {
+                throw new AppException(ErrorCode.INTERNAL_ERROR, "Internal server error while creating an account");
+            }
+        }
+
+        throw new AppException(ErrorCode.INTERNAL_ERROR, "An unexpected error occurred");
     }
 
     @Transactional

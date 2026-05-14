@@ -2,7 +2,10 @@ package com.arcabank.core_finance.service;
 
 import com.arcabank.core_finance.convertor.AccountMapper;
 import com.arcabank.core_finance.dto.AccountDto;
+import com.arcabank.core_finance.dto.AccountOnlyRequest;
+import com.arcabank.core_finance.exception.AppException;
 import com.arcabank.core_finance.model.Account;
+import com.arcabank.core_finance.notificator.engine.Notificator;
 import com.arcabank.core_finance.repository.AccountRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -11,16 +14,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static com.arcabank.core_finance.model.util.AccountType.CHECKING;
+import static com.arcabank.core_finance.model.util.AccountType.SAVINGS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AccountService Tests")
@@ -31,6 +37,9 @@ class AccountServiceTest {
 
     @Mock
     private AccountMapper accountMapper;
+
+    @Mock
+    private Notificator notificator;
 
     @InjectMocks
     private AccountService accountService;
@@ -137,6 +146,50 @@ class AccountServiceTest {
 
             verify(accountRepository).findAllByUserId(userId);
             verify(accountMapper).toDtoList(accounts);
+        }
+
+        @Test
+        @DisplayName("openNewAccount should retry and succeed when DuplicateKeyException thrown onc")
+        void openNewAccount_shouldRetryAndSucceed_whenDuplicateKeyExceptionThrownOnce() {
+            UUID userId = UUID.randomUUID();
+            AccountOnlyRequest request = new AccountOnlyRequest("UAH", SAVINGS);
+            UUID expectedAccountId = UUID.randomUUID();
+            AccountDto expectedDto = AccountDto.builder().id(expectedAccountId).build();
+
+            when(accountRepository.createJustAccount(any(Account.class)))
+                .thenThrow(new DuplicateKeyException("Duplicate IBAN"))
+                .thenReturn(expectedAccountId);
+
+            when(accountMapper.toDto(any(Account.class))).thenReturn(expectedDto);
+
+            AccountDto result = accountService.openNewAccount(userId, request);
+
+            assertNotNull(result);
+            assertEquals(expectedAccountId, result.getId());
+
+            verify(accountRepository, times(2)).createJustAccount(any(Account.class));
+
+            verify(notificator, times(1)).notifyAccountCreated(any(Account.class));
+        }
+
+        @Test
+        @DisplayName("openNewAccount should throw AppException when MaxRetries exceeded")
+        void openNewAccount_shouldThrowAppException_whenMaxRetriesExceeded() {
+            UUID userId = UUID.randomUUID();
+            AccountOnlyRequest request = new AccountOnlyRequest("USD", CHECKING);
+
+            when(accountRepository.createJustAccount(any(Account.class)))
+                .thenThrow(new DuplicateKeyException("Duplicate IBAN permanently"));
+
+            AppException exception = assertThrows(AppException.class, () ->
+                accountService.openNewAccount(userId, request)
+            );
+
+            assertEquals("Failed to generate unique IBAN", exception.getMessage());
+
+            verify(accountRepository, times(3)).createJustAccount(any(Account.class));
+
+            verify(notificator, never()).notifyAccountCreated(any(Account.class));
         }
     }
 }
