@@ -36,6 +36,10 @@ public class TransactionService {
         UUID senderAccountId = resolveSenderAccountId(userId, request);
         UUID receiverAccountId = resolveDestinationToAccountId(cleanDestination);
 
+        if (senderAccountId.equals(receiverAccountId)) {
+            throw new AppException(ErrorCode.VALIDATION_ERROR, "Картки прив'язані до одного рахунку. Переказ неможливий");
+        }
+
         Account senderAccount = accountRepository.findById(senderAccountId)
             .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND, "Рахунок відправника не знайдено"));
 
