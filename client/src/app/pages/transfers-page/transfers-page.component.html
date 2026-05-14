@@ -1,0 +1,151 @@
+<p-toast position="top-right" />
+
+<div class="transfer-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Переказати</h1>
+    <p class="page-subtitle">Перекажіть кошти на рахунок або карту</p>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div *ngIf="isLoading" class="skeleton-wrap">
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-row"></div>
+    <div class="skeleton skeleton-row short"></div>
+  </div>
+
+  <!-- Main form card -->
+  <div *ngIf="!isLoading" class="transfer-card" [formGroup]="transferForm">
+
+    <!-- ── Step 1: Source ── -->
+    <section class="form-section">
+      <span class="section-label">1 — Звідки</span>
+
+      <div class="field">
+        <label class="field-label">Рахунок відправника</label>
+        <div class="select-wrapper">
+          <select formControlName="fromAccountId" class="field-select" (change)="onAccountChange()">
+            <option value="" disabled>Оберіть рахунок</option>
+            <option *ngFor="let acc of accounts" [value]="acc.id">
+              {{ acc.currency }} · {{ acc.balance | currency:acc.currency:'symbol':'1.2-2' }}
+            </option>
+          </select>
+        </div>
+        <div *ngIf="transferForm.controls.fromAccountId.touched && transferForm.controls.fromAccountId.errors?.['required']"
+             class="field-error">Оберіть рахунок відправника.</div>
+      </div>
+
+      <!-- Card picker (only when destination = CARD) -->
+      <div class="field" *ngIf="destinationType === 'CARD'">
+        <label class="field-label">Карта рахунку</label>
+        <div *ngIf="cardsForSelectedAccount.length === 0" class="empty-hint">
+          Спершу оберіть рахунок із картками.
+        </div>
+        <div *ngIf="cardsForSelectedAccount.length > 0" class="card-chips">
+          <label
+            *ngFor="let card of cardsForSelectedAccount"
+            class="card-chip"
+            [class.selected]="transferForm.controls.fromCardId.value === card.id">
+            <input
+              type="radio"
+              formControlName="fromCardId"
+              [value]="card.id"
+              hidden />
+            <span class="chip-icon">&#9646;&#9646;&#9646;&#9646;</span>
+            <span class="chip-number">{{ formatCardNumber(card.cardNumber).slice(-9) }}</span>
+          </label>
+        </div>
+        <div *ngIf="transferForm.touched && destinationType === 'CARD' && !transferForm.controls.fromCardId.value"
+             class="field-error">Оберіть карту.</div>
+      </div>
+    </section>
+
+    <div class="divider">
+      <span class="divider-arrow">↓</span>
+    </div>
+
+    <!-- ── Step 2: Destination type ── -->
+    <section class="form-section">
+      <span class="section-label">2 — Куди</span>
+
+      <div class="dest-type-toggle">
+        <button
+          type="button"
+          class="toggle-btn"
+          [class.active]="destinationType === 'ACCOUNT'"
+          (click)="setDestinationType('ACCOUNT')">
+          На рахунок
+        </button>
+        <button
+          type="button"
+          class="toggle-btn"
+          [class.active]="destinationType === 'CARD'"
+          (click)="setDestinationType('CARD')">
+          На картку
+        </button>
+      </div>
+
+      <div class="field">
+        <label class="field-label">
+          {{ destinationType === 'ACCOUNT' ? 'ID рахунку отримувача' : 'Номер картки отримувача' }}
+        </label>
+        <input
+          formControlName="destination"
+          class="field-input"
+          [placeholder]="destinationType === 'ACCOUNT' ? 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' : '1234 5678 9012 3456'"
+          autocomplete="off" />
+        <div *ngIf="transferForm.controls.destination.touched && transferForm.controls.destination.errors?.['required']"
+             class="field-error">Введіть реквізити отримувача.</div>
+      </div>
+    </section>
+
+    <div class="divider">
+      <span class="divider-arrow">↓</span>
+    </div>
+
+    <!-- ── Step 3: Amount ── -->
+    <section class="form-section">
+      <span class="section-label">3 — Сума</span>
+
+      <div class="field">
+        <label class="field-label">Сума переказу</label>
+        <div class="amount-wrapper">
+          <span class="amount-currency">{{ selectedAccount?.currency ?? '$' }}</span>
+          <input
+            type="number"
+            formControlName="amount"
+            class="field-input amount-input"
+            placeholder="0.00"
+            min="0.01"
+            step="0.01"
+            (change)="updateAmountValidator()" />
+        </div>
+        <div *ngIf="getAmountError()" class="field-error">{{ getAmountError() }}</div>
+        <div *ngIf="selectedAccount" class="balance-hint">
+          Доступно: <strong>{{ selectedAccount.balance | currency:selectedAccount.currency:'symbol':'1.2-2' }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Server error banner -->
+    <div *ngIf="serverError" class="server-error">
+      <span class="server-error-icon">⚠</span>
+      <span>{{ serverError }}</span>
+    </div>
+
+    <!-- Submit -->
+    <button
+      type="button"
+      class="submit-btn"
+      [class.loading]="isSubmitting"
+      [disabled]="isSubmitting"
+      (click)="submit()">
+      <span *ngIf="!isSubmitting">Перекинути кошти</span>
+      <span *ngIf="isSubmitting" class="spinner-wrap">
+        <span class="spinner"></span> Обробка...
+      </span>
+    </button>
+
+  </div>
+</div>

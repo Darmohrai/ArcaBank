@@ -10,6 +10,8 @@ import {AuthLayoutComponent} from "./layout/auth-layout";
 import {authGuard} from "./guard/auth.guard";
 import {BalancesComponent} from "./pages/balances/balances.component";
 import {BalanceDetailComponent} from "./pages/balance-detail/balance-detail.component";
+import {TransfersPageComponent} from "./pages/transfers-page/transfers-page.component";
+import {ExchangePageComponent} from "./pages/exchange-page/exchange-page.component";
 
 export const routes: Routes = [
   {
@@ -20,6 +22,8 @@ export const routes: Routes = [
       {path: '', component: OverviewComponent},
       {path: 'balances', component: BalancesComponent},
       {path: 'balances-detail/:id', component: BalanceDetailComponent},
+      {path: 'transfer', component: TransfersPageComponent},
+      {path: 'exchange', component: ExchangePageComponent},
     ]
   },
   {

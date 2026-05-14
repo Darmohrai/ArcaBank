@@ -1,0 +1,414 @@
+/* ── Page ── */
+.exchange-page {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--default-black);
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: var(--gray02);
+  margin: 0;
+}
+
+/* ── Rates strip ── */
+.rates-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.rate-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--default-white);
+  border: 1px solid var(--gray05);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--gray01);
+  white-space: nowrap;
+}
+
+.rate-pair {
+  font-weight: 600;
+  color: var(--default-black);
+}
+
+.rate-buy {
+  color: var(--special-green);
+}
+
+.rate-sell {
+  color: var(--special-red);
+}
+
+.rate-dot {
+  color: var(--gray05);
+}
+
+/* ── Card ── */
+.exchange-card {
+  background: var(--default-white);
+  border-radius: 16px;
+  padding: 24px 24px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Account blocks ── */
+.account-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.block-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--gray03);
+}
+
+/* ── Select ── */
+.select-wrapper {
+  position: relative;
+}
+
+.account-select {
+  width: 100%;
+  height: 44px;
+  padding: 0 36px 0 14px;
+  border: 1.5px solid var(--gray05);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--default-black);
+  background: var(--app-background-color);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  box-sizing: border-box;
+}
+
+.account-select:focus {
+  border-color: var(--app-primary-color);
+  box-shadow: 0 0 0 3px rgba(41,157,145,0.12);
+  background: var(--default-white);
+}
+
+.select-caret {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--gray02);
+  pointer-events: none;
+}
+
+/* ── Account chip ── */
+.account-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+.from-chip {
+  background: rgba(41,157,145,0.07);
+  border: 1px solid rgba(41,157,145,0.18);
+}
+
+.to-chip {
+  background: rgba(77,175,110,0.07);
+  border: 1px solid rgba(77,175,110,0.18);
+}
+
+.chip-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 5px;
+  background: var(--app-primary-color);
+  color: var(--default-white);
+  letter-spacing: 0.04em;
+}
+
+.to-badge {
+  background: var(--special-green);
+}
+
+.chip-balance {
+  color: var(--gray01);
+  font-size: 13px;
+}
+
+.chip-balance strong {
+  color: var(--default-black);
+}
+
+/* ── Swap button ── */
+.swap-btn {
+  align-self: center;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--gray05);
+  border-radius: 50%;
+  background: var(--app-background-color);
+  color: var(--gray02);
+  cursor: pointer;
+  margin: 4px 0;
+  transition: all 0.16s;
+  flex-shrink: 0;
+}
+
+.swap-btn:hover {
+  border-color: var(--app-primary-color);
+  color: var(--app-primary-color);
+  background: rgba(41,157,145,0.06);
+  transform: rotate(180deg);
+}
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: var(--gray05);
+  margin: 12px 0 8px;
+}
+
+/* ── Amount section ── */
+.amount-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.amount-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.amount-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.amount-currency-badge {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--app-primary-color);
+  pointer-events: none;
+  background: rgba(41,157,145,0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.amount-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px 0 54px;
+  border: 1.5px solid var(--gray05);
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--default-black);
+  background: var(--app-background-color);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  appearance: none;
+}
+
+.amount-input::-webkit-inner-spin-button,
+.amount-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.amount-input:focus {
+  border-color: var(--app-primary-color);
+  box-shadow: 0 0 0 3px rgba(41,157,145,0.12);
+  background: var(--default-white);
+}
+
+/* ── Live estimate ── */
+.estimate-block {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.2s, transform 0.2s;
+  white-space: nowrap;
+}
+
+.estimate-block.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.estimate-arrow {
+  font-size: 16px;
+  color: var(--gray03);
+}
+
+.estimate-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--special-green);
+}
+
+/* ── Balance hint ── */
+.balance-hint {
+  font-size: 12px;
+  color: var(--gray02);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.balance-hint strong {
+  color: var(--app-primary-color);
+}
+
+.max-btn {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border: 1px solid var(--app-primary-color);
+  border-radius: 4px;
+  color: var(--app-primary-color);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.14s;
+}
+
+.max-btn:hover {
+  background: var(--app-primary-color);
+  color: var(--default-white);
+}
+
+/* ── Field error ── */
+.field-error {
+  font-size: 12px;
+  color: var(--special-red);
+}
+
+/* ── Warning banner ── */
+.warn-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(255, 180, 0, 0.08);
+  border: 1px solid rgba(255, 180, 0, 0.3);
+  border-radius: 9px;
+  font-size: 13px;
+  color: #9a6800;
+  margin-top: 4px;
+}
+
+/* ── Error banner ── */
+.error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(231,61,28,0.07);
+  border: 1px solid rgba(231,61,28,0.2);
+  border-radius: 9px;
+  font-size: 13px;
+  color: var(--special-red);
+  margin-top: 4px;
+}
+
+/* ── Submit ── */
+.submit-btn {
+  width: 100%;
+  height: 48px;
+  margin-top: 16px;
+  background: var(--app-primary-color);
+  color: var(--default-white);
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.18s, transform 0.12s, opacity 0.18s;
+}
+
+.submit-btn:hover:not(:disabled) { background: #22877c; }
+.submit-btn:active:not(:disabled) { transform: scale(0.985); }
+.submit-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+/* ── Spinner ── */
+.spinner-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Skeleton ── */
+.skeleton-wrap { display: flex; flex-direction: column; gap: 12px; }
+.skeleton {
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--gray06) 25%, var(--gray05) 50%, var(--gray06) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.3s infinite;
+}
+.s-tall { height: 200px; }
+.s-mid  { height: 44px; }
+.s-short { height: 44px; width: 55%; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  .exchange-page { padding: 20px 14px 48px; }
+  .exchange-card { padding: 18px 16px; }
+  .amount-row { flex-direction: column; align-items: flex-start; }
+  .estimate-block { padding-left: 2px; }
+}

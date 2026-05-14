@@ -1,0 +1,146 @@
+<p-toast position="top-right" />
+
+<div class="exchange-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Конвертація</h1>
+    <p class="page-subtitle">Обмін коштів між власними рахунками</p>
+  </div>
+
+  <!-- Skeleton -->
+  <div *ngIf="isLoading" class="skeleton-wrap">
+    <div class="skeleton s-tall"></div>
+    <div class="skeleton s-mid"></div>
+    <div class="skeleton s-short"></div>
+  </div>
+
+  <!-- Rates strip -->
+  <div *ngIf="!isLoading && rates.length" class="rates-strip">
+    <div class="rate-pill" *ngFor="let r of rates">
+      <span class="rate-pair">{{ r.currency }}/{{ r.baseCurrency }}</span>
+      <span class="rate-buy">купівля {{ r.buyRate | number:'1.2-4' }}</span>
+      <span class="rate-dot">·</span>
+      <span class="rate-sell">продаж {{ r.sellRate | number:'1.2-4' }}</span>
+    </div>
+  </div>
+
+  <!-- Form card -->
+  <div *ngIf="!isLoading" class="exchange-card" [formGroup]="exchangeForm">
+
+    <!-- FROM -->
+    <div class="account-block">
+      <span class="block-label">Списати з</span>
+      <div class="select-wrapper">
+        <select formControlName="fromAccountId" class="account-select" (change)="onFromAccountChange()">
+          <option value="" disabled>Оберіть рахунок</option>
+          <option *ngFor="let acc of accounts" [value]="acc.id">
+            {{ acc.currency }} · {{ acc.balance | number:'1.2-2' }}
+          </option>
+        </select>
+      </div>
+      <div
+        *ngIf="exchangeForm.controls.fromAccountId.touched && exchangeForm.controls.fromAccountId.errors?.['required']"
+        class="field-error">Оберіть рахунок.</div>
+
+      <!-- From account info chip -->
+      <div *ngIf="fromAccount" class="account-chip from-chip">
+        <span class="chip-badge">{{ fromAccount.currency }}</span>
+        <span class="chip-balance">Баланс: <strong>{{ fromAccount.balance | number:'1.2-2' }} {{ fromAccount.currency }}</strong></span>
+      </div>
+    </div>
+
+    <!-- Swap button -->
+    <button type="button" class="swap-btn" (click)="swapAccounts()" title="Поміняти рахунки місцями">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+      </svg>
+    </button>
+
+    <!-- TO -->
+    <div class="account-block">
+      <span class="block-label">Зарахувати на</span>
+      <div class="select-wrapper">
+        <select formControlName="toAccountId" class="account-select" (change)="onToAccountChange()">
+          <option value="" disabled>Оберіть рахунок</option>
+          <ng-container *ngIf="toAccounts.length > 0; else noTargets">
+            <option *ngFor="let acc of toAccounts" [value]="acc.id">
+              {{ acc.currency }} · {{ acc.balance | number:'1.2-2' }}
+            </option>
+          </ng-container>
+          <ng-template #noTargets>
+            <option disabled>Немає доступних рахунків</option>
+          </ng-template>
+        </select>
+      </div>
+      <div
+        *ngIf="exchangeForm.controls.toAccountId.touched && exchangeForm.controls.toAccountId.errors?.['required']"
+        class="field-error">Оберіть рахунок.</div>
+
+      <!-- To account info chip -->
+      <div *ngIf="toAccount" class="account-chip to-chip">
+        <span class="chip-badge to-badge">{{ toAccount.currency }}</span>
+        <span class="chip-balance">Баланс: <strong>{{ toAccount.balance | number:'1.2-2' }} {{ toAccount.currency }}</strong></span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Amount -->
+    <div class="amount-section">
+      <label class="block-label">Сума списання</label>
+      <div class="amount-row">
+        <div class="amount-wrap">
+          <span class="amount-currency-badge">{{ fromAccount?.currency ?? '—' }}</span>
+          <input
+            type="number"
+            formControlName="amount"
+            class="amount-input"
+            placeholder="0.00"
+            min="0.01"
+            step="0.01"
+            (input)="onAmountChange()" />
+        </div>
+
+        <!-- Live estimate -->
+        <div class="estimate-block" [class.visible]="!!estimatedResult">
+          <span class="estimate-arrow">→</span>
+          <span class="estimate-value">{{ estimatedResult }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="getAmountError()" class="field-error">{{ getAmountError() }}</div>
+
+      <div *ngIf="fromAccount" class="balance-hint">
+        Доступно: <strong>{{ fromAccount.balance | number:'1.2-2' }} {{ fromAccount.currency }}</strong>
+        <button type="button" class="max-btn" (click)="exchangeForm.controls.amount.setValue(fromAccount!.balance); onAmountChange()">
+          MAX
+        </button>
+      </div>
+    </div>
+
+    <!-- Same currency warning -->
+    <div *ngIf="fromAccount && toAccount && fromAccount.currency === toAccount.currency" class="warn-banner">
+      <span>⚠</span> Оберіть рахунки з різними валютами.
+    </div>
+
+    <!-- Server error -->
+    <div *ngIf="serverError" class="error-banner">
+      <span>⚠</span> {{ serverError }}
+    </div>
+
+    <!-- Submit -->
+    <button type="button" class="submit-btn" [class.loading]="isSubmitting" [disabled]="isSubmitting" (click)="submit()">
+      <ng-container *ngIf="!isSubmitting">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        Конвертувати
+      </ng-container>
+      <span *ngIf="isSubmitting" class="spinner-wrap">
+        <span class="spinner"></span> Обробка...
+      </span>
+    </button>
+
+  </div>
+</div>
