@@ -12,6 +12,7 @@ import {BalancesComponent} from "./pages/balances/balances.component";
 import {BalanceDetailComponent} from "./pages/balance-detail/balance-detail.component";
 import {TransfersPageComponent} from "./pages/transfers-page/transfers-page.component";
 import {ExchangePageComponent} from "./pages/exchange-page/exchange-page.component";
+import {DepositPageComponent} from "./pages/deposit-page/deposit-page.component";
 
 export const routes: Routes = [
   {
@@ -24,6 +25,7 @@ export const routes: Routes = [
       {path: 'balances-detail/:id', component: BalanceDetailComponent},
       {path: 'transfer', component: TransfersPageComponent},
       {path: 'exchange', component: ExchangePageComponent},
+      {path: 'deposit', component: DepositPageComponent},
     ]
   },
   {
