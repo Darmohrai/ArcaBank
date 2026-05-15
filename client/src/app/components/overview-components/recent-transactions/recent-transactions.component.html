@@ -3,53 +3,72 @@
   <div class="recent-transaction__tabs">
 
     <button
+      type="button"
       class="recent-transaction__tab"
       [class.active]="activeTab === 'all'"
       (click)="setTab('all')"
     >
-      All
+      Усі
     </button>
 
     <button
+      type="button"
       class="recent-transaction__tab"
       [class.active]="activeTab === 'income'"
       (click)="setTab('income')"
     >
-      Income
+      Надходження
     </button>
 
     <button
+      type="button"
       class="recent-transaction__tab"
       [class.active]="activeTab === 'expense'"
       (click)="setTab('expense')"
     >
-      Expense
+      Витрати
     </button>
 
   </div>
 
-  <ng-container *ngFor="let el of currentData">
+  <div *ngIf="isLoading" class="recent-transaction__loading">Завантаження…</div>
 
-    <div class="recent-transaction__transaction">
+  <div *ngIf="!isLoading && loadError" class="recent-transaction__error">
+    Не вдалося завантажити транзакції.
+  </div>
+
+  <div *ngIf="!isLoading && !loadError && currentData.length === 0" class="recent-transaction__empty">
+    Немає операцій для цього фільтра.
+  </div>
+
+  <ng-container *ngIf="!isLoading && !loadError">
+    <div class="recent-transaction__list">
+      <div *ngFor="let el of currentData" class="recent-transaction__transaction">
 
       <div class="transaction-inner-main-container">
 
-        <i class="pi pi-amazon"></i>
+        <i [class]="el.iconClass"></i>
 
         <div class="transaction-inner-inner-container">
-          <p class="transaction-name">{{ el.name }}</p>
+          <p class="transaction-name">{{ el.title }}</p>
           <p class="transaction-description">{{ el.description }}</p>
         </div>
 
       </div>
 
       <div class="transaction-inner-container">
-        <p class="transaction-amount">${{ el.amount }}</p>
-        <p class="transaction-date">{{ el.date }}</p>
+        <p
+          class="transaction-amount"
+          [class.income]="el.direction === 'income'"
+          [class.expense]="el.direction === 'expense'">
+          {{ el.amount | currency:el.currency:'symbol':'1.2-2' }}
+        </p>
+        <p class="transaction-date">{{ el.createdAt | date:'dd.MM.yyyy, HH:mm' }}</p>
       </div>
 
+      </div>
     </div>
-
   </ng-container>
 
+  <a routerLink="/transactions" class="recent-transaction__footer-link">Усі транзакції →</a>
 </div>

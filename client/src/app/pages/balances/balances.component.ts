@@ -1,11 +1,20 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {AccountService} from "../../services/AccountService";
-import {Button} from "primeng/button";
+import {CardService} from "../../services/CardService";
 import {DialogModule} from "primeng/dialog";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {CreateAccountRequest} from "../../request/AccountRequest";
 import {ToastModule} from "primeng/toast";
 import {MessageService} from "primeng/api";
+import {TabViewModule} from "primeng/tabview";
+import {NgForOf, NgIf} from "@angular/common";
+import {CreateAccountResponse} from "../../response/AccountResponse";
+import {getAllCardsResponse} from "../../response/CardsResponse";
+
+interface AccountTab {
+  account: CreateAccountResponse;
+  cards: getAllCardsResponse[];
+}
 
 @Component({
   selector: 'app-balances',
@@ -13,61 +22,124 @@ import {MessageService} from "primeng/api";
   imports: [
     DialogModule,
     ReactiveFormsModule,
-    ToastModule
+    ToastModule,
+    TabViewModule,
+    NgForOf,
+    NgIf
   ],
   providers: [MessageService],
   templateUrl: './balances.component.html',
   styleUrl: './balances.component.css'
 })
-export class BalancesComponent {
+export class BalancesComponent implements OnInit {
 
-  constructor(private messageService: MessageService) {}
+  private accountService = inject(AccountService);
+  private cardService = inject(CardService);
+  private messageService = inject(MessageService);
 
-  private AccountService = inject(AccountService)
-  visible: boolean = false;
+  visibleAccountCreation = false;
+  visibleCardCreation = false;
+
+  accountTabs: AccountTab[] = [];
+  activeTabIndex = 0;
 
   createAccountForm = new FormGroup({
-    currency: new FormControl<'UAH' | 'USD' | 'EUR'>('UAH', {
-      nonNullable: true
-    }),
-    type: new FormControl<'DEBIT' | 'CREDIT' | 'VIRTUAL'>('DEBIT', {
-      nonNullable: true
-    }),
-  })
+    currency: new FormControl<'UAH' | 'USD' | 'EUR'>('UAH', {nonNullable: true}),
+    type: new FormControl<'DEBIT' | 'CREDIT' | 'VIRTUAL' | 'CHECKING' | 'SAVINGS'>('DEBIT', {nonNullable: true}),
+  });
 
-  submitForm() {
+  createCardForm = new FormGroup({
+    pin: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.pattern(/^\d{4}$/)
+      ]
+    })
+  });
 
-    const payloadData: CreateAccountRequest = {
+  ngOnInit(): void {
+    this.loadAccountsWithCards();
+  }
+
+  loadAccountsWithCards(): void {
+    this.accountService.getAllAccounts().subscribe({
+      next: (accounts) => {
+        this.accountTabs = accounts.map(account => ({
+          account,
+          cards: []
+        }));
+        this.loadAllCards();
+      },
+      error: () => this.showError('Помилка!', 'Не вдалося завантажити рахунки.')
+    });
+  }
+
+  loadAllCards(): void {
+    this.cardService.getAllCards().subscribe({
+      next: (allCards) => {
+        this.accountTabs = this.accountTabs.map(tab => ({
+          ...tab,
+          cards: allCards.filter(card => card.accountId === tab.account.id)
+        }));
+      },
+      error: () => this.showError('Помилка!', 'Не вдалося завантажити картки.')
+    });
+  }
+
+  get activeAccountId(): string | null {
+    return this.accountTabs[this.activeTabIndex]?.account?.id ?? null;
+  }
+
+  submitAccountCreationForm(): void {
+    const payload: CreateAccountRequest = {
       currency: this.createAccountForm.controls.currency.value,
       type: this.createAccountForm.controls.type.value
-    }
+    };
 
-    this.AccountService.createAccount(payloadData)
-      .subscribe({
-        next: (response) => {
-          console.log('SUCCESS', response);
-          this.showSuccess('Успіх!', 'Рахунок створено.')
-          this.visible = false;
-        },
-        error: (error) => {
-          this.showError('Помилка!', 'Не вдалося відкрити рахунок. Спробуйте пізніше.')
-          console.log('ERROR', error);
-        }
-      })
+    this.accountService.createAccount(payload).subscribe({
+      next: () => {
+        this.showSuccess('Успіх!', 'Рахунок створено.');
+        this.visibleAccountCreation = false;
+        this.loadAccountsWithCards();
+      },
+      error: () => this.showError('Помилка!', 'Не вдалося відкрити рахунок. Спробуйте пізніше.')
+    });
   }
 
+  submitCardCreationForm(): void {
+    if (this.createCardForm.invalid || !this.activeAccountId) return;
 
-  showDialog() {
-    this.visible = true;
+    const payload = {pin: Number(this.createCardForm.controls.pin.value)};
+
+    this.cardService.createCardByAccount(payload, this.activeAccountId).subscribe({
+      next: () => {
+        this.showSuccess('Успіх!', 'Картку створено.');
+        this.visibleCardCreation = false;
+        this.createCardForm.reset();
+        this.loadAllCards();
+      },
+      error: () => this.showError('Помилка!', 'Не вдалося створити картку. Спробуйте пізніше.')
+    });
   }
 
-  showSuccess(summary: string, detail: string) {
-    this.messageService.add({ severity: 'success', summary: summary, detail: detail });
+  showAccountCreationDialog(): void {
+    this.visibleAccountCreation = true;
   }
 
-  showError(summary: string, detail: string) {
-    this.messageService.add({ severity: 'error', summary: summary, detail: detail });
+  showCardCreationDialog(): void {
+    this.visibleCardCreation = true;
   }
 
+  showSuccess(summary: string, detail: string): void {
+    this.messageService.add({severity: 'success', summary, detail});
+  }
 
+  showError(summary: string, detail: string): void {
+    this.messageService.add({severity: 'error', summary, detail});
+  }
+
+  formatCardNumber(cardNumber: string): string {
+    return cardNumber.replace(/(.{4})/g, '$1 ').trim();
+  }
 }

@@ -1,0 +1,62 @@
+<div class="transactions-page">
+
+  <div class="page-header">
+    <h1 class="page-title">Історія транзакцій</h1>
+    <p class="page-subtitle">Усі операції за вашими рахунками</p>
+  </div>
+
+  <div *ngIf="loadError" class="error-banner">
+    Не вдалося завантажити історію. Спробуйте оновити сторінку.
+  </div>
+
+  <div *ngIf="isLoading" class="skeleton-wrap">
+    <div class="skeleton skeleton-row" *ngFor="let _ of skeletonSlots"></div>
+  </div>
+
+  <div *ngIf="!isLoading && !loadError" class="transactions-card">
+
+    <div *ngIf="rows.length === 0" class="empty-state">
+      Транзакцій поки немає.
+    </div>
+
+    <ul *ngIf="rows.length > 0" class="tx-list">
+      <li *ngFor="let row of rows" class="tx-row">
+        <div class="tx-main">
+          <span class="tx-date">{{ row.raw.createdAt | date:'dd.MM.yyyy, HH:mm' }}</span>
+          <span class="tx-title">{{ row.title }}</span>
+          <span class="tx-sub">{{ row.subtitle }}</span>
+          <div class="tx-ids">
+            <span class="tx-id-pill">з {{ truncateId(row.raw.senderAccountId) }}</span>
+            <span class="tx-id-pill">на {{ truncateId(row.raw.receiverAccountId) }}</span>
+          </div>
+        </div>
+        <div class="tx-side">
+          <span
+            class="tx-amount"
+            [class.income]="row.direction === 'income'"
+            [class.expense]="row.direction === 'expense'">
+            {{ row.raw.amount | currency:row.raw.currency:'symbol':'1.2-2' }}
+          </span>
+          <span class="tx-status">{{ row.raw.status }}</span>
+          <span class="tx-type-code">{{ row.raw.type }}</span>
+        </div>
+      </li>
+    </ul>
+
+    <div *ngIf="totalPages > 1" class="pager">
+      <button type="button" class="pager-btn" [disabled]="page === 0" (click)="loadPage(-1)">
+        Назад
+      </button>
+      <span class="pager-info">Сторінка {{ page + 1 }} з {{ totalPages }}</span>
+      <button
+        type="button"
+        class="pager-btn"
+        [disabled]="page >= totalPages - 1"
+        (click)="loadPage(1)">
+        Далі
+      </button>
+    </div>
+
+    <p *ngIf="totalElements > 0" class="total-hint">Всього записів: {{ totalElements }}</p>
+  </div>
+</div>

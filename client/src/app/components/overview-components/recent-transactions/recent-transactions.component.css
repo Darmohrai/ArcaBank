@@ -1,131 +1,174 @@
 .recent-transaction {
   width: 352px;
-  height: 542px;
+  min-height: 320px;
+  max-height: 560px;
 
   padding: 24px;
 
   border-radius: 16px;
 
-  background: #ffffff;
+  background: var(--default-white);
 
   box-sizing: border-box;
 
-  .recent-transaction__tabs {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
 
-    margin-bottom: 12px;
+  .recent-transaction__loading,
+  .recent-transaction__error,
+  .recent-transaction__empty {
+    font-size: 14px;
+    color: var(--gray02);
+    padding: 12px 0 8px;
   }
 
-  .recent-transaction__tab {
-    height: 36px;
+  .recent-transaction__error {
+    color: var(--special-red);
+  }
 
-    padding: 0 16px;
+  .recent-transaction__list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
 
-    border: none;
+  .recent-transaction__footer-link {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray05);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--app-primary-color);
+    text-decoration: none;
+    align-self: flex-start;
+  }
 
-    background: transparent;
+  .recent-transaction__footer-link:hover {
+    text-decoration: underline;
+  }
 
-    color: var(--gray02);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 12px;
+}
+
+.recent-transaction__tab {
+  height: 36px;
+
+  padding: 0 16px;
+
+  border: none;
+
+  background: transparent;
+
+  color: var(--gray02);
+
+  font-size: 16px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition: background-color 0.2s ease,
+  color 0.2s ease;
+
+  &:hover {
+    border-bottom: 2px solid var(--gray06);
+  }
+
+  &.active {
+    border-bottom: 2px solid var(--app-primary-color);
+    color: var(--app-primary-color);
+  }
+}
+
+.recent-transaction__transaction {
+
+  padding: 24px 0;
+
+  border-bottom: 1px solid var(--gray05);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .transaction-name {
+    margin: 0;
 
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
+    line-height: 24px;
+  }
 
-    cursor: pointer;
+  .transaction-description {
+    margin: 0;
 
-    transition:
-      background-color 0.2s ease,
-      color 0.2s ease;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
 
-    &:hover {
-      border-bottom: 2px solid var(--gray06);
+    color: var(--gray03);
+  }
+
+  .transaction-amount {
+    margin: 0;
+
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+
+    text-align: right;
+
+    &.income {
+      color: var(--special-green);
     }
 
-    &.active {
-      border-bottom: 2px solid var(--app-primary-color);
-      color: var(--app-primary-color);
+    &.expense {
+      color: var(--special-red);
     }
   }
 
-  .recent-transaction__transaction {
+  .transaction-date {
+    margin: 0;
 
-    padding: 24px 0;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
 
-    border-bottom: 1px solid var(--gray05);
+    color: var(--gray03);
+  }
 
+  .transaction-inner-container {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: flex-end;
+
+    gap: 4px;
+  }
+
+  .transaction-inner-main-container {
+    display: flex;
     align-items: center;
 
-    .transaction-name {
-      margin: 0;
+    gap: 12px;
 
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 24px;
-    }
+    i {
+      background-color: var(--special-bg-opacity-25);
 
-    .transaction-description {
-      margin: 0;
+      color: var(--gray01);
 
-      font-size: 12px;
-      font-weight: 400;
-      line-height: 16px;
+      width: 40px;
+      height: 40px;
 
-      color: var(--gray03);
-    }
+      border-radius: 10px;
 
-    .transaction-amount {
-      margin: 0;
-
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 24px;
-
-      text-align: right;
-    }
-
-    .transaction-date {
-      margin: 0;
-
-      font-size: 12px;
-      font-weight: 400;
-      line-height: 16px;
-
-      color: var(--gray03);
-    }
-
-    .transaction-inner-container {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-
-      gap: 4px;
-    }
-
-    .transaction-inner-main-container {
       display: flex;
       align-items: center;
+      justify-content: center;
 
-      gap: 12px;
-
-      i {
-        background-color: var(--special-bg-opacity-25);
-
-        color: var(--gray01);
-
-        width: 40px;
-        height: 40px;
-
-        border-radius: 10px;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        font-size: 18px;
-      }
+      font-size: 18px;
     }
   }
 }
+

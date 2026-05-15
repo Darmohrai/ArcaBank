@@ -1,0 +1,83 @@
+<p-toast position="top-right" />
+
+<div class="deposit-page">
+
+  <div class="page-header">
+    <h1 class="page-title">Поповнення рахунку</h1>
+    <p class="page-subtitle">Оберіть свій рахунок і вкажіть суму зарахування</p>
+  </div>
+
+  <div *ngIf="isLoading" class="skeleton-wrap">
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-row"></div>
+  </div>
+
+  <div *ngIf="!isLoading" class="deposit-card" [formGroup]="depositForm">
+
+    <section class="form-section">
+      <span class="section-label">Рахунок</span>
+      <div class="field">
+        <label class="field-label">Куди зарахувати</label>
+        <div class="select-wrapper">
+          <select formControlName="accountId" class="field-select">
+            <option value="" disabled>Оберіть рахунок</option>
+            <option *ngFor="let acc of accounts" [value]="acc.id">
+              {{ acc.currency }} · {{ acc.balance | currency:acc.currency:'symbol':'1.2-2' }}
+            </option>
+          </select>
+        </div>
+        <div
+          *ngIf="depositForm.controls.accountId.touched && depositForm.controls.accountId.errors?.['required']"
+          class="field-error">
+          Оберіть рахунок.
+        </div>
+      </div>
+
+      <div *ngIf="selectedAccount" class="account-hint">
+        Поточний баланс:
+        <strong>{{ selectedAccount.balance | currency:selectedAccount.currency:'symbol':'1.2-2' }}</strong>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="form-section">
+      <span class="section-label">Сума</span>
+      <div class="field">
+        <label class="field-label">Сума поповнення</label>
+        <div class="amount-wrapper">
+          <span class="amount-currency">{{ selectedAccount?.currency ?? '—' }}</span>
+          <input
+            type="number"
+            formControlName="amount"
+            class="field-input amount-input"
+            placeholder="0.00"
+            min="0.01"
+            step="0.01" />
+        </div>
+        <div *ngIf="getAmountError()" class="field-error">{{ getAmountError() }}</div>
+      </div>
+    </section>
+
+    <div *ngIf="serverError" class="server-error">
+      <span class="server-error-icon">⚠</span>
+      <span>{{ serverError }}</span>
+    </div>
+
+    <button
+      type="button"
+      class="submit-btn"
+      [class.loading]="isSubmitting"
+      [disabled]="isSubmitting || accounts.length === 0"
+      (click)="submit()">
+      <span *ngIf="!isSubmitting">Поповнити рахунок</span>
+      <span *ngIf="isSubmitting" class="spinner-wrap">
+        <span class="spinner"></span> Обробка...
+      </span>
+    </button>
+
+    <p *ngIf="accounts.length === 0" class="empty-accounts">
+      У вас ще немає рахунків. Створіть рахунок у розділі «Рахунки».
+    </p>
+  </div>
+</div>

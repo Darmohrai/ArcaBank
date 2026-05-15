@@ -9,7 +9,10 @@
       <ul>
         <app-sidebar-btn (btnClicked)="navigateByUrl('')" text="Огляд" icon="/assets/svg/menu.svg"/>
         <app-sidebar-btn (btnClicked)="navigateByUrl('/balances')" text="Рахунки" icon="/assets/svg/wallet.svg"/>
-        <app-sidebar-btn text="Транзакції" icon="/assets/svg/arrows.svg"/>
+        <app-sidebar-btn (btnClicked)="navigateByUrl('/transactions')" text="Транзакції" icon="/assets/svg/arrows.svg"/>
+        <app-sidebar-btn (btnClicked)="navigateByUrl('/transfer')" text="Переказати" icon="/assets/svg/arrows.svg"/>
+        <app-sidebar-btn (btnClicked)="navigateByUrl('/deposit')" text="Поповнення" icon="/assets/svg/wallet.svg"/>
+        <app-sidebar-btn (btnClicked)="navigateByUrl('/exchange')" text="Обмін валют" icon="/assets/svg/arrows.svg"/>
         <app-sidebar-btn text="Спільний рахунок" icon="/assets/svg/expenses.svg"/>
         <app-sidebar-btn text="Налаштування" icon="/assets/svg/settings.svg"/>
       </ul>

@@ -1,9 +1,60 @@
 .balances {
-  padding: 40px;
+
+  .balances__create-account-container {
+    margin-bottom: 16px;
+
+    p {
+      color: var(--default-black);
+      font-size: 21px;
+      font-weight: 500;
+    }
+    span {
+      color: var(--app-primary-color);
+      font-size: 21px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+  }
+
+  .balances__tabs-container {
+    background-color: var(--default-white);
+    padding: 10px;
+    border-radius: 16px;
+
+    .balances__cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      .balances__card {
+        background-color: var(--app-primary-color);
+        border-radius: 20px;
+        padding: 10px;
+        color: var(--default-white);
+
+        display: flex;
+        flex-direction: column;
+        gap: 36px;
+
+        .balances__card-title {
+          font-size: 20px;
+          font-weight: 500;
+        }
+
+        .balances__card-number {
+          text-align-last: justify;
+          font-size: 20px;
+          width: 70%;
+          margin: 0 auto;
+        }
+
+        .balances__card-holder {}
+      }
+    }
+  }
 
   .balances__create-account-btn {
-    width: 300px;
-    height: 200px;
+    min-height: 160px;
+    height: 100%;
     border: 2px solid var(--app-primary-color);
     border-radius: 20px;
     outline: none;
@@ -58,6 +109,17 @@
         &:hover {
           border-color: var(--app-primary-color);
         }
+      }
+    }
+
+    .balances__form-input-container {
+
+      .balances__form-input {
+        width: 100%;
+        border: 1px solid var(--app-primary-color);
+        border-radius: 8px;
+        outline: none;
+        padding: 6px 14px;
       }
     }
 
@@ -125,5 +187,16 @@
     background: var(--default-white);
   }
 
+/* tabs */
+
+
+  .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+    color: var(--app-primary-color);
+    border-color: var(--app-primary-color);
+  }
+
+  .p-tabview .p-tabview-nav {
+    border: none;
+  }
 
 }
