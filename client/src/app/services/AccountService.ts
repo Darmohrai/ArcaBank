@@ -1,5 +1,5 @@
 import {inject, Injectable, signal} from "@angular/core";
-import {HttpClient, HttpParams} from "@angular/common/http";
+import {HttpClient, HttpParams, HttpResponse} from "@angular/common/http";
 import {CreateAccountRequest} from "../request/AccountRequest";
 import {catchError, Observable, throwError} from "rxjs";
 import {
@@ -48,6 +48,15 @@ export class AccountService {
 
     return this.http
       .get<getAccountTransactionsResponse>(`${this.apiUrl}/${accountId}/transactions`, { params })
+      .pipe(catchError((error) => throwError(() => error)));
+  }
+
+  exportStatementPdf(accountId: string): Observable<HttpResponse<Blob>> {
+    return this.http
+      .get(`${this.apiUrl}/${accountId}/statement/pdf`, {
+        observe: 'response',
+        responseType: 'blob',
+      })
       .pipe(catchError((error) => throwError(() => error)));
   }
 

@@ -5,6 +5,35 @@
     <p class="page-subtitle">Усі операції за вашими рахунками</p>
   </div>
 
+  <div *ngIf="!isLoading && accounts.length > 0" class="export-panel">
+    <div class="export-panel__field">
+      <label class="export-label" for="statement-account">Виписка PDF</label>
+      <select
+        id="statement-account"
+        class="export-select"
+        [value]="selectedAccountId"
+        (change)="selectedAccountId = $any($event.target).value; exportError = null">
+        <option *ngFor="let acc of accounts" [value]="acc.id">
+          {{ acc.currency }} · {{ acc.balance | currency:acc.currency:'symbol':'1.2-2' }}
+        </option>
+      </select>
+    </div>
+    <button
+      type="button"
+      class="export-btn"
+      [disabled]="isExporting || !selectedAccountId"
+      (click)="downloadStatement()">
+      <span *ngIf="!isExporting">Завантажити PDF</span>
+      <span *ngIf="isExporting" class="export-btn__loading">
+        <span class="export-spinner"></span> Завантаження…
+      </span>
+    </button>
+  </div>
+
+  <div *ngIf="exportError" class="error-banner export-error">
+    {{ exportError }}
+  </div>
+
   <div *ngIf="loadError" class="error-banner">
     Не вдалося завантажити історію. Спробуйте оновити сторінку.
   </div>

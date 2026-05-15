@@ -1,0 +1,111 @@
+.balance-detail-page {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--app-primary-color);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.loading {
+  color: var(--gray02);
+  font-size: 14px;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--default-black);
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: var(--gray02);
+  margin: 0;
+}
+
+.error-banner {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(231, 61, 28, 0.07);
+  border: 1px solid rgba(231, 61, 28, 0.2);
+  color: var(--special-red);
+  font-size: 14px;
+}
+
+.account-card {
+  background: var(--default-white);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+}
+
+.account-balance {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--default-black);
+}
+
+.account-meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gray02);
+}
+
+.export-block {
+  background: var(--default-white);
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+}
+
+.export-desc {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: var(--gray01);
+}
+
+.export-btn {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: var(--app-primary-color);
+  color: var(--default-white);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, opacity 0.18s;
+}
+
+.export-btn:hover:not(:disabled) {
+  background: #22877c;
+}
+
+.export-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.export-error {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--special-red);
+}
