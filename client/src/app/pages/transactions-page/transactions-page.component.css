@@ -21,6 +21,98 @@
   margin: 0;
 }
 
+.export-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 16px 18px;
+  background: var(--default-white);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.export-panel__field {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.export-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray01);
+}
+
+.export-select {
+  height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--gray05);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--default-black);
+  background: var(--app-background-color);
+  outline: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.export-select:focus {
+  border-color: var(--app-primary-color);
+  box-shadow: 0 0 0 3px rgba(41, 157, 145, 0.12);
+}
+
+.export-btn {
+  height: 44px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 10px;
+  background: var(--app-primary-color);
+  color: var(--default-white);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, opacity 0.18s;
+  white-space: nowrap;
+}
+
+.export-btn:hover:not(:disabled) {
+  background: #22877c;
+}
+
+.export-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.export-btn__loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: var(--default-white);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.export-error {
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .error-banner {
   padding: 14px 16px;
   border-radius: 10px;

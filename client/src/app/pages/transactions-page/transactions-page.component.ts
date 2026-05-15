@@ -1,10 +1,16 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { NgForOf, NgIf, DatePipe, CurrencyPipe } from '@angular/common';
 import { forkJoin } from 'rxjs';
+import { finalize } from 'rxjs';
 
 import { TransfersService } from '../../services/TransfersService';
 import { AccountService } from '../../services/AccountService';
+import { CreateAccountResponse } from '../../response/AccountResponse';
 import { Transaction } from '../../response/TransferResponse';
+import {
+  exportAccountStatementPdf,
+  statementExportErrorMessage,
+} from '../../util/statement-export';
 import {
   classifyTransaction,
   humanizeTransactionType,
@@ -31,9 +37,13 @@ export class TransactionsPageComponent implements OnInit {
   private transfersService = inject(TransfersService);
   private accountService = inject(AccountService);
 
+  accounts: CreateAccountResponse[] = [];
+  selectedAccountId = '';
   rows: TransactionRow[] = [];
   isLoading = true;
   loadError = false;
+  isExporting = false;
+  exportError: string | null = null;
 
   page = 0;
   readonly pageSize = 15;
@@ -50,6 +60,10 @@ export class TransactionsPageComponent implements OnInit {
       history: this.transfersService.getUserTransactionHistory(this.page, this.pageSize),
     }).subscribe({
       next: ({ accounts, history }) => {
+        this.accounts = accounts;
+        if (!this.selectedAccountId && accounts.length > 0) {
+          this.selectedAccountId = accounts[0].id;
+        }
         this.myAccountIds = new Set(accounts.map((a) => a.id));
         this.applyHistory(history);
         this.isLoading = false;
@@ -101,5 +115,33 @@ export class TransactionsPageComponent implements OnInit {
 
   truncateId(id: string): string {
     return shortAccountId(id);
+  }
+
+  get selectedAccount(): CreateAccountResponse | undefined {
+    return this.accounts.find((a) => a.id === this.selectedAccountId);
+  }
+
+  downloadStatement(): void {
+    this.exportError = null;
+    if (!this.selectedAccountId) {
+      this.exportError = 'Оберіть рахунок для виписки.';
+      return;
+    }
+
+    this.isExporting = true;
+    const currency = this.selectedAccount?.currency ?? 'account';
+
+    exportAccountStatementPdf(
+      this.accountService,
+      this.selectedAccountId,
+      currency
+    )
+      .pipe(finalize(() => (this.isExporting = false)))
+      .subscribe({
+        next: () => {},
+        error: async (error) => {
+          this.exportError = await statementExportErrorMessage(error.detail);
+        },
+      });
   }
 }

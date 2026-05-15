@@ -1,1 +1,37 @@
-<p>balance-detail works!</p>
+<div class="balance-detail-page">
+
+  <a routerLink="/balances" class="back-link">← До рахунків</a>
+
+  <div *ngIf="isLoading" class="loading">Завантаження…</div>
+
+  <div *ngIf="!isLoading && notFound" class="error-banner">
+    Рахунок не знайдено.
+  </div>
+
+  <ng-container *ngIf="!isLoading && account">
+    <div class="page-header">
+      <h1 class="page-title">Деталі рахунку</h1>
+      <p class="page-subtitle">{{ account.currency }} · {{ account.status }}</p>
+    </div>
+
+    <div class="account-card">
+      <p class="account-balance">
+        {{ account.balance | currency:account.currency:'symbol':'1.2-2' }}
+      </p>
+      <p class="account-meta">Створено: {{ account.createdAt | date:'dd.MM.yyyy' }}</p>
+    </div>
+
+    <div class="export-block">
+      <p class="export-desc">Завантажте банківську виписку у форматі PDF за цим рахунком.</p>
+      <button
+        type="button"
+        class="export-btn"
+        [disabled]="isExporting"
+        (click)="downloadStatement()">
+        <span *ngIf="!isExporting">Завантажити PDF</span>
+        <span *ngIf="isExporting">Завантаження…</span>
+      </button>
+      <p *ngIf="exportError" class="export-error">{{ exportError }}</p>
+    </div>
+  </ng-container>
+</div>
