@@ -1,0 +1,1 @@
+ALTER TABLE chests ADD COLUMN frozen_balance NUMERIC(15, 2) NOT NULL DEFAULT 0.00 CHECK (frozen_balance >= 0);
