@@ -11,6 +11,7 @@ public class RoutingRegistry {
     public static final String TRANSACTIONS_RESOURCE = "/transactions";
     public static final String EXCHANGE_RATES_RESOURCE = "/exchange-rates";
     public static final String HEALTH_RESOURCE = "/health";
+    public static final String CHESTS = "/chests";
 
     public static final String V1 = "/api/v1";
 
@@ -47,6 +48,10 @@ public class RoutingRegistry {
         public static final class Transactions {
             public static final String BASE = V1 + TRANSACTIONS_RESOURCE;
             public static final String DEPOSIT = "/deposit";
+        }
+
+        public static final class Chests {
+            public static final String BASE = V1 + CHESTS;
         }
 
         public static final class ExchangeRates {

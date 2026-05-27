@@ -19,6 +19,7 @@ public enum ErrorCode {
 
     ACCOUNT_NOT_FOUND("Рахунок не знайдено", HttpStatus.NOT_FOUND),
     CARD_NOT_FOUND("Картку не знайдено", HttpStatus.NOT_FOUND),
+    USER_NOT_FOUND("Користувача не знайдено", HttpStatus.NOT_FOUND),
 
     ACCESS_DENIED("Доступ заборонено. Це не ваш ресурс.", HttpStatus.FORBIDDEN),
 
