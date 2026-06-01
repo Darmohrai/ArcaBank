@@ -16,10 +16,12 @@ public enum ErrorCode {
     ALREADY_ACTIVE("Ресурс і так активний", HttpStatus.BAD_REQUEST),
     LIMIT_EXCEEDED("Перевищено ліміт операції", HttpStatus.BAD_REQUEST),
     RESTRICTED_ROUTE("Цей напрямок переказу заборонено", HttpStatus.BAD_REQUEST),
+    CHEST_CLOSED("Рахунок закритий", HttpStatus.BAD_REQUEST),
 
     ACCOUNT_NOT_FOUND("Рахунок не знайдено", HttpStatus.NOT_FOUND),
     CARD_NOT_FOUND("Картку не знайдено", HttpStatus.NOT_FOUND),
     USER_NOT_FOUND("Користувача не знайдено", HttpStatus.NOT_FOUND),
+    CHEST_NOT_FOUND("Скриню не знайдено", HttpStatus.NOT_FOUND),
 
     ACCESS_DENIED("Доступ заборонено. Це не ваш ресурс.", HttpStatus.FORBIDDEN),
 

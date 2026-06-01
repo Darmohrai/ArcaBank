@@ -18,6 +18,8 @@ public record ChestCreationRequest(
 
     String description,
 
-    List<UUID> friends
+    List<UUID> friends,
+    String currency,
+    String pin
 ) {
 }
