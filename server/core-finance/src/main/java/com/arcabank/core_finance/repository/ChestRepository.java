@@ -25,6 +25,7 @@ public class ChestRepository extends BaseRepository<Chest> {
         .description(rs.getString("description"))
         .targetAmount(rs.getBigDecimal("target_amount"))
         .balance(rs.getBigDecimal("balance"))
+        .frozenBalance(rs.getBigDecimal("frozen_balance"))
         .status(ChestStatus.valueOf(rs.getString("status")))
         .createdAt(rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null)
         .build();
@@ -46,5 +47,10 @@ public class ChestRepository extends BaseRepository<Chest> {
 
     public void processChestDeposit(UUID accountId, UUID chestId, BigDecimal amount) {
         callProcedure("sp_process_chest_deposit", accountId, chestId, amount);
+    }
+
+    public void freezeFunds(UUID chestId, BigDecimal amount) {
+        String sql = "UPDATE chests SET balance = balance - ?, frozen_balance = COALESCE(frozen_balance, 0) + ? WHERE id = ?";
+        update(sql, amount, amount, chestId);
     }
 }
