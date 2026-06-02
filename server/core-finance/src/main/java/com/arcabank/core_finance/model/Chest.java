@@ -15,6 +15,7 @@ import java.util.UUID;
 @Builder
 public class Chest {
     private UUID id;
+    private UUID accountId;
     private String name;
     private BigDecimal targetAmount;
     private String description;

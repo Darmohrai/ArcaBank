@@ -1,6 +1,8 @@
 package com.arcabank.core_finance.controller;
 
 import com.arcabank.core_finance.dto.ChestCreationRequest;
+import com.arcabank.core_finance.dto.ChestDepositRequest;
+import com.arcabank.core_finance.dto.ChestDepositResponse;
 import com.arcabank.core_finance.dto.ChestResponse;
 import com.arcabank.core_finance.service.ChestService;
 import com.arcabank.core_finance.utils.RoutingRegistry;
@@ -33,5 +35,18 @@ public class ChestController {
         ChestResponse response = chestService.createChest(creatorId, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping(RoutingRegistry.Api.Chests.DEPOSIT)
+    public ResponseEntity<ChestDepositResponse> depositToChest(
+        @PathVariable UUID chestId,
+        @AuthenticationPrincipal Jwt jwt,
+        @Valid @RequestBody ChestDepositRequest request) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        ChestDepositResponse response = chestService.depositToChest(userId, chestId, request);
+
+        return ResponseEntity.ok(response);
     }
 }

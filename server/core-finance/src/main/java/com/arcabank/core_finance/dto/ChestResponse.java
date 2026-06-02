@@ -7,6 +7,8 @@ public record ChestResponse(
     UUID id,
     String name,
     BigDecimal targetAmount,
-    String status
+    String status,
+    String iban,
+    String cardNumber
 ) {
 }
