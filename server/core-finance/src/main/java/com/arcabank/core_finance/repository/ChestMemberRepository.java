@@ -37,4 +37,9 @@ public class ChestMemberRepository extends BaseRepository<ChestMember> {
 
         return result.stream().findFirst();
     }
+
+    public List<ChestMember> findByChestIdAndRole(UUID chestId, ChestMemberRole role) {
+        String sql = "SELECT * FROM chest_members WHERE chest_id = ? AND role = ?";
+        return queryList(sql, chestMemberRowMapper, chestId, role.name());
+    }
 }

@@ -1,10 +1,8 @@
 package com.arcabank.core_finance.controller;
 
-import com.arcabank.core_finance.dto.ChestCreationRequest;
-import com.arcabank.core_finance.dto.ChestDepositRequest;
-import com.arcabank.core_finance.dto.ChestDepositResponse;
-import com.arcabank.core_finance.dto.ChestResponse;
+import com.arcabank.core_finance.dto.*;
 import com.arcabank.core_finance.service.ChestService;
+import com.arcabank.core_finance.service.EscrowService;
 import com.arcabank.core_finance.utils.RoutingRegistry;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -23,6 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ChestController {
     private final ChestService chestService;
+    private final EscrowService escrowService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -48,5 +48,20 @@ public class ChestController {
         ChestDepositResponse response = chestService.depositToChest(userId, chestId, request);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(RoutingRegistry.Api.Chests.VOTES_INITIATE)
+    public ResponseEntity<MessageResponse> initiateEscrow(
+        @PathVariable UUID chestId,
+        @AuthenticationPrincipal Jwt jwt,
+        @Valid @RequestBody EscrowInitiationRequest request) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        escrowService.initiateWithdrawal(chestId, userId, request);
+
+        return ResponseEntity.ok(new MessageResponse(
+            "Запит на виведення успішно створено. Очікується підтвердження довірених осіб."
+        ));
     }
 }

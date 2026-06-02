@@ -21,6 +21,7 @@ public class Chest {
     private String description;
     private Currency currency;
     private BigDecimal balance;
+    private BigDecimal frozenBalance;
     private ChestStatus status;
     private LocalDateTime createdAt;
 }
