@@ -60,16 +60,18 @@ public class ChestService {
 
         chestMemberRepository.addChestMember(chestId, creatorId, ChestMemberRole.OWNER, LocalDateTime.now());
 
-        if (request.friends() != null && !request.friends().isEmpty()) {
-            Set<UUID> uniqueFriends = new HashSet<>(request.friends());
-            uniqueFriends.remove(creatorId);
+        if (request.friendPhones() != null && !request.friendPhones().isEmpty()) {
+            Set<String> uniquePhones = new HashSet<>(request.friendPhones());
 
-            for (UUID friendId : uniqueFriends) {
+            for (String phone : uniquePhones) {
                 try {
-                    userClient.getUserById(friendId);
-                    chestMemberRepository.addChestMember(chestId, friendId, ChestMemberRole.TRUSTEE, LocalDateTime.now());
+                    UserPhoneResponse friend = userClient.getUserByPhone(phone);
+
+                    if (!friend.id().equals(creatorId)) {
+                        chestMemberRepository.addChestMember(chestId, friend.id(), ChestMemberRole.TRUSTEE, LocalDateTime.now());
+                    }
                 } catch (Exception e) {
-                    throw new AppException(ErrorCode.USER_NOT_FOUND, "User not found");
+                    throw new AppException(ErrorCode.USER_NOT_FOUND, "Користувача з номером " + phone + " не знайдено");
                 }
             }
         }

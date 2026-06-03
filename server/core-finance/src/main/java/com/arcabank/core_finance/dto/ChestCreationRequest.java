@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 public record ChestCreationRequest(
     @NotBlank(message = "Name cannot be blank")
@@ -18,7 +17,7 @@ public record ChestCreationRequest(
 
     String description,
 
-    List<UUID> friends,
+    List<String> friendPhones,
     String currency,
     String pin
 ) {
