@@ -47,4 +47,14 @@ public class UserRepository extends BaseRepository<User> {
     public void syncUser(UUID id, String email, String firstName, String lastName, String passportId, String phoneNumber) {
         callProcedure(SP_SYNC_USER_PROCEDURE, id, email, firstName, lastName, passportId, phoneNumber);
     }
+
+    public Optional<User> findByPhone(String phone) {
+        String formattedPhone = phone.replace(" ", "+");
+
+        String sql = "SELECT * FROM users WHERE phone_number = ?";
+
+        List<User> users = jdbcTemplate.query(sql, userMapper, formattedPhone);
+
+        return users.stream().findFirst();
+    }
 }
