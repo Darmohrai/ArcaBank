@@ -53,4 +53,14 @@ public class ChestRepository extends BaseRepository<Chest> {
         String sql = "UPDATE chests SET balance = balance - ?, frozen_balance = COALESCE(frozen_balance, 0) + ? WHERE id = ?";
         update(sql, amount, amount, chestId);
     }
+
+    public void unfreezeFunds(UUID chestId, BigDecimal amount) {
+        String sql = "UPDATE chests SET frozen_balance = frozen_balance - ?, balance = balance + ? WHERE id = ?";
+        update(sql, amount, amount, chestId);
+    }
+
+    public void finalizeEscrowFunds(UUID chestId, BigDecimal amount) {
+        String sql = "UPDATE chests SET frozen_balance = frozen_balance - ? WHERE id = ?";
+        update(sql, amount, chestId);
+    }
 }
