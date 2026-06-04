@@ -54,6 +54,7 @@ public class RoutingRegistry {
             public static final String BASE = V1 + CHESTS;
             public static final String DEPOSIT = "/{chestId}/deposit";
             public static final String VOTES_INITIATE = "/{chestId}/escrow/initiate";
+            public static final String VOTING = "/escrow/{escrowId}/vote";
         }
 
         public static final class ExchangeRates {

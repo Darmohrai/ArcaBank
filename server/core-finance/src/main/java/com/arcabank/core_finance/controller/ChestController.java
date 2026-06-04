@@ -64,4 +64,19 @@ public class ChestController {
             "Запит на виведення успішно створено. Очікується підтвердження довірених осіб."
         ));
     }
+
+    @PostMapping(RoutingRegistry.Api.Chests.VOTING)
+    public ResponseEntity<MessageResponse> voteEscrow(
+        @PathVariable UUID escrowId,
+        @AuthenticationPrincipal Jwt jwt,
+        @Valid @RequestBody VoteRequest request) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        escrowService.processVote(escrowId, userId, request);
+
+        return ResponseEntity.ok(new MessageResponse(
+            "Ваш голос успішно враховано."
+        ));
+    }
 }
