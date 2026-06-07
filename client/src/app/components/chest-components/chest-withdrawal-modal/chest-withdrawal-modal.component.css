@@ -1,0 +1,119 @@
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.balance-info {
+  font-size: 13px;
+  color: var(--gray02);
+  padding: 10px 12px;
+  background: var(--gray06);
+  border-radius: 8px;
+}
+
+.balance-info strong {
+  color: var(--app-primary-color);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray01);
+}
+
+.field-input,
+.field-select {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--gray05);
+  border-radius: 10px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.segmented-control {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background: var(--gray06);
+  border-radius: 10px;
+}
+
+.segmented-control button {
+  flex: 1;
+  min-height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gray02);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segmented-control button.active {
+  background: var(--default-white);
+  color: var(--app-primary-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.segmented-control.compact {
+  margin-top: 2px;
+}
+
+.field-error,
+.server-error {
+  font-size: 12px;
+  color: var(--special-red);
+}
+
+.server-error {
+  padding: 10px 12px;
+  background: rgba(231, 61, 28, 0.07);
+  border-radius: 8px;
+}
+
+.loading-hint {
+  font-size: 13px;
+  color: var(--gray02);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cancel-btn,
+.submit-btn {
+  flex: 1;
+  height: 42px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  border: 1.5px solid var(--gray05);
+  background: var(--default-white);
+}
+
+.submit-btn {
+  border: none;
+  background: var(--app-primary-color);
+  color: var(--default-white);
+}
+
+.submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}

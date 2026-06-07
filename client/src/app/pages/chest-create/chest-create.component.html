@@ -1,0 +1,124 @@
+<p-toast position="top-right" />
+
+<div class="chest-page">
+  <div class="page-header">
+    <a routerLink="/chests" class="back-link">← Мої скрині</a>
+    <h1 class="page-title">Створити скриню</h1>
+    <p class="page-subtitle">Спільний збір коштів з довіреними учасниками</p>
+  </div>
+
+  <div class="chest-card" [formGroup]="createForm">
+    <section class="form-section">
+      <span class="section-label">Основне</span>
+
+      <div class="field">
+        <label class="field-label">Назва скрині</label>
+        <input formControlName="name" class="field-input" placeholder="На ЗСУ" />
+        <div
+          *ngIf="createForm.controls.name.touched && createForm.controls.name.errors?.['required']"
+          class="field-error">
+          Назва обов'язкова.
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Цільова сума</label>
+        <div class="amount-wrapper">
+          <span class="amount-currency">{{ createForm.controls.currency.value }}</span>
+          <input
+            type="number"
+            formControlName="targetAmount"
+            class="field-input amount-input"
+            placeholder="0.00"
+            min="0.01"
+            step="0.01" />
+        </div>
+        <div *ngIf="getTargetAmountError()" class="field-error">{{ getTargetAmountError() }}</div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Валюта</label>
+        <select formControlName="currency" class="field-select">
+          <option value="UAH">UAH</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Опис (необов'язково)</label>
+        <textarea
+          formControlName="description"
+          class="field-textarea"
+          rows="3"
+          placeholder="На що збираємо кошти"></textarea>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="form-section">
+      <span class="section-label">PIN для картки скрині</span>
+      <div class="field">
+        <label class="field-label">PIN-код (4 цифри)</label>
+        <input
+          type="password"
+          formControlName="pin"
+          class="field-input"
+          maxlength="4"
+          inputmode="numeric"
+          placeholder="1234" />
+        <div *ngIf="getPinError()" class="field-error">{{ getPinError() }}</div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="form-section">
+      <span class="section-label">Довірені особи</span>
+      <p class="section-hint">Додайте друзів за номером телефону (+380...)</p>
+
+      <div class="member-input-row">
+        <input
+          [formControl]="memberPhoneInput"
+          class="field-input"
+          placeholder="+380XXXXXXXXX"
+          (keydown)="onMemberKeydown($event)" />
+        <button type="button" class="add-member-btn" (click)="addMember()">Додати</button>
+      </div>
+      <div *ngIf="memberPhoneError" class="field-error">{{ memberPhoneError }}</div>
+      <div *ngIf="members.length === 0 && !memberPhoneError" class="field-error">
+        Для створення скрині потрібен хоча б один довірений учасник.
+      </div>
+
+      <div *ngIf="members.length > 0" class="member-chips">
+        <span
+          *ngFor="let phone of members"
+          class="member-chip"
+          [class.chip-error]="invalidPhones.has(phone)">
+          {{ phone }}
+          <button type="button" class="chip-remove" (click)="removeMember(phone)" aria-label="Видалити">
+            ×
+          </button>
+        </span>
+      </div>
+    </section>
+
+    <div *ngIf="serverError" class="server-error">
+      <span class="server-error-icon">⚠</span>
+      <span>{{ serverError }}</span>
+    </div>
+
+    <button
+      type="button"
+      class="submit-btn"
+      [class.loading]="isSubmitting"
+      [disabled]="isSubmitDisabled"
+      (click)="submit()">
+      <span *ngIf="!isSubmitting">Створити</span>
+      <span *ngIf="isSubmitting" class="spinner-wrap">
+        <span class="spinner"></span> Створення...
+      </span>
+    </button>
+  </div>
+</div>

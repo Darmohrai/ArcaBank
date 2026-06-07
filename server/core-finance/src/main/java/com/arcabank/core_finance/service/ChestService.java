@@ -6,12 +6,12 @@ import com.arcabank.core_finance.exception.AppException;
 import com.arcabank.core_finance.model.Account;
 import com.arcabank.core_finance.model.Chest;
 import com.arcabank.core_finance.model.ChestMember;
+import com.arcabank.core_finance.model.EscrowTransaction;
 import com.arcabank.core_finance.model.util.AccountType;
 import com.arcabank.core_finance.model.util.ChestMemberRole;
 import com.arcabank.core_finance.model.util.ChestStatus;
-import com.arcabank.core_finance.repository.AccountRepository;
-import com.arcabank.core_finance.repository.ChestMemberRepository;
-import com.arcabank.core_finance.repository.ChestRepository;
+import com.arcabank.core_finance.model.util.EscrowStatus;
+import com.arcabank.core_finance.repository.*;
 import com.arcabank.core_finance.utils.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -33,6 +34,8 @@ public class ChestService {
     private final AccountRepository accountRepository;
     private final AccountService accountService;
     private final UserClient userClient;
+    private final EscrowTransactionRepository escrowTransactionRepository;
+    private final EscrowVoteRepository escrowVoteRepository;
 
     @Transactional
     public ChestResponse createChest(UUID creatorId, ChestCreationRequest request) {
@@ -123,6 +126,44 @@ public class ChestService {
             "Скриню успішно поповнено",
             chestId,
             newBalance
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<Chest> getMyChests(UUID userId) {
+        return chestRepository.findAllByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public ChestDetailResponse getChestDetails(UUID chestId, UUID userId) {
+        Chest chest = chestRepository.findChestById(chestId)
+            .orElseThrow(() -> new AppException(ErrorCode.CHEST_NOT_FOUND, "Скриню не знайдено"));
+
+        ChestMember currentUser = chestMemberRepository.findByChestIdAndUserId(chestId, userId)
+            .orElseThrow(() -> new AppException(ErrorCode.ACCESS_DENIED, "Ви не є учасником цієї скрині"));
+
+        List<ChestMemberDto> members = chestMemberRepository.findByChestId(chestId).stream()
+            .map(m -> new ChestMemberDto(m.getUserId(), m.getRole().name(), m.getJoinedAt()))
+            .toList();
+
+        List<EscrowTransaction> escrows = escrowTransactionRepository.findAllByChestId(chestId);
+        int trusteesCount = chestMemberRepository.findByChestIdAndRole(chestId, ChestMemberRole.TRUSTEE).size();
+
+        List<PendingEscrowResponse> escrowsData = escrows.stream().map(e -> {
+            int approvalsCount = escrowVoteRepository.countApprovals(e.getId());
+            boolean voted = escrowVoteRepository.existsByEscrowTransactionIdAndUserId(e.getId(), userId);
+            boolean canVote = (currentUser.getRole() == ChestMemberRole.TRUSTEE) && !voted && e.getStatus() == EscrowStatus.PENDING;
+
+            return new PendingEscrowResponse(
+                e.getId(), e.getChestId(), e.getInitiatorId(), e.getAmount(), e.getDestinationAccountId(),
+                e.getPurpose(), e.getStatus().name(), e.getCreatedAt(), approvalsCount, trusteesCount, voted, canVote
+            );
+        }).toList();
+
+        return new ChestDetailResponse(
+            chest.getId(), chest.getName(), chest.getTargetAmount(), chest.getBalance(),
+            chest.getCurrency() != null ? chest.getCurrency().name() : "UAH",
+            chest.getStatus().name(), members, escrowsData
         );
     }
 }

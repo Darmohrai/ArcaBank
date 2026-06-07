@@ -14,6 +14,9 @@ import {TransfersPageComponent} from "./pages/transfers-page/transfers-page.comp
 import {ExchangePageComponent} from "./pages/exchange-page/exchange-page.component";
 import {DepositPageComponent} from "./pages/deposit-page/deposit-page.component";
 import {TransactionsPageComponent} from "./pages/transactions-page/transactions-page.component";
+import {ChestListComponent} from "./pages/chest-list/chest-list.component";
+import {ChestCreateComponent} from "./pages/chest-create/chest-create.component";
+import {ChestDetailComponent} from "./pages/chest-detail/chest-detail.component";
 
 export const routes: Routes = [
   {
@@ -28,6 +31,9 @@ export const routes: Routes = [
       {path: 'exchange', component: ExchangePageComponent},
       {path: 'deposit', component: DepositPageComponent},
       {path: 'transactions', component: TransactionsPageComponent},
+      {path: 'chests', component: ChestListComponent},
+      {path: 'chests/create', component: ChestCreateComponent},
+      {path: 'chests/:id', component: ChestDetailComponent},
     ]
   },
   {

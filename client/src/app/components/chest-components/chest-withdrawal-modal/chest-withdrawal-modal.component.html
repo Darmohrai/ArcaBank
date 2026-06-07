@@ -1,0 +1,100 @@
+<p-dialog
+  draggable="false"
+  header="Запит на виведення"
+  [modal]="true"
+  [(visible)]="dialogVisible"
+  (visibleChange)="onDialogVisibleChange($event)"
+  [style]="{ width: '30rem' }">
+
+  <div *ngIf="isLoading" class="loading-hint">Завантаження...</div>
+
+  <form *ngIf="!isLoading" [formGroup]="withdrawForm" class="modal-form">
+    <div class="balance-info">
+      Доступний баланс:
+      <strong>{{ availableBalance | currency:'UAH':'symbol':'1.2-2' }}</strong>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Сума</label>
+      <input
+        type="number"
+        formControlName="amount"
+        class="field-input"
+        placeholder="0.00"
+        min="0.01"
+        step="0.01" />
+      <div *ngIf="getAmountError()" class="field-error">{{ getAmountError() }}</div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Призначення</label>
+      <input
+        formControlName="purpose"
+        class="field-input"
+        placeholder="Цільове призначення платежу" />
+    </div>
+
+    <div class="field">
+      <label class="field-label">Отримувач</label>
+      <div class="segmented-control">
+        <button
+          type="button"
+          [class.active]="destinationMode === 'OWN_ACCOUNT'"
+          (click)="setDestinationMode('OWN_ACCOUNT')">
+          Мій рахунок
+        </button>
+        <button
+          type="button"
+          [class.active]="destinationMode === 'MANUAL'"
+          (click)="setDestinationMode('MANUAL')">
+          Вручну
+        </button>
+      </div>
+
+      <select
+        *ngIf="destinationMode === 'OWN_ACCOUNT'"
+        formControlName="destinationAccountId"
+        class="field-select">
+        <option value="" disabled>Оберіть рахунок</option>
+        <option *ngFor="let acc of accounts" [value]="acc.id">
+          {{ acc.currency }} · {{ acc.iban }}
+        </option>
+      </select>
+
+      <ng-container *ngIf="destinationMode === 'MANUAL'">
+        <div class="segmented-control compact">
+          <button
+            type="button"
+            [class.active]="manualDestinationType === 'ACCOUNT'"
+            (click)="setManualDestinationType('ACCOUNT')">
+            Рахунок
+          </button>
+          <button
+            type="button"
+            [class.active]="manualDestinationType === 'CARD'"
+            (click)="setManualDestinationType('CARD')">
+            Картка
+          </button>
+        </div>
+        <input
+          formControlName="manualDestination"
+          class="field-input"
+          [placeholder]="manualDestinationType === 'ACCOUNT' ? 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' : '1234 5678 9012 3456'" />
+      </ng-container>
+      <div *ngIf="getDestinationError()" class="field-error">{{ getDestinationError() }}</div>
+    </div>
+
+    <div *ngIf="serverError" class="server-error">{{ serverError }}</div>
+
+    <div class="modal-actions">
+      <button type="button" class="cancel-btn" (click)="close()">Скасувати</button>
+      <button
+        type="button"
+        class="submit-btn"
+        [disabled]="isSubmitting || isFormInvalid"
+        (click)="submit()">
+        {{ isSubmitting ? 'Обробка...' : 'Надіслати запит' }}
+      </button>
+    </div>
+  </form>
+</p-dialog>

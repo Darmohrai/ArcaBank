@@ -1,0 +1,43 @@
+<div class="chest-list-page">
+  <div class="page-header">
+    <h1 class="page-title">Спільні скрині</h1>
+    <p class="page-subtitle">Накопичувальні збори з голосуванням довірених осіб</p>
+  </div>
+
+  <a routerLink="/chests/create" class="create-btn">+ Створити скриню</a>
+
+  <div *ngIf="isLoading" class="empty-state">
+    <p>Завантаження скринь...</p>
+  </div>
+
+  <div *ngIf="!isLoading && serverError" class="server-error">
+    {{ serverError }}
+  </div>
+
+  <div *ngIf="!isLoading && !serverError && chests.length === 0" class="empty-state">
+    <p>У вас ще немає скринь.</p>
+    <p class="empty-hint">Створіть першу скриню або зачекайте, поки вас додадуть до спільного збору.</p>
+  </div>
+
+  <div *ngIf="!isLoading && !serverError" class="chest-grid">
+    <button
+      *ngFor="let chest of chests"
+      type="button"
+      class="chest-card"
+      (click)="openChest(chest.id)">
+      <div class="chest-card-header">
+        <h2>{{ chest.name }}</h2>
+        <span class="status" [class.inactive]="chest.status !== 'ACTIVE'">
+          {{ chest.status === 'ACTIVE' ? 'Активна' : chest.status }}
+        </span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="getProgress(chest)"></div>
+      </div>
+      <p class="chest-amount">
+        {{ chest.currentBalance | currency:(chest.currency || 'UAH'):'symbol':'1.2-2' }}
+        / {{ chest.targetAmount | currency:(chest.currency || 'UAH'):'symbol':'1.2-2' }}
+      </p>
+    </button>
+  </div>
+</div>

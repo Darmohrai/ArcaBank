@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -46,5 +47,15 @@ public class EscrowTransactionRepository extends BaseRepository<EscrowTransactio
         String sql = "INSERT INTO escrow_transactions (id, chest_id, initiator_id, amount, destination_account, purpose, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
         update(sql, transaction.getId(), transaction.getChestId(), transaction.getInitiatorId(),
             transaction.getAmount(), transaction.getDestinationAccountId(), transaction.getPurpose(), transaction.getStatus().name());
+    }
+
+    public Optional<EscrowTransaction> findPendingByChestId(UUID chestId) {
+        String sql = "SELECT * FROM escrow_transactions WHERE chest_id = ? AND status = 'PENDING'";
+        return queryList(sql, escrowRowMapper, chestId).stream().findFirst();
+    }
+
+    public List<EscrowTransaction> findAllByChestId(UUID chestId) {
+        String sql = "SELECT * FROM escrow_transactions WHERE chest_id = ? ORDER BY created_at DESC";
+        return queryList(sql, escrowRowMapper, chestId);
     }
 }

@@ -1,6 +1,8 @@
 package com.arcabank.core_finance.service;
 
 import com.arcabank.core_finance.dto.EscrowInitiationRequest;
+import com.arcabank.core_finance.dto.EscrowInitiationResponse;
+import com.arcabank.core_finance.dto.PendingEscrowResponse;
 import com.arcabank.core_finance.dto.VoteRequest;
 import com.arcabank.core_finance.exception.AppException;
 import com.arcabank.core_finance.model.Chest;
@@ -34,7 +36,7 @@ public class EscrowService {
     private final TransactionService transactionService;
 
     @Transactional
-    public void initiateWithdrawal(UUID chestId, UUID userId, EscrowInitiationRequest request) {
+    public EscrowInitiationResponse initiateWithdrawal(UUID chestId, UUID userId, EscrowInitiationRequest request) {
         ChestMember member = chestMemberRepository.findByChestIdAndUserId(chestId, userId)
             .orElseThrow(() -> new AppException(ErrorCode.NOT_CHEST_ACCESS, "Ви не є учасником цієї скрині"));
 
@@ -81,6 +83,14 @@ public class EscrowService {
 
             notificationOutboxRepository.insert(outboxMessage);
         }
+
+        return new EscrowInitiationResponse(
+            "Запит на виведення успішно створено",
+            escrowTx.getId(),
+            chestId,
+            escrowTx.getAmount(),
+            EscrowStatus.PENDING.name()
+        );
     }
 
     @Transactional
@@ -139,5 +149,35 @@ public class EscrowService {
                 escrowTx.getAmount()
             );
         }
+    }
+
+    @Transactional(readOnly = true)
+    public PendingEscrowResponse getPendingEscrow(UUID chestId, UUID userId) {
+        ChestMember member = chestMemberRepository.findByChestIdAndUserId(chestId, userId)
+            .orElseThrow(() -> new AppException(ErrorCode.NOT_CHEST_ACCESS, "Ви не є учасником цієї скрині"));
+
+        EscrowTransaction escrowTx = escrowTransactionRepository.findPendingByChestId(chestId)
+            .orElseThrow(() -> new AppException(ErrorCode.TRANSACTION_NOT_FOUND, "Немає активних голосувань для цієї скрині"));
+
+        int trusteesCount = chestMemberRepository.findByChestIdAndRole(chestId, ChestMemberRole.TRUSTEE).size();
+        int approvalsCount = escrowVoteRepository.countApprovals(escrowTx.getId());
+
+        boolean currentUserVoted = escrowVoteRepository.existsByEscrowTransactionIdAndUserId(escrowTx.getId(), userId);
+        boolean canCurrentUserVote = (member.getRole() == ChestMemberRole.TRUSTEE) && !currentUserVoted;
+
+        return new PendingEscrowResponse(
+            escrowTx.getId(),
+            escrowTx.getChestId(),
+            escrowTx.getInitiatorId(),
+            escrowTx.getAmount(),
+            escrowTx.getDestinationAccountId(),
+            escrowTx.getPurpose(),
+            escrowTx.getStatus().name(),
+            escrowTx.getCreatedAt(),
+            approvalsCount,
+            trusteesCount,
+            currentUserVoted,
+            canCurrentUserVote
+        );
     }
 }
