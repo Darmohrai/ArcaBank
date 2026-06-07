@@ -1,0 +1,29 @@
+<div class="voting-widget">
+  <div class="voting-header">
+    <span class="voting-icon">🗳</span>
+    <div>
+      <p class="voting-title">Голосування за виведення</p>
+      <p class="voting-subtitle">{{ voteProgress }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="!hasVoted" class="voting-actions">
+    <button
+      type="button"
+      class="vote-btn approve"
+      [disabled]="isSubmitting"
+      (click)="approve()">
+      Схвалити
+    </button>
+    <button
+      type="button"
+      class="vote-btn reject"
+      [disabled]="isSubmitting"
+      (click)="reject()">
+      Відхилити
+    </button>
+  </div>
+
+  <p *ngIf="hasVoted" class="voted-msg">Ваш голос успішно враховано.</p>
+  <p *ngIf="serverError" class="vote-error">{{ serverError }}</p>
+</div>

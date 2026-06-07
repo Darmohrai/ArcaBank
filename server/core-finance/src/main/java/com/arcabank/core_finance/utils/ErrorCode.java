@@ -16,11 +16,19 @@ public enum ErrorCode {
     ALREADY_ACTIVE("Ресурс і так активний", HttpStatus.BAD_REQUEST),
     LIMIT_EXCEEDED("Перевищено ліміт операції", HttpStatus.BAD_REQUEST),
     RESTRICTED_ROUTE("Цей напрямок переказу заборонено", HttpStatus.BAD_REQUEST),
+    CHEST_CLOSED("Рахунок закритий", HttpStatus.BAD_REQUEST),
+    NOT_CHEST_ACCESS("Вам рахунок не доступний", HttpStatus.FORBIDDEN),
 
     ACCOUNT_NOT_FOUND("Рахунок не знайдено", HttpStatus.NOT_FOUND),
     CARD_NOT_FOUND("Картку не знайдено", HttpStatus.NOT_FOUND),
+    USER_NOT_FOUND("Користувача не знайдено", HttpStatus.NOT_FOUND),
+    CHEST_NOT_FOUND("Скриню не знайдено", HttpStatus.NOT_FOUND),
+    TRANSACTION_NOT_FOUND("Транзакцію не знайдено", HttpStatus.NOT_FOUND),
 
     ACCESS_DENIED("Доступ заборонено. Це не ваш ресурс.", HttpStatus.FORBIDDEN),
+
+    ALREADY_VOTE("Ви вже проголосували за цей запит", HttpStatus.CONFLICT),
+
 
     INTERNAL_ERROR("Внутрішня помилка сервера", HttpStatus.INTERNAL_SERVER_ERROR),
     TRANSFER_ERROR("Помилка виконання переказу", HttpStatus.INTERNAL_SERVER_ERROR),

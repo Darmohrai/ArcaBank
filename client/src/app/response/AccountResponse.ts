@@ -1,6 +1,7 @@
 export interface CreateAccountResponse {
  id: string;
  userId: string;
+ iban?: string;
  currency: string;
  balance: number;
  status: string;

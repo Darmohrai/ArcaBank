@@ -1,0 +1,117 @@
+<p-toast position="top-right" />
+
+<div *ngIf="isLoading" class="not-found">
+  <p>Завантаження скрині...</p>
+</div>
+
+<div *ngIf="!isLoading && serverError" class="not-found">
+  <p>{{ serverError }}</p>
+  <a routerLink="/chests">Повернутися до списку</a>
+</div>
+
+<div class="chest-detail-page" *ngIf="!isLoading && chest && !notFound && !serverError">
+  <div class="page-header">
+    <a routerLink="/chests" class="back-link">← Мої скрині</a>
+    <h1 class="page-title">{{ chest.name }}</h1>
+    <span class="status-badge" [class.inactive]="chest.status !== 'ACTIVE'">
+      {{ chest.status === 'ACTIVE' ? 'Активна' : chest.status }}
+    </span>
+  </div>
+
+  <div *ngIf="activeEscrow" class="vote-banner">
+    Очікується голосування
+    <span class="vote-banner-note">
+      {{ voteProgress }}
+    </span>
+  </div>
+
+  <div class="detail-card">
+    <p *ngIf="chest.description" class="description">{{ chest.description }}</p>
+
+    <div class="progress-section">
+      <div class="progress-labels">
+        <span>Зібрано</span>
+        <span>{{ chest.currentBalance | currency:(chest.currency || 'UAH'):'symbol':'1.2-2' }} / {{ chest.targetAmount | currency:(chest.currency || 'UAH'):'symbol':'1.2-2' }}</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="progressPercent"></div>
+      </div>
+      <p class="progress-percent">{{ progressPercent | number:'1.0-0' }}%</p>
+    </div>
+
+    <div class="balance-grid">
+      <div class="balance-item">
+        <span class="balance-label">Доступний баланс</span>
+        <span class="balance-value">{{ chest.currentBalance | currency:(chest.currency || 'UAH'):'symbol':'1.2-2' }}</span>
+      </div>
+      <div class="balance-item frozen">
+        <span class="balance-label">У голосуванні</span>
+        <span class="balance-value">{{ chest.frozenBalance | currency:(chest.currency || 'UAH'):'symbol':'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div class="meta-grid" *ngIf="activeEscrow">
+      <div class="meta-item">
+        <span class="meta-label">Призначення виведення</span>
+        <span class="meta-value">{{ activeEscrow.purpose }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Рахунок отримувача</span>
+        <span class="meta-value">{{ activeEscrow.destinationAccount }}</span>
+      </div>
+    </div>
+
+    <div class="members-section" *ngIf="hasMembers">
+      <span class="members-title">Учасники скрині</span>
+      <div class="member-list">
+        <div *ngFor="let member of memberRows" class="member-row">
+          <span class="member-name">{{ member.label }}</span>
+          <span class="member-role">{{ member.role === 'OWNER' ? 'Власник' : 'Довірена особа' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button
+        *ngIf="chest.status === 'ACTIVE'"
+        type="button"
+        class="action-btn primary"
+        (click)="showDepositModal = true">
+        Поповнити скриню
+      </button>
+      <button
+        *ngIf="chest.status === 'ACTIVE' && !activeEscrow"
+        type="button"
+        class="action-btn secondary"
+        (click)="showWithdrawModal = true">
+        Запит на виведення
+      </button>
+    </div>
+  </div>
+
+  <app-chest-voting-widget
+    *ngIf="activeEscrow && activeEscrow.id && canVote"
+    [escrowId]="activeEscrow.id"
+    [voteProgress]="voteProgress"
+    [alreadyVoted]="activeEscrow.currentUserVoted"
+    (voted)="onVoted()" />
+
+  <div *ngIf="activeEscrow && !canVote" class="vote-info">
+    {{ activeEscrow.currentUserVoted ? 'Ви вже проголосували за цей запит.' : 'Голосування очікує довірених учасників.' }}
+  </div>
+
+  <app-chest-deposit-modal
+    [(visible)]="showDepositModal"
+    [chest]="chest"
+    (deposited)="onDepositSuccess()" />
+
+  <app-chest-withdrawal-modal
+    [(visible)]="showWithdrawModal"
+    [chest]="chest"
+    (initiated)="onWithdrawInitiated()" />
+</div>
+
+<div *ngIf="!isLoading && notFound" class="not-found">
+  <p>Скриню не знайдено.</p>
+  <a routerLink="/chests">Повернутися до списку</a>
+</div>

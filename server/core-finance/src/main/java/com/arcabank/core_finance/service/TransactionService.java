@@ -181,4 +181,29 @@ public class TransactionService {
 
         return new PageResponse<>(enrichedTransactions, page, size, totalElements, totalPages);
     }
+
+    @Transactional
+    public UUID processEscrowTransfer(UUID chestAccountId, UUID receiverAccountId, java.math.BigDecimal amount) {
+        try {
+            UUID transactionId = accountRepository.processTransfer(chestAccountId, receiverAccountId, amount);
+
+            Account receiverAccount = accountRepository.findById(receiverAccountId)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND, "Рахунок отримувача не знайдено"));
+
+            notificator.notifyTransferSuccess(
+                null,
+                receiverAccount.getUserId(),
+                amount,
+                receiverAccount.getCurrency().name()
+            );
+
+            return transactionId;
+
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Escrow Transfer failed: {}", e.getMessage());
+            throw new AppException(ErrorCode.TRANSFER_ERROR, "Помилка при переказі коштів зі скрині");
+        }
+    }
 }
