@@ -42,4 +42,9 @@ public class ChestMemberRepository extends BaseRepository<ChestMember> {
         String sql = "SELECT * FROM chest_members WHERE chest_id = ? AND role = ?";
         return queryList(sql, chestMemberRowMapper, chestId, role.name());
     }
+
+    public List<ChestMember> findByChestId(UUID chestId) {
+        String sql = "SELECT * FROM chest_members WHERE chest_id = ?";
+        return queryList(sql, chestMemberRowMapper, chestId);
+    }
 }

@@ -63,4 +63,11 @@ public class ChestRepository extends BaseRepository<Chest> {
         String sql = "UPDATE chests SET frozen_balance = frozen_balance - ? WHERE id = ?";
         update(sql, amount, chestId);
     }
+
+    public List<Chest> findAllByUserId(UUID userId) {
+        String sql = "SELECT c.* FROM chests c " +
+            "JOIN chest_members cm ON c.id = cm.chest_id " +
+            "WHERE cm.user_id = ?";
+        return queryList(sql, chestRowMapper, userId);
+    }
 }

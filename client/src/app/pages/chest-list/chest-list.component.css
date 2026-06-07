@@ -1,0 +1,131 @@
+.chest-list-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--default-black);
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: var(--gray02);
+  margin: 0;
+}
+
+.create-btn {
+  display: inline-block;
+  padding: 10px 18px;
+  background: var(--app-primary-color);
+  color: var(--default-white);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 24px;
+}
+
+.create-btn:hover {
+  background: #22877c;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--default-white);
+  border-radius: 16px;
+  color: var(--gray02);
+}
+
+.empty-hint {
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.server-error {
+  padding: 12px 16px;
+  background: rgba(231, 61, 28, 0.07);
+  border: 1px solid rgba(231, 61, 28, 0.2);
+  border-radius: 10px;
+  color: var(--special-red);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.chest-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chest-card {
+  text-align: left;
+  background: var(--default-white);
+  border: 1.5px solid var(--gray05);
+  border-radius: 14px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.chest-card:hover {
+  border-color: var(--app-primary-color);
+  box-shadow: 0 4px 12px rgba(41, 157, 145, 0.12);
+}
+
+.chest-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.chest-card-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--default-black);
+}
+
+.status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: rgba(41, 157, 145, 0.12);
+  color: var(--app-primary-color);
+}
+
+.status.inactive {
+  background: rgba(231, 61, 28, 0.1);
+  color: var(--special-red);
+}
+
+.progress-track {
+  height: 6px;
+  background: var(--gray05);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--app-primary-color);
+  border-radius: 3px;
+  transition: width 0.5s ease-in-out;
+}
+
+.chest-amount {
+  font-size: 13px;
+  color: var(--gray02);
+  margin: 0;
+}

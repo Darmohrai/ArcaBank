@@ -1,0 +1,381 @@
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/controller/ChestController.java b/server/core-finance/src/main/java/com/arcabank/core_finance/controller/ChestController.java
+index 74fcd62..9eb4cb5 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/controller/ChestController.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/controller/ChestController.java
+@@ -1,6 +1,7 @@
+ package com.arcabank.core_finance.controller;
+ 
+ import com.arcabank.core_finance.dto.*;
++import com.arcabank.core_finance.model.Chest;
+ import com.arcabank.core_finance.service.ChestService;
+ import com.arcabank.core_finance.service.EscrowService;
+ import com.arcabank.core_finance.utils.RoutingRegistry;
+@@ -13,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
+ import org.springframework.security.oauth2.jwt.Jwt;
+ import org.springframework.web.bind.annotation.*;
+ 
++import java.util.List;
+ import java.util.Map;
+ import java.util.UUID;
+ 
+@@ -50,33 +52,55 @@ public class ChestController {
+         return ResponseEntity.ok(response);
+     }
+ 
+-    @PostMapping(RoutingRegistry.Api.Chests.VOTES_INITIATE)
+-    public ResponseEntity<MessageResponse> initiateEscrow(
+-        @PathVariable UUID chestId,
++    @PostMapping(RoutingRegistry.Api.Chests.VOTING)
++    public ResponseEntity<MessageResponse> voteEscrow(
++        @PathVariable UUID escrowId,
+         @AuthenticationPrincipal Jwt jwt,
+-        @Valid @RequestBody EscrowInitiationRequest request) {
++        @Valid @RequestBody VoteRequest request) {
+ 
+         UUID userId = UUID.fromString(jwt.getSubject());
+ 
+-        escrowService.initiateWithdrawal(chestId, userId, request);
++        escrowService.processVote(escrowId, userId, request);
+ 
+         return ResponseEntity.ok(new MessageResponse(
+-            "Запит на виведення успішно створено. Очікується підтвердження довірених осіб."
++            "Ваш голос успішно враховано."
+         ));
+     }
+ 
+-    @PostMapping(RoutingRegistry.Api.Chests.VOTING)
+-    public ResponseEntity<MessageResponse> voteEscrow(
+-        @PathVariable UUID escrowId,
++    @GetMapping
++    public ResponseEntity<List<Chest>> getMyChests(@AuthenticationPrincipal Jwt jwt) {
++        UUID userId = UUID.fromString(jwt.getSubject());
++        return ResponseEntity.ok(chestService.getMyChests(userId));
++    }
++
++    @GetMapping("/{chestId}")
++    public ResponseEntity<ChestDetailResponse> getChestDetails(
++        @PathVariable UUID chestId,
++        @AuthenticationPrincipal Jwt jwt) {
++        UUID userId = UUID.fromString(jwt.getSubject());
++        return ResponseEntity.ok(chestService.getChestDetails(chestId, userId));
++    }
++
++    @PostMapping(RoutingRegistry.Api.Chests.VOTES_INITIATE)
++    public ResponseEntity<EscrowInitiationResponse> initiateEscrow(
++        @PathVariable UUID chestId,
+         @AuthenticationPrincipal Jwt jwt,
+-        @Valid @RequestBody VoteRequest request) {
++        @Valid @RequestBody EscrowInitiationRequest request) {
+ 
+         UUID userId = UUID.fromString(jwt.getSubject());
++        EscrowInitiationResponse response = escrowService.initiateWithdrawal(chestId, userId, request);
+ 
+-        escrowService.processVote(escrowId, userId, request);
++        return ResponseEntity.ok(response);
++    }
+ 
+-        return ResponseEntity.ok(new MessageResponse(
+-            "Ваш голос успішно враховано."
+-        ));
++    @GetMapping("/{chestId}/escrow/pending")
++    public ResponseEntity<PendingEscrowResponse> getPendingEscrow(
++        @PathVariable UUID chestId,
++        @AuthenticationPrincipal Jwt jwt) {
++
++        UUID userId = UUID.fromString(jwt.getSubject());
++        PendingEscrowResponse response = escrowService.getPendingEscrow(chestId, userId);
++
++        return ResponseEntity.ok(response);
+     }
+ }
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/dto/ChestDetailResponse.java b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/ChestDetailResponse.java
+new file mode 100644
+index 0000000..676737f
+--- /dev/null
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/ChestDetailResponse.java
+@@ -0,0 +1,16 @@
++package com.arcabank.core_finance.dto;
++
++import java.math.BigDecimal;
++import java.util.List;
++import java.util.UUID;
++
++public record ChestDetailResponse(
++    UUID id,
++    String name,
++    BigDecimal targetAmount,
++    BigDecimal balance,
++    String currency,
++    String status,
++    List<ChestMemberDto> members,
++    List<PendingEscrowResponse> escrows
++) {}
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/dto/ChestMemberDto.java b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/ChestMemberDto.java
+new file mode 100644
+index 0000000..e0f3bfe
+--- /dev/null
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/ChestMemberDto.java
+@@ -0,0 +1,10 @@
++package com.arcabank.core_finance.dto;
++
++import java.time.LocalDateTime;
++import java.util.UUID;
++
++public record ChestMemberDto(
++    UUID userId,
++    String role,
++    LocalDateTime joinedAt
++) {}
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/dto/EscrowInitiationResponse.java b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/EscrowInitiationResponse.java
+new file mode 100644
+index 0000000..ae89fbe
+--- /dev/null
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/EscrowInitiationResponse.java
+@@ -0,0 +1,12 @@
++package com.arcabank.core_finance.dto;
++
++import java.math.BigDecimal;
++import java.util.UUID;
++
++public record EscrowInitiationResponse(
++    String message,
++    UUID escrowId,
++    UUID chestId,
++    BigDecimal amount,
++    String status
++) {}
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/dto/PendingEscrowResponse.java b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/PendingEscrowResponse.java
+new file mode 100644
+index 0000000..e89b037
+--- /dev/null
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/dto/PendingEscrowResponse.java
+@@ -0,0 +1,20 @@
++package com.arcabank.core_finance.dto;
++
++import java.math.BigDecimal;
++import java.time.LocalDateTime;
++import java.util.UUID;
++
++public record PendingEscrowResponse(
++    UUID id,
++    UUID chestId,
++    UUID initiatorId,
++    BigDecimal amount,
++    UUID destinationAccount,
++    String purpose,
++    String status,
++    LocalDateTime createdAt,
++    int approvalsCount,
++    int trusteesCount,
++    boolean currentUserVoted,
++    boolean canCurrentUserVote
++) {}
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/repository/ChestMemberRepository.java b/server/core-finance/src/main/java/com/arcabank/core_finance/repository/ChestMemberRepository.java
+index 117306c..e3785e2 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/repository/ChestMemberRepository.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/repository/ChestMemberRepository.java
+@@ -42,4 +42,9 @@ public class ChestMemberRepository extends BaseRepository<ChestMember> {
+         String sql = "SELECT * FROM chest_members WHERE chest_id = ? AND role = ?";
+         return queryList(sql, chestMemberRowMapper, chestId, role.name());
+     }
++
++    public List<ChestMember> findByChestId(UUID chestId) {
++        String sql = "SELECT * FROM chest_members WHERE chest_id = ?";
++        return queryList(sql, chestMemberRowMapper, chestId);
++    }
+ }
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/repository/ChestRepository.java b/server/core-finance/src/main/java/com/arcabank/core_finance/repository/ChestRepository.java
+index 7ac46da..b0f649b 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/repository/ChestRepository.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/repository/ChestRepository.java
+@@ -63,4 +63,11 @@ public class ChestRepository extends BaseRepository<Chest> {
+         String sql = "UPDATE chests SET frozen_balance = frozen_balance - ? WHERE id = ?";
+         update(sql, amount, chestId);
+     }
++
++    public List<Chest> findAllByUserId(UUID userId) {
++        String sql = "SELECT c.* FROM chests c " +
++            "JOIN chest_members cm ON c.id = cm.chest_id " +
++            "WHERE cm.user_id = ?";
++        return queryList(sql, chestRowMapper, userId);
++    }
+ }
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/repository/EscrowTransactionRepository.java b/server/core-finance/src/main/java/com/arcabank/core_finance/repository/EscrowTransactionRepository.java
+index 7f0bfe4..b1b09c5 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/repository/EscrowTransactionRepository.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/repository/EscrowTransactionRepository.java
+@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
+ import org.springframework.jdbc.core.RowMapper;
+ import org.springframework.stereotype.Repository;
+ 
++import java.util.List;
+ import java.util.Optional;
+ import java.util.UUID;
+ 
+@@ -47,4 +48,14 @@ public class EscrowTransactionRepository extends BaseRepository<EscrowTransactio
+         update(sql, transaction.getId(), transaction.getChestId(), transaction.getInitiatorId(),
+             transaction.getAmount(), transaction.getDestinationAccountId(), transaction.getPurpose(), transaction.getStatus().name());
+     }
++
++    public Optional<EscrowTransaction> findPendingByChestId(UUID chestId) {
++        String sql = "SELECT * FROM escrow_transactions WHERE chest_id = ? AND status = 'PENDING'";
++        return queryList(sql, escrowRowMapper, chestId).stream().findFirst();
++    }
++
++    public List<EscrowTransaction> findAllByChestId(UUID chestId) {
++        String sql = "SELECT * FROM escrow_transactions WHERE chest_id = ? ORDER BY created_at DESC";
++        return queryList(sql, escrowRowMapper, chestId);
++    }
+ }
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/service/ChestService.java b/server/core-finance/src/main/java/com/arcabank/core_finance/service/ChestService.java
+index 3108f2a..3de934c 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/service/ChestService.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/service/ChestService.java
+@@ -6,12 +6,12 @@ import com.arcabank.core_finance.exception.AppException;
+ import com.arcabank.core_finance.model.Account;
+ import com.arcabank.core_finance.model.Chest;
+ import com.arcabank.core_finance.model.ChestMember;
++import com.arcabank.core_finance.model.EscrowTransaction;
+ import com.arcabank.core_finance.model.util.AccountType;
+ import com.arcabank.core_finance.model.util.ChestMemberRole;
+ import com.arcabank.core_finance.model.util.ChestStatus;
+-import com.arcabank.core_finance.repository.AccountRepository;
+-import com.arcabank.core_finance.repository.ChestMemberRepository;
+-import com.arcabank.core_finance.repository.ChestRepository;
++import com.arcabank.core_finance.model.util.EscrowStatus;
++import com.arcabank.core_finance.repository.*;
+ import com.arcabank.core_finance.utils.ErrorCode;
+ import lombok.RequiredArgsConstructor;
+ import lombok.extern.slf4j.Slf4j;
+@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
+ import java.math.BigDecimal;
+ import java.time.LocalDateTime;
+ import java.util.HashSet;
++import java.util.List;
+ import java.util.Set;
+ import java.util.UUID;
+ 
+@@ -33,6 +34,8 @@ public class ChestService {
+     private final AccountRepository accountRepository;
+     private final AccountService accountService;
+     private final UserClient userClient;
++    private final EscrowTransactionRepository escrowTransactionRepository;
++    private final EscrowVoteRepository escrowVoteRepository;
+ 
+     @Transactional
+     public ChestResponse createChest(UUID creatorId, ChestCreationRequest request) {
+@@ -125,4 +128,42 @@ public class ChestService {
+             newBalance
+         );
+     }
++
++    @Transactional(readOnly = true)
++    public List<Chest> getMyChests(UUID userId) {
++        return chestRepository.findAllByUserId(userId);
++    }
++
++    @Transactional(readOnly = true)
++    public ChestDetailResponse getChestDetails(UUID chestId, UUID userId) {
++        Chest chest = chestRepository.findChestById(chestId)
++            .orElseThrow(() -> new AppException(ErrorCode.CHEST_NOT_FOUND, "Скриню не знайдено"));
++
++        ChestMember currentUser = chestMemberRepository.findByChestIdAndUserId(chestId, userId)
++            .orElseThrow(() -> new AppException(ErrorCode.ACCESS_DENIED, "Ви не є учасником цієї скрині"));
++
++        List<ChestMemberDto> members = chestMemberRepository.findByChestId(chestId).stream()
++            .map(m -> new ChestMemberDto(m.getUserId(), m.getRole().name(), m.getJoinedAt()))
++            .toList();
++
++        List<EscrowTransaction> escrows = escrowTransactionRepository.findAllByChestId(chestId);
++        int trusteesCount = chestMemberRepository.findByChestIdAndRole(chestId, ChestMemberRole.TRUSTEE).size();
++
++        List<PendingEscrowResponse> escrowsData = escrows.stream().map(e -> {
++            int approvalsCount = escrowVoteRepository.countApprovals(e.getId());
++            boolean voted = escrowVoteRepository.existsByEscrowTransactionIdAndUserId(e.getId(), userId);
++            boolean canVote = (currentUser.getRole() == ChestMemberRole.TRUSTEE) && !voted && e.getStatus() == EscrowStatus.PENDING;
++
++            return new PendingEscrowResponse(
++                e.getId(), e.getChestId(), e.getInitiatorId(), e.getAmount(), e.getDestinationAccountId(),
++                e.getPurpose(), e.getStatus().name(), e.getCreatedAt(), approvalsCount, trusteesCount, voted, canVote
++            );
++        }).toList();
++
++        return new ChestDetailResponse(
++            chest.getId(), chest.getName(), chest.getTargetAmount(), chest.getBalance(),
++            chest.getCurrency() != null ? chest.getCurrency().name() : "UAH",
++            chest.getStatus().name(), members, escrowsData
++        );
++    }
+ }
+diff --git a/server/core-finance/src/main/java/com/arcabank/core_finance/service/EscrowService.java b/server/core-finance/src/main/java/com/arcabank/core_finance/service/EscrowService.java
+index 82fea4b..0564b2e 100644
+--- a/server/core-finance/src/main/java/com/arcabank/core_finance/service/EscrowService.java
++++ b/server/core-finance/src/main/java/com/arcabank/core_finance/service/EscrowService.java
+@@ -1,6 +1,8 @@
+ package com.arcabank.core_finance.service;
+ 
+ import com.arcabank.core_finance.dto.EscrowInitiationRequest;
++import com.arcabank.core_finance.dto.EscrowInitiationResponse;
++import com.arcabank.core_finance.dto.PendingEscrowResponse;
+ import com.arcabank.core_finance.dto.VoteRequest;
+ import com.arcabank.core_finance.exception.AppException;
+ import com.arcabank.core_finance.model.Chest;
+@@ -34,7 +36,7 @@ public class EscrowService {
+     private final TransactionService transactionService;
+ 
+     @Transactional
+-    public void initiateWithdrawal(UUID chestId, UUID userId, EscrowInitiationRequest request) {
++    public EscrowInitiationResponse initiateWithdrawal(UUID chestId, UUID userId, EscrowInitiationRequest request) {
+         ChestMember member = chestMemberRepository.findByChestIdAndUserId(chestId, userId)
+             .orElseThrow(() -> new AppException(ErrorCode.NOT_CHEST_ACCESS, "Ви не є учасником цієї скрині"));
+ 
+@@ -81,6 +83,14 @@ public class EscrowService {
+ 
+             notificationOutboxRepository.insert(outboxMessage);
+         }
++
++        return new EscrowInitiationResponse(
++            "Запит на виведення успішно створено",
++            escrowTx.getId(),
++            chestId,
++            escrowTx.getAmount(),
++            EscrowStatus.PENDING.name()
++        );
+     }
+ 
+     @Transactional
+@@ -140,4 +150,34 @@ public class EscrowService {
+             );
+         }
+     }
++
++    @Transactional(readOnly = true)
++    public PendingEscrowResponse getPendingEscrow(UUID chestId, UUID userId) {
++        ChestMember member = chestMemberRepository.findByChestIdAndUserId(chestId, userId)
++            .orElseThrow(() -> new AppException(ErrorCode.NOT_CHEST_ACCESS, "Ви не є учасником цієї скрині"));
++
++        EscrowTransaction escrowTx = escrowTransactionRepository.findPendingByChestId(chestId)
++            .orElseThrow(() -> new AppException(ErrorCode.TRANSACTION_NOT_FOUND, "Немає активних голосувань для цієї скрині"));
++
++        int trusteesCount = chestMemberRepository.findByChestIdAndRole(chestId, ChestMemberRole.TRUSTEE).size();
++        int approvalsCount = escrowVoteRepository.countApprovals(escrowTx.getId());
++
++        boolean currentUserVoted = escrowVoteRepository.existsByEscrowTransactionIdAndUserId(escrowTx.getId(), userId);
++        boolean canCurrentUserVote = (member.getRole() == ChestMemberRole.TRUSTEE) && !currentUserVoted;
++
++        return new PendingEscrowResponse(
++            escrowTx.getId(),
++            escrowTx.getChestId(),
++            escrowTx.getInitiatorId(),
++            escrowTx.getAmount(),
++            escrowTx.getDestinationAccountId(),
++            escrowTx.getPurpose(),
++            escrowTx.getStatus().name(),
++            escrowTx.getCreatedAt(),
++            approvalsCount,
++            trusteesCount,
++            currentUserVoted,
++            canCurrentUserVote
++        );
++    }
+ }

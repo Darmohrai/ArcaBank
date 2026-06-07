@@ -1,6 +1,7 @@
 package com.arcabank.core_finance.controller;
 
 import com.arcabank.core_finance.dto.*;
+import com.arcabank.core_finance.model.Chest;
 import com.arcabank.core_finance.service.ChestService;
 import com.arcabank.core_finance.service.EscrowService;
 import com.arcabank.core_finance.utils.RoutingRegistry;
@@ -13,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -50,21 +52,6 @@ public class ChestController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping(RoutingRegistry.Api.Chests.VOTES_INITIATE)
-    public ResponseEntity<MessageResponse> initiateEscrow(
-        @PathVariable UUID chestId,
-        @AuthenticationPrincipal Jwt jwt,
-        @Valid @RequestBody EscrowInitiationRequest request) {
-
-        UUID userId = UUID.fromString(jwt.getSubject());
-
-        escrowService.initiateWithdrawal(chestId, userId, request);
-
-        return ResponseEntity.ok(new MessageResponse(
-            "Запит на виведення успішно створено. Очікується підтвердження довірених осіб."
-        ));
-    }
-
     @PostMapping(RoutingRegistry.Api.Chests.VOTING)
     public ResponseEntity<MessageResponse> voteEscrow(
         @PathVariable UUID escrowId,
@@ -78,5 +65,42 @@ public class ChestController {
         return ResponseEntity.ok(new MessageResponse(
             "Ваш голос успішно враховано."
         ));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Chest>> getMyChests(@AuthenticationPrincipal Jwt jwt) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return ResponseEntity.ok(chestService.getMyChests(userId));
+    }
+
+    @GetMapping("/{chestId}")
+    public ResponseEntity<ChestDetailResponse> getChestDetails(
+        @PathVariable UUID chestId,
+        @AuthenticationPrincipal Jwt jwt) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return ResponseEntity.ok(chestService.getChestDetails(chestId, userId));
+    }
+
+    @PostMapping(RoutingRegistry.Api.Chests.VOTES_INITIATE)
+    public ResponseEntity<EscrowInitiationResponse> initiateEscrow(
+        @PathVariable UUID chestId,
+        @AuthenticationPrincipal Jwt jwt,
+        @Valid @RequestBody EscrowInitiationRequest request) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+        EscrowInitiationResponse response = escrowService.initiateWithdrawal(chestId, userId, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{chestId}/escrow/pending")
+    public ResponseEntity<PendingEscrowResponse> getPendingEscrow(
+        @PathVariable UUID chestId,
+        @AuthenticationPrincipal Jwt jwt) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+        PendingEscrowResponse response = escrowService.getPendingEscrow(chestId, userId);
+
+        return ResponseEntity.ok(response);
     }
 }
