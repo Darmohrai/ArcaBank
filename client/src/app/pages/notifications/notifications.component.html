@@ -1,0 +1,23 @@
+<div class="notifications-wrapper">
+  <div class="header">
+    <h2>Сповіщення</h2>
+  </div>
+
+  <div class="notification-list" *ngIf="(notifications$ | async) as notifications">
+
+    <div class="empty-state" *ngIf="notifications.length === 0">
+      <div class="empty-icon">📭</div>
+      <h3>Все переглянуто</h3>
+      <p>У вас немає нових сповіщень на даний момент.</p>
+    </div>
+
+    <div class="notification-card"
+         *ngFor="let notif of (notifications$ | async)"
+         [class.unread]="!notif.isRead"
+         (click)="markAsRead(notif.id)">
+
+      <h4>{{ notif.title }}</h4>
+      <p>{{ notif.text }}</p>
+    </div>
+  </div>
+</div>

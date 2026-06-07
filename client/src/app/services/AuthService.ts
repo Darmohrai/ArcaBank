@@ -108,4 +108,8 @@ export class AuthService {
   isLoggedIn(): boolean {
     return this.loggedIn.value;
   }
+
+  public getToken(): string | null {
+    return localStorage.getItem('token');
+  }
 }
