@@ -1,5 +1,6 @@
 package com.arcabank.core_finance.repository;
 
+import com.arcabank.core_finance.dto.MonthlyStatsDto;
 import com.arcabank.core_finance.dto.TransactionDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -74,4 +75,23 @@ public class TransactionRepository extends BaseRepository<TransactionDto> {
         return jdbcTemplate.queryForObject(sql, Long.class, userId, userId);
     }
 
+    public List<MonthlyStatsDto> getMonthlyStats(UUID userId) {
+        String sql = """
+                SELECT
+                    EXTRACT(MONTH FROM t.created_at) as month,
+                    SUM(CASE WHEN r.user_id = ? THEN t.amount ELSE 0 END) as income,
+                    SUM(CASE WHEN s.user_id = ? THEN t.amount ELSE 0 END) as expense
+                FROM transactions t
+                JOIN accounts s ON t.sender_account_id = s.id
+                LEFT JOIN accounts r ON t.receiver_account_id = r.id
+                WHERE (s.user_id = ? OR r.user_id = ?)
+                GROUP BY EXTRACT(MONTH FROM t.created_at)
+                ORDER BY month;
+            """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new MonthlyStatsDto(
+            rs.getInt("month"),
+            rs.getDouble("income"),
+            rs.getDouble("expense")
+        ), userId, userId, userId, userId);
+    }
 }

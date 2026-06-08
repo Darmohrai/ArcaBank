@@ -1,10 +1,27 @@
 <section class="overview">
-  <div class="overview__top-content">
-    <app-balance-element/>
-    <app-goals-element/>
+
+  <div class="overview__top-row">
+    <div class="overview__balance"><app-balance-element/></div>
+
+    <div class="overview__title">
+      <div class="brand-container">
+        <i class="pi pi-chart-line brand-icon"></i>
+        <h1 class="brand-text">ARKABANK</h1>
+      </div>
+      <p class="brand-subtitle">Ваш фінансовий дашборд</p>
+    </div>
+
+    <div class="overview__goals"><app-goals-element/></div>
   </div>
 
-  <div class="overview__bottom-content">
-    <app-recent-transactions/>
+  <div class="overview__bottom-row">
+    <div class="overview__transactions"><app-recent-transactions/></div>
+    <div class="overview__chart">
+      <h3 class="chart-title">Статистика місяця</h3>
+      <div class="chart-wrapper">
+        <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="'bar'"></canvas>
+      </div>
+    </div>
   </div>
+
 </section>
