@@ -3,6 +3,7 @@ package com.arcabank.core_finance.service;
 import com.arcabank.core_finance.client.NbuClient;
 import com.arcabank.core_finance.dto.NbuRateResponse;
 import com.arcabank.core_finance.repository.ExchangeRateRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,12 @@ public class ExchangeRateUpdateService {
 
     @Value("${bank.exchange.margin}")
     private BigDecimal bankMargin;
+
+    @PostConstruct
+    public void init() {
+        log.info("Initial trigger: Running exchange rate update on startup...");
+        fetchAndUpdateRates();
+    }
 
     @Scheduled(cron = "${bank.exchange.cron}")
     public void fetchAndUpdateRates() {
