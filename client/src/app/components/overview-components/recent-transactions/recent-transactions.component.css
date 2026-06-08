@@ -1,174 +1,169 @@
 .recent-transaction {
-  width: 352px;
-  min-height: 320px;
-  max-height: 560px;
-
+  /* Задаємо висоту, як у графіка на дашборді */
+  width: 100%;
+  height: 350px;
   padding: 24px;
-
-  border-radius: 16px;
-
-  background: var(--default-white);
-
+  border-radius: 12px; /* Зробив 12px для узгодженості з дашбордом */
+  background: var(--default-white, #fff);
   box-sizing: border-box;
-
   display: flex;
   flex-direction: column;
+}
 
-  .recent-transaction__loading,
-  .recent-transaction__error,
-  .recent-transaction__empty {
-    font-size: 14px;
-    color: var(--gray02);
-    padding: 12px 0 8px;
-  }
-
-  .recent-transaction__error {
-    color: var(--special-red);
-  }
-
-  .recent-transaction__list {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-  }
-
-  .recent-transaction__footer-link {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--gray05);
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--app-primary-color);
-    text-decoration: none;
-    align-self: flex-start;
-  }
-
-  .recent-transaction__footer-link:hover {
-    text-decoration: underline;
-  }
-
+/* Виправив: ці стилі раніше були "загублені" в кінці блоку */
+.recent-transaction__tabs {
   display: flex;
   align-items: center;
   gap: 10px;
-
   margin-bottom: 12px;
 }
 
-.recent-transaction__tab {
-  height: 36px;
-
-  padding: 0 16px;
-
-  border: none;
-
-  background: transparent;
-
+.recent-transaction__loading,
+.recent-transaction__error,
+.recent-transaction__empty {
+  font-size: 14px;
   color: var(--gray02);
-
-  font-size: 16px;
-  font-weight: 500;
-
-  cursor: pointer;
-
-  transition: background-color 0.2s ease,
-  color 0.2s ease;
-
-  &:hover {
-    border-bottom: 2px solid var(--gray06);
-  }
-
-  &.active {
-    border-bottom: 2px solid var(--app-primary-color);
-    color: var(--app-primary-color);
-  }
+  padding: 12px 0 8px;
 }
 
+.recent-transaction__error {
+  color: var(--special-red);
+}
+
+/* --- Налаштування зони скролінгу --- */
+.recent-transaction__list {
+  flex: 1; /* Забирає весь вільний простір */
+  min-height: 0;
+  overflow-y: auto; /* Вмикає вертикальний скрол */
+  padding-right: 8px; /* Відступ, щоб текст не прилипав до повзунка */
+  margin-right: -8px; /* Компенсація відступу */
+}
+
+/* Стилізація скролбару (Chrome, Safari, Edge) */
+.recent-transaction__list::-webkit-scrollbar {
+  width: 6px;
+}
+.recent-transaction__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.recent-transaction__list::-webkit-scrollbar-thumb {
+  background-color: var(--gray05, #cbd5e1);
+  border-radius: 10px;
+}
+.recent-transaction__list::-webkit-scrollbar-thumb:hover {
+  background-color: var(--gray04, #94a3b8);
+}
+
+.recent-transaction__footer-link {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray05);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--app-primary-color);
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.recent-transaction__footer-link:hover {
+  text-decoration: underline;
+}
+
+/* --- Вкладки --- */
+.recent-transaction__tab {
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  background: transparent;
+  color: var(--gray02);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.recent-transaction__tab:hover {
+  border-bottom: 2px solid var(--gray06);
+}
+
+.recent-transaction__tab.active {
+  border-bottom: 2px solid var(--app-primary-color);
+  color: var(--app-primary-color);
+}
+
+/* --- Окрема транзакція --- */
 .recent-transaction__transaction {
-
-  padding: 24px 0;
-
+  padding: 16px 0; /* Трохи зменшив відступи, щоб гарно влазило ~5 елементів */
   border-bottom: 1px solid var(--gray05);
-
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  .transaction-name {
-    margin: 0;
-
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 24px;
-  }
-
-  .transaction-description {
-    margin: 0;
-
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 16px;
-
-    color: var(--gray03);
-  }
-
-  .transaction-amount {
-    margin: 0;
-
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 24px;
-
-    text-align: right;
-
-    &.income {
-      color: var(--special-green);
-    }
-
-    &.expense {
-      color: var(--special-red);
-    }
-  }
-
-  .transaction-date {
-    margin: 0;
-
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 16px;
-
-    color: var(--gray03);
-  }
-
-  .transaction-inner-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-
-    gap: 4px;
-  }
-
-  .transaction-inner-main-container {
-    display: flex;
-    align-items: center;
-
-    gap: 12px;
-
-    i {
-      background-color: var(--special-bg-opacity-25);
-
-      color: var(--gray01);
-
-      width: 40px;
-      height: 40px;
-
-      border-radius: 10px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      font-size: 18px;
-    }
-  }
 }
 
+.recent-transaction__transaction:last-child {
+  border-bottom: none; /* Забираємо лінію в останнього елемента */
+}
+
+.transaction-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.transaction-description {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--gray03);
+}
+
+.transaction-amount {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+  text-align: right;
+}
+
+.transaction-amount.income {
+  color: var(--special-green);
+}
+
+.transaction-amount.expense {
+  color: var(--special-red);
+}
+
+.transaction-date {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--gray03);
+}
+
+.transaction-inner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.transaction-inner-main-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.transaction-inner-main-container i {
+  background-color: var(--special-bg-opacity-25, #f1f5f9);
+  color: var(--gray01, #334155);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}

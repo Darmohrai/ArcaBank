@@ -206,4 +206,13 @@ public class TransactionService {
             throw new AppException(ErrorCode.TRANSFER_ERROR, "Помилка при переказі коштів зі скрині");
         }
     }
+
+    public List<MonthlyStatsDto> getMonthlyStats(UUID userId){
+        try {
+            return transactionRepository.getMonthlyStats(userId);
+        } catch (Exception e) {
+            log.error("ПОМИЛКА ПРИ ЗАВАНТАЖЕННІ СТАТИСТИКИ: ", e);
+            throw e;
+        }
+    }
 }

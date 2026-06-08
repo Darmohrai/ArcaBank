@@ -1,14 +1,122 @@
+/* Базовий контейнер дашборду */
 .overview {
-
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px; /* Відстань між верхнім і нижнім рядами */
+  padding: 24px;
+  width: 100%;
+  max-width: 1440px; /* ЗБІЛЬШИВ ШИРИНУ, щоб картки не стискалися і не налазили */
+  margin: 0 auto;
+  box-sizing: border-box;
+}
 
-  .overview__top-content {
-    display: flex;
-    gap: 16px;
-  }
+/* ================= ВЕРХНІЙ РЯД ================= */
+.overview__top-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start; /* САМЕ ЦЕ ВИРІВНЮЄ ВСІ БЛОКИ СУВОРО ЗВЕРХУ */
+  justify-content: space-between; /* Розсовує баланс вліво, цілі вправо, а текст по центру */
+  gap: 20px;
+  width: 100%;
+}
 
-  .overview__bottom-content {
-  }
+.overview__balance {
+  flex: 0 1 auto; /* Дозволяє блоку займати своє місце */
+  min-width: 0;
+}
+
+.overview__title {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;      /* Центрує текст і підзаголовок по горизонталі */
+
+  /* --- ОНОВЛЕНІ СТИЛІ ДЛЯ ОПУСКАННЯ ТЕКСТУ --- */
+  align-self: center;       /* Автоматично опускає весь блок у вертикальний центр між картками */
+  margin-top: 20px;         /* Якщо захочете опустити ще нижче вручну, просто збільшуйте це значення (наприклад, 30px або 40px) */
+}
+
+.overview__goals {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* --- Внутрішні стилі заголовка --- */
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-icon {
+  font-size: 28px;
+  color: #6366f1;
+}
+
+.brand-text {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #1e293b, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.brand-subtitle {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+/* ================= НИЖНІЙ РЯД ================= */
+.overview__bottom-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 24px;
+  width: 100%;
+}
+
+.overview__transactions {
+  flex: 0 0 352px; /* Жорстко фіксуємо ширину для транзакцій (як у вашому компоненті) */
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.overview__chart {
+  flex: 1 1 0; /* Графік слухняно забирає весь вільний простір, що залишився */
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  height: 350px; /* Рівна висота з транзакціями поруч */
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.chart-title {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  color: #444;
+}
+
+.chart-wrapper {
+  flex-grow: 1;
+  position: relative;
+  min-height: 0;
 }
