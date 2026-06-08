@@ -2,7 +2,11 @@
   <h1>Привіт Arsenii</h1>
 
   <div class="header__btns-container">
-    <i class="pi pi-bell"></i>
+    <a routerLink="/notifications" class="notification-link">
+      <i class="pi pi-bell"></i>
+      <span class="notification-badge" *ngIf="(unreadCount$ | async) as count" [class.hidden]="count === 0">
+        {{ count > 99 ? '99+' : count }}
+      </span>
+    </a>
   </div>
-
 </header>

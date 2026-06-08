@@ -1,0 +1,138 @@
+.notifications-wrapper {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header h2 {
+  font-size: 1.75rem;
+  color: #1a1a1a;
+  margin: 0;
+  font-weight: 700;
+}
+
+.mark-read-btn {
+  background: transparent;
+  border: 1px solid #007bff;
+  color: #007bff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.mark-read-btn:hover {
+  background: #007bff;
+  color: #ffffff;
+}
+
+/* Контейнер списку */
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem; /* Простір між картками */
+}
+
+/* Дизайн самої картки */
+.notification-card {
+  display: flex;
+  align-items: flex-start;
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notification-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Кругла іконка зліва */
+.icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-right: 1.2rem;
+}
+
+/* Кольори для різних типів іконок */
+.bg-green { background: #e6f4ea; color: #28a745; }
+.bg-red { background: #fce8e6; color: #dc3545; }
+.bg-blue { background: #e7f1ff; color: #007bff; }
+.bg-gray { background: #f1f3f5; color: #6c757d; }
+
+.content {
+  flex-grow: 1;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #2b2b2b;
+}
+
+/* Ярлик типу транзакції */
+.badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  background: #f8f9fa;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid #e9ecef;
+}
+
+.text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #5a5a5a;
+  line-height: 1.5;
+}
+
+/* Дизайн для порожнього списку */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #888;
+  background: #fcfcfc;
+  border-radius: 16px;
+  border: 1px dashed #eaeaea;
+}
+
+.empty-state .empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+}

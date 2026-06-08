@@ -20,4 +20,6 @@ public class BaseNotification {
     private String title;
     private String text;
     private String endpoint;
+
+    private boolean isRead;
 }

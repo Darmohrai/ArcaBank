@@ -139,7 +139,7 @@ public class ChestService {
         Chest chest = chestRepository.findChestById(chestId)
             .orElseThrow(() -> new AppException(ErrorCode.CHEST_NOT_FOUND, "Скриню не знайдено"));
 
-        ChestMember currentUser = chestMemberRepository.findByChestIdAndUserId(chestId, userId)
+        chestMemberRepository.findByChestIdAndUserId(chestId, userId)
             .orElseThrow(() -> new AppException(ErrorCode.ACCESS_DENIED, "Ви не є учасником цієї скрині"));
 
         List<ChestMemberDto> members = chestMemberRepository.findByChestId(chestId).stream()
@@ -147,16 +147,20 @@ public class ChestService {
             .toList();
 
         List<EscrowTransaction> escrows = escrowTransactionRepository.findAllByChestId(chestId);
-        int trusteesCount = chestMemberRepository.findByChestIdAndRole(chestId, ChestMemberRole.TRUSTEE).size();
+
+        int totalMembers = members.size();
+        int requiredApprovals = totalMembers - 1;
 
         List<PendingEscrowResponse> escrowsData = escrows.stream().map(e -> {
             int approvalsCount = escrowVoteRepository.countApprovals(e.getId());
             boolean voted = escrowVoteRepository.existsByEscrowTransactionIdAndUserId(e.getId(), userId);
-            boolean canVote = (currentUser.getRole() == ChestMemberRole.TRUSTEE) && !voted && e.getStatus() == EscrowStatus.PENDING;
+
+            boolean isInitiator = e.getInitiatorId().equals(userId);
+            boolean canVote = !isInitiator && !voted && e.getStatus() == EscrowStatus.PENDING;
 
             return new PendingEscrowResponse(
                 e.getId(), e.getChestId(), e.getInitiatorId(), e.getAmount(), e.getDestinationAccountId(),
-                e.getPurpose(), e.getStatus().name(), e.getCreatedAt(), approvalsCount, trusteesCount, voted, canVote
+                e.getPurpose(), e.getStatus().name(), e.getCreatedAt(), approvalsCount, requiredApprovals, voted, canVote
             );
         }).toList();
 

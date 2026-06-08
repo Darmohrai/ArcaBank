@@ -18,6 +18,8 @@ import {ChestListComponent} from "./pages/chest-list/chest-list.component";
 import {ChestCreateComponent} from "./pages/chest-create/chest-create.component";
 import {ChestDetailComponent} from "./pages/chest-detail/chest-detail.component";
 
+import {NotificationsComponent} from "./pages/notifications/notifications.component";
+
 export const routes: Routes = [
   {
     path: '',
@@ -34,6 +36,8 @@ export const routes: Routes = [
       {path: 'chests', component: ChestListComponent},
       {path: 'chests/create', component: ChestCreateComponent},
       {path: 'chests/:id', component: ChestDetailComponent},
+
+      {path: 'notifications', component: NotificationsComponent},
     ]
   },
   {

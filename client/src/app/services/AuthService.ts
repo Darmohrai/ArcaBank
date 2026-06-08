@@ -5,19 +5,19 @@ import { HttpClient } from '@angular/common/http';
 import { LoginRequest } from '../request/LoginRequest';
 import { LoginResponse } from '../response/LoginResponse';
 import { isPlatformBrowser } from '@angular/common';
-import {Router} from "@angular/router";
-import {AccountService} from "./AccountService";
-import {CardService} from "./CardService";
+import { Router } from "@angular/router";
+import { AccountService } from "./AccountService";
+import { CardService } from "./CardService";
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost/api/v1/auth/public';
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
-  private AccountService = inject(AccountService)
-  private CardService = inject(CardService)
+  private accountService = inject(AccountService);
+  private cardService = inject(CardService);
 
+  private apiUrl = 'http://localhost/api/v1/auth/public';
   private readonly ACCESS_KEY = 'auth_token';
   private readonly REFRESH_KEY = 'auth_refresh_token';
   private readonly EXPIRES_AT_KEY = 'auth_token_expires_at';
@@ -47,24 +47,47 @@ export class AuthService {
           const expiresAt = Date.now() + res.expires_in * 1000;
           const storage = rememberMe ? localStorage : sessionStorage;
 
-          // Avoid "stale token in the other storage" bugs
           this.clearStoredTokens();
 
           storage.setItem(this.ACCESS_KEY, res.access_token);
           storage.setItem(this.REFRESH_KEY, res.refresh_token);
           storage.setItem(this.EXPIRES_AT_KEY, String(expiresAt));
-          this.AccountService.getAllAccounts().subscribe(accounts => {
-            this.AccountService.userAccounts.set(accounts);
-            console.log(this.AccountService.userAccounts());
-          })
 
-          this.CardService.getAllCards().subscribe(cards => {
-            this.CardService.userCards.set(cards);
-            console.log(this.CardService.userCards());
-          })
+          this.accountService.getAllAccounts().subscribe(accounts => {
+            this.accountService.userAccounts.set(accounts);
+          });
+
+          this.cardService.getAllCards().subscribe(cards => {
+            this.cardService.userCards.set(cards);
+          });
         }
         this.loggedIn.next(true);
-        console.log(this.loggedIn.value);
+      })
+    );
+  }
+
+  refreshToken(): Observable<LoginResponse> {
+    const refreshToken = localStorage.getItem(this.REFRESH_KEY) || sessionStorage.getItem(this.REFRESH_KEY);
+
+    if (!refreshToken) {
+      this.signOut();
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    return this.http.post<LoginResponse>(`${this.apiUrl}/refresh`, { refresh_token: refreshToken }).pipe(
+      tap((res) => {
+        if (isPlatformBrowser(this.platformId)) {
+          const expiresAt = Date.now() + res.expires_in * 1000;
+          const storage = localStorage.getItem(this.REFRESH_KEY) ? localStorage : sessionStorage;
+
+          storage.setItem(this.ACCESS_KEY, res.access_token);
+          storage.setItem(this.REFRESH_KEY, res.refresh_token);
+          storage.setItem(this.EXPIRES_AT_KEY, String(expiresAt));
+        }
+      }),
+      catchError((error) => {
+        this.signOut();
+        return throwError(() => error);
       })
     );
   }
@@ -74,9 +97,7 @@ export class AuthService {
       this.clearStoredTokens();
     }
     this.loggedIn.next(false);
-    console.log(this.loggedIn.value);
     this.router.navigateByUrl('/login');
-
   }
 
   private hasToken(): boolean {
@@ -86,5 +107,9 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return this.loggedIn.value;
+  }
+
+  public getToken(): string | null {
+    return localStorage.getItem('token');
   }
 }

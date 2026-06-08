@@ -11,5 +11,31 @@
     font-size: 28px;
   }
 
+  .notification-link {
+    text-decoration: none;
+    color: inherit;
+    position: relative; /* Це дозволить позиціонувати бейдж абсолютно */
+    display: inline-block;
+    padding: 5px;
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: 0;
+    right: -5px;
+    background-color: #dc3545;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 15px;
+    text-align: center;
+    border: 2px solid white; /* Додає "рамку", щоб бейдж виділявся */
+  }
+
+  .hidden {
+    display: none;
+  }
   .header__btns-container {}
 }

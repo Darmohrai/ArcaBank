@@ -40,10 +40,6 @@ public class EscrowService {
         ChestMember member = chestMemberRepository.findByChestIdAndUserId(chestId, userId)
             .orElseThrow(() -> new AppException(ErrorCode.NOT_CHEST_ACCESS, "Ви не є учасником цієї скрині"));
 
-        if (member.getRole() != ChestMemberRole.OWNER) {
-            throw new AppException(ErrorCode.NOT_CHEST_ACCESS, "Тільки власник може ініціювати виведення коштів");
-        }
-
         if (escrowTransactionRepository.existsByChestIdAndStatus(chestId, EscrowStatus.PENDING.name())) {
             throw new AppException(ErrorCode.VALIDATION_ERROR, "Завершіть поточне голосування");
         }
@@ -68,11 +64,14 @@ public class EscrowService {
             .build();
         escrowTransactionRepository.save(escrowTx);
 
-        List<ChestMember> trustees = chestMemberRepository.findByChestIdAndRole(chestId, ChestMemberRole.TRUSTEE);
+        List<ChestMember> allMembers = chestMemberRepository.findByChestId(chestId);
+        List<ChestMember> voters = allMembers.stream()
+            .filter(m -> !m.getUserId().equals(userId))
+            .toList();
 
-        for (ChestMember trustee : trustees) {
+        for (ChestMember voter : voters) {
             String payload = String.format("{\"eventType\": \"ESCROW_VOTE_REQUIRED\", \"escrowId\": \"%s\", \"trusteeId\": \"%s\"}",
-                escrowTx.getId(), trustee.getUserId());
+                escrowTx.getId(), voter.getUserId());
 
             NotificationOutbox outboxMessage = NotificationOutbox.builder()
                 .topic("notification-events")
@@ -102,14 +101,11 @@ public class EscrowService {
             throw new AppException(ErrorCode.VALIDATION_ERROR, "Голосування по цьому запиту вже закрито");
         }
 
-        ChestMember member = chestMemberRepository.findByChestIdAndUserId(escrowTx.getChestId(), userId)
+        chestMemberRepository.findByChestIdAndUserId(escrowTx.getChestId(), userId)
             .orElseThrow(() -> new AppException(ErrorCode.NOT_CHEST_ACCESS, "Ви не є учасником скрині"));
 
-        if (member.getRole() == ChestMemberRole.OWNER) {
-            throw new AppException(ErrorCode.NOT_CHEST_ACCESS, "Власник (OWNER) не має права голосу");
-        }
-        if (member.getRole() != ChestMemberRole.TRUSTEE) {
-            throw new AppException(ErrorCode.NOT_CHEST_ACCESS, "Тільки TRUSTEE можуть голосувати");
+        if (escrowTx.getInitiatorId().equals(userId)) {
+            throw new AppException(ErrorCode.NOT_CHEST_ACCESS, "Ініціатор запиту не може за нього голосувати");
         }
 
         if (escrowVoteRepository.existsByEscrowTransactionIdAndUserId(escrowId, userId)) {
@@ -133,10 +129,11 @@ public class EscrowService {
 
         escrowVoteRepository.save(vote);
 
-        int totalTrustees = chestMemberRepository.findByChestIdAndRole(escrowTx.getChestId(), ChestMemberRole.TRUSTEE).size();
+        int totalMembers = chestMemberRepository.findByChestId(escrowTx.getChestId()).size();
+        int requiredApprovals = totalMembers - 1;
         int totalApprovals = escrowVoteRepository.countApprovals(escrowId);
 
-        if (totalApprovals == totalTrustees) {
+        if (totalApprovals >= requiredApprovals) {
             escrowTransactionRepository.updateStatus(escrowId, EscrowStatus.APPROVED.name());
             chestRepository.finalizeEscrowFunds(escrowTx.getChestId(), escrowTx.getAmount());
 
@@ -153,17 +150,20 @@ public class EscrowService {
 
     @Transactional(readOnly = true)
     public PendingEscrowResponse getPendingEscrow(UUID chestId, UUID userId) {
-        ChestMember member = chestMemberRepository.findByChestIdAndUserId(chestId, userId)
+        chestMemberRepository.findByChestIdAndUserId(chestId, userId)
             .orElseThrow(() -> new AppException(ErrorCode.NOT_CHEST_ACCESS, "Ви не є учасником цієї скрині"));
 
         EscrowTransaction escrowTx = escrowTransactionRepository.findPendingByChestId(chestId)
             .orElseThrow(() -> new AppException(ErrorCode.TRANSACTION_NOT_FOUND, "Немає активних голосувань для цієї скрині"));
 
-        int trusteesCount = chestMemberRepository.findByChestIdAndRole(chestId, ChestMemberRole.TRUSTEE).size();
+        int totalMembers = chestMemberRepository.findByChestId(chestId).size();
+        int requiredApprovals = totalMembers - 1;
         int approvalsCount = escrowVoteRepository.countApprovals(escrowTx.getId());
 
         boolean currentUserVoted = escrowVoteRepository.existsByEscrowTransactionIdAndUserId(escrowTx.getId(), userId);
-        boolean canCurrentUserVote = (member.getRole() == ChestMemberRole.TRUSTEE) && !currentUserVoted;
+        boolean isInitiator = escrowTx.getInitiatorId().equals(userId);
+
+        boolean canCurrentUserVote = !isInitiator && !currentUserVoted;
 
         return new PendingEscrowResponse(
             escrowTx.getId(),
@@ -175,7 +175,7 @@ public class EscrowService {
             escrowTx.getStatus().name(),
             escrowTx.getCreatedAt(),
             approvalsCount,
-            trusteesCount,
+            requiredApprovals,
             currentUserVoted,
             canCurrentUserVote
         );
