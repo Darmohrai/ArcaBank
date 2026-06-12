@@ -23,15 +23,31 @@ import {HeaderComponent} from "../components/header/header.component";
     .app-layout {
       display: flex;
       height: 100vh;
+      overflow: hidden;
     }
+
     .app-inner-layout {
-      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      height: 100vh;
     }
+
     .main-content {
       flex: 1;
       overflow-y: auto;
       padding: 24px;
-      height: 90vh;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .main-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .main-content {
+      scrollbar-width: none;
     }
   `]
 })
