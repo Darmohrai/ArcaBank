@@ -45,7 +45,7 @@ export class BalancesComponent implements OnInit {
 
   createAccountForm = new FormGroup({
     currency: new FormControl<'UAH' | 'USD' | 'EUR'>('UAH', {nonNullable: true}),
-    type: new FormControl<'DEBIT' | 'CREDIT' | 'VIRTUAL' | 'CHECKING' | 'SAVINGS'>('DEBIT', {nonNullable: true}),
+    type: new FormControl<'CREDIT' | 'CHECKING' | 'SAVINGS'>('SAVINGS', {nonNullable: true}),
   });
 
   createCardForm = new FormGroup({

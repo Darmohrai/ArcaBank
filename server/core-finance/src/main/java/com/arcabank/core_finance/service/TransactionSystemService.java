@@ -36,7 +36,7 @@ public class TransactionSystemService {
                 return new AppException(ErrorCode.ACCESS_DENIED, "Рахунок не знайдено або ви не є його власником");
             });
 
-        accountRepository.updateBalance(targetAccount.getId(), request.amount());
+        accountRepository.increaseBalance(targetAccount.getId(), request.amount());
 
         log.info("Deposit successful. Added {} UAH/USD/EUR to account {}", request.amount(), targetAccount.getId());
     }

@@ -24,7 +24,7 @@ export interface UpsertGoalRequest {
 })
 export class GoalsService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8082/api/v1/goals';
+  private apiUrl = 'http://localhost:80/api/v1/goals';
 
   getGoal(year: number, month: number): Observable<GoalResponse> {
     return this.http.get<GoalResponse>(`${this.apiUrl}/${year}/${month}`);

@@ -24,7 +24,7 @@ public class AccountCreatedStrategy implements NotificationStrategy<AccountCreat
         notification.setUserEmail(event.userEmail());
         notification.setTitle(TemplateTitleCreator.generateAccountCreatedTitle());
         notification.setText(TemplateTextCreator.generateAccountCreatedText(event.currency()));
-        notification.setEndpoint("/endpoint"); //todo endpoints unification
+        notification.setEndpoint("/");
 
         return notification;
     }

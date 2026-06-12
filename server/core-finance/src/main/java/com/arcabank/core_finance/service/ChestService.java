@@ -148,12 +148,23 @@ public class ChestService {
 
         List<EscrowTransaction> escrows = escrowTransactionRepository.findAllByChestId(chestId);
 
+        List<UUID> escrowIds = escrows.stream().map(EscrowTransaction::getId).toList();
+
+        java.util.Map<UUID, Integer> approvalsMap = escrowIds.isEmpty() ?
+            java.util.Collections.emptyMap() :
+            escrowVoteRepository.countApprovalsForEscrows(escrowIds);
+
+        java.util.Set<UUID> votedEscrows = escrowIds.isEmpty() ?
+            java.util.Collections.emptySet() :
+            escrowVoteRepository.findEscrowsVotedByUser(escrowIds, userId);
+
         int totalMembers = members.size();
         int requiredApprovals = totalMembers - 1;
 
         List<PendingEscrowResponse> escrowsData = escrows.stream().map(e -> {
-            int approvalsCount = escrowVoteRepository.countApprovals(e.getId());
-            boolean voted = escrowVoteRepository.existsByEscrowTransactionIdAndUserId(e.getId(), userId);
+
+            int approvalsCount = approvalsMap.getOrDefault(e.getId(), 0);
+            boolean voted = votedEscrows.contains(e.getId());
 
             boolean isInitiator = e.getInitiatorId().equals(userId);
             boolean canVote = !isInitiator && !voted && e.getStatus() == EscrowStatus.PENDING;

@@ -174,6 +174,11 @@ public class AccountRepository extends BaseRepository<Account> {
         jdbcTemplate.update(sql, newBalance, accountId);
     }
 
+    public void increaseBalance(UUID accountId, BigDecimal amount) {
+        String sql = "UPDATE accounts SET balance = balance + ? WHERE id = ?";
+        jdbcTemplate.update(sql, amount, accountId);
+    }
+
     public Optional<Account> findById(UUID id) {
         String sql = "SELECT * FROM accounts WHERE id = ?";
         List<Account> results = queryList(sql, accountRowMapper, id);

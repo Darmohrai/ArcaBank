@@ -16,8 +16,6 @@ public class NotificationOutboxRepository extends BaseRepository<NotificationOut
         super(jdbcTemplate);
     }
 
-    //todo fix mapper
-    //todo create sp
     private final RowMapper<NotificationOutbox> rowMapper = (rs, rowNum) ->
         NotificationOutbox.builder()
             .id(rs.getObject("id", UUID.class))

@@ -12,7 +12,7 @@ import java.util.UUID;
 @Service
 public class Notificator {
 
-    private final ApplicationEventPublisher eventPublisher; // todo create custom for notification
+    private final ApplicationEventPublisher eventPublisher;
 
     public void notifyAccountCreated(Account account) {
         AccountCreatedEvent event = new AccountCreatedEvent(
@@ -20,7 +20,7 @@ public class Notificator {
                 account.getCurrency(),
                 account.getType(),
                 account.getIban(),
-                "email@email" //todo fix email
+                ""
         );
 
         eventPublisher.publishEvent(event);
@@ -30,7 +30,7 @@ public class Notificator {
         AccountBlockedEvent event = new AccountBlockedEvent(
                 account.getUserId(),
                 account.getIban(),
-                "email@email"
+                ""
         );
 
         eventPublisher.publishEvent(event);
@@ -41,7 +41,7 @@ public class Notificator {
                 account.getUserId(),
                 account.getId(),
                 account.getIban(),
-                "email@email"
+                ""
         );
 
         eventPublisher.publishEvent(event);
@@ -54,7 +54,7 @@ public class Notificator {
             userId,
             cardId,
             maskedPan,
-            "email@email" // todo:
+            ""
         );
 
         eventPublisher.publishEvent(event);
@@ -62,12 +62,12 @@ public class Notificator {
 
     public void notifyTransferSuccess(UUID senderId, UUID receiverId, java.math.BigDecimal amount, String currency) {
         TransferExpenseEvent expenseEvent = new TransferExpenseEvent(
-            senderId, amount, currency, "email@email"
+            senderId, amount, currency, ""
         );
         eventPublisher.publishEvent(expenseEvent);
 
         TransferIncomeEvent incomeEvent = new TransferIncomeEvent(
-            receiverId, amount, currency, "email@email"
+            receiverId, amount, currency, ""
         );
         eventPublisher.publishEvent(incomeEvent);
     }
@@ -75,7 +75,7 @@ public class Notificator {
     public void notifyCardBlocked(UUID userId, UUID cardId, String pan) {
         String maskedPan = "**** " + pan.substring(pan.length() - 4);
         CardBlockedEvent event = new CardBlockedEvent(
-                userId, cardId, maskedPan, "email@email" // todo:
+                userId, cardId, maskedPan, ""
         );
         eventPublisher.publishEvent(event);
     }
@@ -83,21 +83,21 @@ public class Notificator {
     public void notifyCardUnblocked(UUID userId, UUID cardId, String pan) {
         String maskedPan = "**** " + pan.substring(pan.length() - 4);
         CardUnblockedEvent event = new CardUnblockedEvent(
-                userId, cardId, maskedPan, "email@email" // todo:
+                userId, cardId, maskedPan, ""
         );
         eventPublisher.publishEvent(event);
     }
 
     public void notifyNotEnoughMoney(UUID userId, java.math.BigDecimal amount, String currency) {
         NotEnoughMoneyEvent event = new NotEnoughMoneyEvent(
-                userId, amount, currency, "email@email"
+                userId, amount, currency, ""
         );
         eventPublisher.publishEvent(event);
     }
 
     public void notifyPaymentFailed(UUID userId, java.math.BigDecimal amount, String currency, String reason) {
         PaymentFailedEvent event = new PaymentFailedEvent(
-                userId, amount, currency, reason, "email@email"
+                userId, amount, currency, reason, ""
         );
         eventPublisher.publishEvent(event);
     }
