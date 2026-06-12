@@ -7,14 +7,28 @@
 
     <nav class="sidebar__navbar">
       <ul>
-        <app-sidebar-btn (btnClicked)="navigateByUrl('')" text="Огляд" icon="/assets/svg/menu.svg"/>
-        <app-sidebar-btn (btnClicked)="navigateByUrl('/balances')" text="Рахунки" icon="/assets/svg/wallet.svg"/>
-        <app-sidebar-btn (btnClicked)="navigateByUrl('/transactions')" text="Транзакції" icon="/assets/svg/arrows.svg"/>
-        <app-sidebar-btn (btnClicked)="navigateByUrl('/transfer')" text="Переказати" icon="/assets/svg/arrows.svg"/>
-        <app-sidebar-btn (btnClicked)="navigateByUrl('/deposit')" text="Поповнення" icon="/assets/svg/wallet.svg"/>
-        <app-sidebar-btn (btnClicked)="navigateByUrl('/exchange')" text="Обмін валют" icon="/assets/svg/arrows.svg"/>
-        <app-sidebar-btn (btnClicked)="navigateByUrl('/chests')" text="Спільний рахунок" icon="/assets/svg/expenses.svg"/>
-<!--        <app-sidebar-btn text="Налаштування" icon="/assets/svg/settings.svg"/>-->
+        <li>
+          <app-sidebar-btn (btnClicked)="navigateByUrl('')" text="Огляд" icon="/assets/svg/menu.svg"/>
+
+        </li>
+        <li>
+          <app-sidebar-btn (btnClicked)="navigateByUrl('/balances')" text="Рахунки" icon="/assets/svg/wallet.svg"/>
+        </li>
+        <li>
+          <app-sidebar-btn (btnClicked)="navigateByUrl('/transactions')" text="Транзакції" icon="/assets/svg/arrows.svg"/>
+        </li>
+        <li>
+          <app-sidebar-btn (btnClicked)="navigateByUrl('/transfer')" text="Переказати" icon="/assets/svg/arrows.svg"/>
+        </li>
+        <li>
+          <app-sidebar-btn (btnClicked)="navigateByUrl('/deposit')" text="Поповнення" icon="/assets/svg/wallet.svg"/>
+        </li>
+        <li>
+          <app-sidebar-btn (btnClicked)="navigateByUrl('/exchange')" text="Обмін валют" icon="/assets/svg/arrows.svg"/>
+        </li>
+        <li>
+          <app-sidebar-btn (btnClicked)="navigateByUrl('/chests')" text="Спільний рахунок" icon="/assets/svg/expenses.svg"/>
+        </li>
       </ul>
     </nav>
   </div>
@@ -22,7 +36,7 @@
   <div class="sidebar__bottom-content">
     <app-sidebar-logout-btn (click)="auth.signOut()"/>
     <hr class="sidebar__bottom-hr">
-<!--    <app-sidebar-user-profile userProfileName="Arsenii Redko" userProfilePicture="/assets/images/kabachok.jpg"/>-->
+    <!--    <app-sidebar-user-profile userProfileName="Arsenii Redko" userProfilePicture="/assets/images/kabachok.jpg"/>-->
   </div>
 
 </aside>
