@@ -1,10 +1,17 @@
 <header class="header">
   <div class="header__btns-container">
-    <a routerLink="/notifications" class="notification-link">
-      <i class="pi pi-bell"></i>
-      <span class="notification-badge" *ngIf="(unreadCount$ | async) as count" [class.hidden]="count === 0">
-        {{ count > 99 ? '99+' : count }}
-      </span>
+    <a
+      routerLink="/notifications"
+      class="notification-link"
+      aria-label="Перейти до сповіщень">
+      <i class="pi pi-bell" aria-hidden="true"></i>
+
+      <span
+        class="notification-badge"
+        *ngIf="(unreadCount$ | async) as count"
+        [class.hidden]="count === 0">
+    {{ count > 99 ? '99+' : count }}
+  </span>
     </a>
   </div>
 </header>
