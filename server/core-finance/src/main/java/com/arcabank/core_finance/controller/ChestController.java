@@ -5,6 +5,10 @@ import com.arcabank.core_finance.model.Chest;
 import com.arcabank.core_finance.service.ChestService;
 import com.arcabank.core_finance.service.EscrowService;
 import com.arcabank.core_finance.utils.RoutingRegistry;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +19,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
+@Tag(name = "Chests", description = "API for managing shared savings chests and escrow voting")
 @Slf4j
 @RestController
 @RequestMapping(RoutingRegistry.Api.Chests.BASE)
@@ -26,6 +30,13 @@ public class ChestController {
     private final ChestService chestService;
     private final EscrowService escrowService;
 
+    @Operation(summary = "Create a new chest", description = "Creates a new shared savings chest and assigns the creator as the owner.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Chest successfully created"),
+        @ApiResponse(responseCode = "400", description = "Validation error of input data"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<ChestResponse> createChest(
@@ -39,6 +50,15 @@ public class ChestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Deposit funds to chest", description = "Transfers money from a user's account to the specified shared chest.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Deposit successfully processed"),
+        @ApiResponse(responseCode = "400", description = "Insufficient funds or invalid amount"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "403", description = "Access denied (user is not a member of the chest)"),
+        @ApiResponse(responseCode = "404", description = "Chest or source account not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping(RoutingRegistry.Api.Chests.DEPOSIT)
     public ResponseEntity<ChestDepositResponse> depositToChest(
         @PathVariable UUID chestId,
@@ -52,6 +72,15 @@ public class ChestController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Vote on an escrow transaction", description = "Casts an approval or rejection vote for a pending escrow withdrawal proposal.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Vote successfully recorded"),
+        @ApiResponse(responseCode = "400", description = "User has already voted or cannot vote (e.g., initiator)"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Escrow transaction not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping(RoutingRegistry.Api.Chests.VOTING)
     public ResponseEntity<MessageResponse> voteEscrow(
         @PathVariable UUID escrowId,
@@ -63,16 +92,30 @@ public class ChestController {
         escrowService.processVote(escrowId, userId, request);
 
         return ResponseEntity.ok(new MessageResponse(
-            "Ваш голос успішно враховано."
+            "Your vote has been successfully recorded."
         ));
     }
 
+    @Operation(summary = "Get user's chests", description = "Returns a list of all chests where the authenticated user is a member or owner.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Chests successfully retrieved"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping
     public ResponseEntity<List<Chest>> getMyChests(@AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
         return ResponseEntity.ok(chestService.getMyChests(userId));
     }
 
+    @Operation(summary = "Get chest details", description = "Returns detailed information about a specific chest, including its members and balance.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Chest details successfully retrieved"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "403", description = "Access denied (user is not a member)"),
+        @ApiResponse(responseCode = "404", description = "Chest not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/{chestId}")
     public ResponseEntity<ChestDetailResponse> getChestDetails(
         @PathVariable UUID chestId,
@@ -81,6 +124,15 @@ public class ChestController {
         return ResponseEntity.ok(chestService.getChestDetails(chestId, userId));
     }
 
+    @Operation(summary = "Initiate an escrow withdrawal", description = "Proposes a withdrawal from the chest to a specific account. Requires approval from other members.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Escrow transaction successfully initiated"),
+        @ApiResponse(responseCode = "400", description = "Insufficient chest funds or pending transaction already exists"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Chest or target account not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping(RoutingRegistry.Api.Chests.VOTES_INITIATE)
     public ResponseEntity<EscrowInitiationResponse> initiateEscrow(
         @PathVariable UUID chestId,
@@ -93,6 +145,14 @@ public class ChestController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Get pending escrow", description = "Retrieves information about currently active pending escrow proposals for a specific chest.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Pending escrow data successfully retrieved"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Chest or escrow transaction not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/{chestId}/escrow/pending")
     public ResponseEntity<PendingEscrowResponse> getPendingEscrow(
         @PathVariable UUID chestId,

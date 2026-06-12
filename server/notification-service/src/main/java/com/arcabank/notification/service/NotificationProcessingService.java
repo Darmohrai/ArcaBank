@@ -17,7 +17,7 @@ import java.util.UUID;
 public class NotificationProcessingService {
 
     private final NotificationRepository notificationRepository;
-    private final SimpMessagingTemplate messagingTemplate; // todo change to netty
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
     public void processAndSave(BaseNotification event) {

@@ -5,6 +5,10 @@ import com.arcabank.core_finance.service.AccountService;
 import com.arcabank.core_finance.service.PdfService;
 import com.arcabank.core_finance.service.TransactionService;
 import com.arcabank.core_finance.utils.RoutingRegistry;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Tag(name = "Accounts", description = "API for managing bank accounts and statements")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(RoutingRegistry.Api.Accounts.BASE)
@@ -26,6 +31,12 @@ public class AccountController {
     private final TransactionService transactionService;
     private final PdfService pdfService;
 
+    @Operation(summary = "Get all user accounts", description = "Returns a list of all accounts belonging to the currently authenticated user.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of accounts"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping(RoutingRegistry.Api.Accounts.ALL)
     public ResponseEntity<List<AccountDto>> getMyAccounts(@AuthenticationPrincipal Jwt jwt) {
         String userIdString = jwt.getSubject();
@@ -36,6 +47,13 @@ public class AccountController {
         return ResponseEntity.ok(accounts);
     }
 
+    @Operation(summary = "Create an account with a card", description = "Creates a new account and automatically issues a linked card.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Account and card successfully created"),
+        @ApiResponse(responseCode = "400", description = "Validation error of input data"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "500", description = "Internal server error (e.g., failed to generate IBAN/PAN)")
+    })
     @PostMapping(RoutingRegistry.Api.Accounts.CREATE_WITH_CARD)
     public ResponseEntity<AccountResponse> createAccount(
         @Valid @RequestBody AccountCreationRequest request,
@@ -48,6 +66,13 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Create a new account", description = "Opens a new account without issuing a physical or virtual card.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Account successfully created"),
+        @ApiResponse(responseCode = "400", description = "Validation error of input data"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping
     public ResponseEntity<AccountDto> createAccount(
         @Valid @RequestBody AccountOnlyRequest request,
@@ -57,6 +82,14 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.CREATED).body(account);
     }
 
+    @Operation(summary = "Get account details", description = "Returns account information by its ID (only if it belongs to the user).")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Account found"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "403", description = "Access denied (account belongs to another user)"),
+        @ApiResponse(responseCode = "404", description = "Account not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping(RoutingRegistry.Api.Accounts.BY_ID)
     public ResponseEntity<AccountDto> getAccountById(
         @PathVariable("id") UUID id,
@@ -68,6 +101,14 @@ public class AccountController {
         return ResponseEntity.ok(account);
     }
 
+    @Operation(summary = "Get transaction history", description = "Returns a paginated list of incoming and outgoing transactions for the specified account.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "History successfully retrieved"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Account not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping(RoutingRegistry.Api.Accounts.ACCOUNT_TRANSACTIONS)
     public ResponseEntity<PageResponse<TransactionDto>> getAccountTransactions(
         @PathVariable("accountId") UUID accountId,
@@ -82,7 +123,15 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(RoutingRegistry.Api.Accounts.ACCOUNT_CARDS) // Шлях: /api/v1/accounts/{accountId}/cards
+    @Operation(summary = "Get all account cards", description = "Returns a list of cards linked to a specific account.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Cards successfully retrieved"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Account not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping(RoutingRegistry.Api.Accounts.ACCOUNT_CARDS)
     public ResponseEntity<List<CardDto>> getCardsByAccount(
         @PathVariable("accountId") UUID accountId,
         @AuthenticationPrincipal Jwt jwt) {
@@ -94,6 +143,15 @@ public class AccountController {
         return ResponseEntity.ok(cards);
     }
 
+    @Operation(summary = "Block account", description = "Blocks an active account. Debit operations will become unavailable.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Account successfully blocked"),
+        @ApiResponse(responseCode = "400", description = "Account is already blocked"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Account not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PatchMapping(RoutingRegistry.Api.Accounts.BLOCK)
     public ResponseEntity<Map<String, String>> blockAccount(
         @PathVariable("accountId") UUID accountId,
@@ -105,6 +163,15 @@ public class AccountController {
         return ResponseEntity.ok(Map.of("message", "Account successfully blocked"));
     }
 
+    @Operation(summary = "Unblock account", description = "Removes the block from an account.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Account successfully unblocked"),
+        @ApiResponse(responseCode = "400", description = "Account is already active"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Account not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PatchMapping(RoutingRegistry.Api.Accounts.UNBLOCK)
     public ResponseEntity<Map<String, String>> unblockAccount(
         @PathVariable("accountId") UUID accountId,
@@ -116,6 +183,14 @@ public class AccountController {
         return ResponseEntity.ok(Map.of("message", "Account successfully unblocked"));
     }
 
+    @Operation(summary = "Download statement in PDF", description = "Generates and returns a PDF file with the transaction history for the account.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "PDF file successfully generated"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Account not found"),
+        @ApiResponse(responseCode = "500", description = "Error during PDF generation")
+    })
     @GetMapping(value = RoutingRegistry.Api.Accounts.STATEMENT_PDF, produces = org.springframework.http.MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> getAccountStatementPdf(
         @PathVariable UUID accountId,

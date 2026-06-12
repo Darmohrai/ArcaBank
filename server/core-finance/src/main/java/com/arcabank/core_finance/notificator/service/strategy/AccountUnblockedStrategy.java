@@ -24,7 +24,7 @@ public class AccountUnblockedStrategy implements NotificationStrategy<AccountUnb
         notification.setUserEmail(event.userEmail());
         notification.setTitle(TemplateTitleCreator.generateAccountUnblockedTitle());
         notification.setText(TemplateTextCreator.generateAccountUnblockedText(event.iban()));
-        notification.setEndpoint("/endpoint"); //todo endpoints unification
+        notification.setEndpoint("/");
 
         return notification;
     }

@@ -12,6 +12,7 @@ public class RoutingRegistry {
     public static final String EXCHANGE_RATES_RESOURCE = "/exchange-rates";
     public static final String HEALTH_RESOURCE = "/health";
     public static final String CHESTS = "/chests";
+    public static final String GOALS = "/goals";
 
     public static final String V1 = "/api/v1";
 
@@ -59,6 +60,11 @@ public class RoutingRegistry {
 
         public static final class ExchangeRates {
             public static final String BASE = V1 + EXCHANGE_RATES_RESOURCE;
+        }
+
+        public static final class Goals {
+            public static final String BASE = V1 + GOALS;
+            public static final String PROGRESS = "/{year}/{month}";
         }
 
         public static final class System {

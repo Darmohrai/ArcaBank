@@ -59,3 +59,15 @@ If you prefer to run services individually via your IDE or terminal for debuggin
    cd ../client
    npm install
    ng serve
+
+
+### API Documentation (Swagger)
+Once the system is running, explore and test the endpoints via Swagger UI:
+Core Finance Service: http://localhost:8088/swagger-ui/index.html#/
+Auth Service: http://localhost:8081/swagger-ui/index.html#/
+
+Frontend Application
+URL: http://localhost:4200
+
+#### Test Credentials
+Watch arcabank-realm in deploy.

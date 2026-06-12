@@ -24,7 +24,7 @@ public class AccountBlockedStrategy implements NotificationStrategy<AccountBlock
         notification.setUserEmail(event.userEmail());
         notification.setTitle(TemplateTitleCreator.generateAccountBlockedTitle());
         notification.setText(TemplateTextCreator.generateAccountBlockedText(event.iban()));
-        notification.setEndpoint("/endpoint"); //todo endpoints unification
+        notification.setEndpoint("/");
 
         return notification;
     }

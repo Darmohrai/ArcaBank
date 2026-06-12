@@ -30,4 +30,46 @@ public class EscrowVoteRepository extends BaseRepository<EscrowTransaction> {
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, escrowTransactionId);
         return count != null ? count : 0;
     }
+
+    public java.util.Map<UUID, Integer> countApprovalsForEscrows(java.util.List<UUID> escrowIds) {
+        if (escrowIds == null || escrowIds.isEmpty()) {
+            return java.util.Collections.emptyMap();
+        }
+
+        String inSql = String.join(",", java.util.Collections.nCopies(escrowIds.size(), "?"));
+        String sql = "SELECT escrow_transaction_id, COUNT(*) as cnt " +
+            "FROM escrow_votes " +
+            "WHERE decision = 'APPROVED' AND escrow_transaction_id IN (" + inSql + ") " +
+            "GROUP BY escrow_transaction_id";
+
+        return jdbcTemplate.query(sql, rs -> {
+            java.util.Map<UUID, Integer> map = new java.util.HashMap<>();
+            while (rs.next()) {
+                map.put(UUID.fromString(rs.getString("escrow_transaction_id")), rs.getInt("cnt"));
+            }
+            return map;
+        }, escrowIds.toArray());
+    }
+
+    public java.util.Set<UUID> findEscrowsVotedByUser(java.util.List<UUID> escrowIds, UUID userId) {
+        if (escrowIds == null || escrowIds.isEmpty()) {
+            return java.util.Collections.emptySet();
+        }
+
+        String inSql = String.join(",", java.util.Collections.nCopies(escrowIds.size(), "?"));
+        String sql = "SELECT escrow_transaction_id FROM escrow_votes " +
+            "WHERE user_id = ? AND escrow_transaction_id IN (" + inSql + ")";
+
+        java.util.List<Object> params = new java.util.ArrayList<>();
+        params.add(userId);
+        params.addAll(escrowIds);
+
+        return jdbcTemplate.query(sql, rs -> {
+            java.util.Set<UUID> set = new java.util.HashSet<>();
+            while (rs.next()) {
+                set.add(UUID.fromString(rs.getString("escrow_transaction_id")));
+            }
+            return set;
+        }, params.toArray());
+    }
 }

@@ -94,4 +94,25 @@ public class TransactionRepository extends BaseRepository<TransactionDto> {
             rs.getDouble("expense")
         ), userId, userId, userId, userId);
     }
+
+    public MonthlyStatsDto getStatsForSpecificMonth(UUID userId, int year, int month) {
+        String sql = """
+                SELECT
+                    ? as month,
+                    SUM(CASE WHEN r.user_id = ? THEN t.amount ELSE 0 END) as income,
+                    SUM(CASE WHEN s.user_id = ? THEN t.amount ELSE 0 END) as expense
+                FROM transactions t
+                JOIN accounts s ON t.sender_account_id = s.id
+                LEFT JOIN accounts r ON t.receiver_account_id = r.id
+                WHERE (s.user_id = ? OR r.user_id = ?)
+                  AND EXTRACT(YEAR FROM t.created_at) = ?
+                  AND EXTRACT(MONTH FROM t.created_at) = ?
+            """;
+
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new MonthlyStatsDto(
+            rs.getInt("month"),
+            rs.getDouble("income") != 0 ? rs.getDouble("income") : 0.0,
+            rs.getDouble("expense") != 0 ? rs.getDouble("expense") : 0.0
+        ), month, userId, userId, userId, userId, year, month);
+    }
 }
