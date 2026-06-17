@@ -1,19 +1,19 @@
 .recent-transaction {
-  /* Задаємо висоту, як у графіка на дашборді */
   width: 100%;
   height: 450px;
   padding: 24px;
-  border-radius: 12px; /* Зробив 12px для узгодженості з дашбордом */
+  border-radius: 12px;
   background: var(--default-white, #fff);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
-/* Виправив: ці стилі раніше були "загублені" в кінці блоку */
 .recent-transaction__tabs {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 12px;
 }
@@ -30,31 +30,30 @@
   color: var(--special-red);
 }
 
-/* --- Налаштування зони скролінгу --- */
 .recent-transaction__list {
-  flex: 1; /* Забирає весь вільний простір */
+  flex: 1;
   min-height: 0;
-  overflow-y: auto; /* Вмикає вертикальний скрол */
-  padding-right: 8px; /* Відступ, щоб текст не прилипав до повзунка */
-  margin-right: -8px; /* Компенсація відступу */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  margin-right: -8px;
 }
 
-/* Стилізація скролбару (Chrome, Safari, Edge) */
 .recent-transaction__list::-webkit-scrollbar {
   width: 6px;
 }
+
 .recent-transaction__list::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .recent-transaction__list::-webkit-scrollbar-thumb {
   background-color: var(--gray05, #cbd5e1);
   border-radius: 10px;
 }
+
 .recent-transaction__list::-webkit-scrollbar-thumb:hover {
   background-color: var(--gray03);
-}
-* {
-  scrollbar-width: none;
 }
 
 .recent-transaction__footer-link {
@@ -72,7 +71,6 @@
   text-decoration: underline;
 }
 
-/* --- Вкладки --- */
 .recent-transaction__tab {
   height: 36px;
   padding: 0 16px;
@@ -81,6 +79,7 @@
   color: var(--gray02);
   font-size: 16px;
   font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
@@ -94,17 +93,18 @@
   color: var(--app-primary-color);
 }
 
-/* --- Окрема транзакція --- */
 .recent-transaction__transaction {
-  padding: 16px 0; /* Трохи зменшив відступи, щоб гарно влазило ~5 елементів */
+  padding: 16px 0;
   border-bottom: 1px solid var(--gray05);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
+  min-width: 0;
 }
 
 .recent-transaction__transaction:last-child {
-  border-bottom: none; /* Забираємо лінію в останнього елемента */
+  border-bottom: none;
 }
 
 .transaction-name {
@@ -112,6 +112,7 @@
   font-size: 15px;
   font-weight: 600;
   line-height: 22px;
+  overflow-wrap: anywhere;
 }
 
 .transaction-description {
@@ -120,6 +121,7 @@
   font-weight: 400;
   line-height: 16px;
   color: var(--gray03);
+  overflow-wrap: anywhere;
 }
 
 .transaction-amount {
@@ -128,6 +130,7 @@
   font-weight: 600;
   line-height: 22px;
   text-align: right;
+  overflow-wrap: anywhere;
 }
 
 .transaction-amount.income {
@@ -144,19 +147,28 @@
   font-weight: 400;
   line-height: 16px;
   color: var(--gray03);
+  text-align: right;
 }
 
 .transaction-inner-container {
   display: flex;
+  flex: 0 1 auto;
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
+  min-width: 120px;
 }
 
 .transaction-inner-main-container {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+}
+
+.transaction-inner-inner-container {
+  min-width: 0;
 }
 
 .transaction-inner-main-container i {
@@ -169,4 +181,52 @@
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  flex: 0 0 40px;
+}
+
+@media (max-width: 760px) {
+  .recent-transaction {
+    height: auto;
+    min-height: 380px;
+    padding: 18px;
+  }
+
+  .recent-transaction__tabs {
+    gap: 6px;
+  }
+
+  .recent-transaction__tab {
+    height: 34px;
+    padding: 0 10px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .recent-transaction__transaction {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .transaction-inner-container {
+    align-items: flex-start;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .transaction-amount,
+  .transaction-date {
+    text-align: left;
+  }
+}
+
+@media (max-width: 360px) {
+  .recent-transaction {
+    padding: 16px;
+  }
+
+  .recent-transaction__tab {
+    font-size: 13px;
+  }
 }

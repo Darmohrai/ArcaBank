@@ -1,202 +1,271 @@
 .balances {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
 
-  .balances__create-account-container {
-    margin-bottom: 16px;
+.balances__create-account-container {
+  margin-bottom: 16px;
+}
 
-    p {
-      color: var(--default-black);
-      font-size: 21px;
-      font-weight: 500;
-    }
-    span {
-      color: var(--app-primary-color);
-      font-size: 21px;
-      font-weight: 500;
-      cursor: pointer;
-    }
+.balances__create-account-container p,
+.balances__create-account-container span {
+  color: var(--default-black);
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.balances__create-account-container span {
+  color: var(--app-primary-color);
+  cursor: pointer;
+}
+
+.balances__tabs-container {
+  min-width: 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--default-white);
+}
+
+.balances__cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.balances__card,
+.balances__create-account-btn {
+  width: 100%;
+  min-height: 176px;
+  aspect-ratio: 1.586 / 1;
+  border-radius: 18px;
+}
+
+.balances__card {
+  position: relative;
+  overflow: hidden;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--default-white);
+  background: linear-gradient(145deg, #17211f 0%, #243b38 54%, #299d91 100%);
+  box-shadow: 0 12px 24px rgba(25, 25, 25, .14);
+}
+
+.balances__card::after {
+  content: "";
+  position: absolute;
+  right: -80px;
+  bottom: -105px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+
+.balances__card-top,
+.balances__card-chip-row,
+.balances__card-bottom {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.balances__card-title {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.balances__card-network {
+  position: relative;
+  width: 46px;
+  height: 28px;
+  flex: 0 0 46px;
+}
+
+.balances__card-network span {
+  position: absolute;
+  top: 2px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
+.balances__card-network span:first-child {
+  left: 0;
+  background: #ff4b4b;
+}
+
+.balances__card-network span:last-child {
+  right: 0;
+  background: #f8c04e;
+  opacity: .88;
+}
+
+.balances__card-chip {
+  width: 48px;
+  height: 36px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #f6d98f, #b88737);
+  box-shadow: inset 0 0 0 1px rgba(80, 50, 18, .3);
+}
+
+.balances__card-currency,
+.balances__card-label {
+  color: rgba(255,255,255,.72);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.balances__card-currency {
+  font-size: 13px;
+}
+
+.balances__card-number {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(18px, 1.75vw, 24px);
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.balances__card-bottom {
+  align-items: flex-end;
+}
+
+.balances__card-bottom > div {
+  min-width: 0;
+}
+
+.balances__card-bottom > div:last-child {
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+.balances__card-holder,
+.balances__card-date {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.balances__card-holder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.balances__create-account-btn {
+  border: 2px dashed rgba(41, 157, 145, .45);
+  display: grid;
+  place-items: center;
+  background: rgba(41, 157, 145, .06);
+  color: var(--app-primary-color);
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.balances__create-account-btn span {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(41, 157, 145, .1);
+  font-size: 36px;
+  line-height: 1;
+}
+
+.balances__create-account-btn:hover {
+  border-color: var(--app-primary-color);
+  transform: translateY(-2px);
+}
+
+.balances__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.balances__form-select,
+.balances__form-input,
+.balances__form-submit-btn,
+.balances__form-cancel-btn {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.balances__form-select,
+.balances__form-input {
+  padding: 0 14px;
+  border: 1px solid var(--gray05);
+  outline: none;
+}
+
+.balances__form-submit-btn,
+.balances__form-cancel-btn {
+  border: 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.balances__form-submit-btn {
+  background: var(--app-primary-color);
+  color: var(--default-white);
+}
+
+.balances__form-cancel-btn {
+  background: var(--gray06);
+  color: var(--gray01);
+}
+
+@media (max-width: 760px) {
+  .balances__create-account-container p,
+  .balances__create-account-container span {
+    font-size: 18px;
   }
 
   .balances__tabs-container {
-    background-color: var(--default-white);
-    padding: 10px;
-    border-radius: 16px;
-
-    .balances__cards-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      .balances__card {
-        background-color: var(--app-primary-color);
-        border-radius: 20px;
-        padding: 10px;
-        color: var(--default-white);
-
-        display: flex;
-        flex-direction: column;
-        gap: 36px;
-
-        .balances__card-title {
-          font-size: 20px;
-          font-weight: 500;
-        }
-
-        .balances__card-number {
-          text-align-last: justify;
-          font-size: 20px;
-          width: 70%;
-          margin: 0 auto;
-        }
-
-        .balances__card-holder {}
-      }
-    }
+    padding: 12px;
   }
 
+  .balances__cards-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .balances__card,
   .balances__create-account-btn {
-    min-height: 160px;
-    height: 100%;
-    border: 2px solid var(--app-primary-color);
-    border-radius: 20px;
-    outline: none;
-    cursor: pointer;
-    background-color: transparent;
-    color: var(--app-primary-color);
-    font-size: 45px;
-    transition: color 0.3s ease-out, background-color 0.3s ease-out;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .balances__card {
+    padding: 18px;
   }
 
-  .balances__create-account-btn:hover {
-    background-color: var(--app-primary-color);
-    color: var(--default-white);
-  }
-
-  .balances__form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding-top: 8px;
-
-    .balances__form-select-container {
-      width: 100%;
-
-      .balances__form-select {
-        width: 100%;
-        height: 48px;
-        padding: 0 14px;
-
-        border: 1px solid var(--gray05);
-        border-radius: 12px;
-
-        background: var(--default-white);
-        color: var(--default-black);
-
-        font-size: 14px;
-        font-weight: 500;
-
-        outline: none;
-        transition:
-          border-color 0.2s ease,
-          box-shadow 0.2s ease,
-          background-color 0.2s ease;
-
-        cursor: pointer;
-
-        &:focus {
-          border-color: var(--app-primary-color);
-          box-shadow: 0 0 0 4px rgba(41, 157, 145, 0.12);
-        }
-
-        &:hover {
-          border-color: var(--app-primary-color);
-        }
-      }
-    }
-
-    .balances__form-input-container {
-
-      .balances__form-input {
-        width: 100%;
-        border: 1px solid var(--app-primary-color);
-        border-radius: 8px;
-        outline: none;
-        padding: 6px 14px;
-      }
-    }
-
-    .balances__form-submit-btn,
-    .balances__form-cancel-btn {
-      width: 100%;
-      height: 48px;
-
-      border: none;
-      border-radius: 12px;
-
-      font-size: 14px;
-      font-weight: 600;
-
-      cursor: pointer;
-      transition:
-        transform 0.15s ease,
-        opacity 0.2s ease,
-        background-color 0.2s ease;
-    }
-
-    .balances__form-submit-btn {
-      background: var(--app-primary-color);
-      color: var(--default-white);
-
-      &:hover {
-        opacity: 0.92;
-      }
-
-      &:active {
-        transform: scale(0.98);
-      }
-    }
-
-    .balances__form-cancel-btn {
-      background: var(--gray06);
-      color: var(--gray01);
-
-      &:hover {
-        background: var(--gray05);
-      }
-
-      &:active {
-        transform: scale(0.98);
-      }
-    }
-  }
-
-  :host ::ng-deep .p-dialog {
-    border-radius: 20px;
-    overflow: hidden;
-  }
-
-  :host ::ng-deep .p-dialog-header {
-    padding: 20px 24px 10px;
-    border-bottom: 1px solid var(--gray05);
-
-    color: var(--default-black);
-    font-size: 18px;
-    font-weight: 700;
-  }
-
-  :host ::ng-deep .p-dialog-content {
-    padding: 20px 24px 24px;
-    background: var(--default-white);
-  }
-
-/* tabs */
-
-
-  .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-    color: var(--app-primary-color);
-    border-color: var(--app-primary-color);
-  }
-
-  .p-tabview .p-tabview-nav {
-    border: none;
+  .balances__card-title,
+  .balances__card-number {
+    font-size: 16px;
   }
 
 }

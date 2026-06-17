@@ -20,10 +20,16 @@ export class SidebarComponent {
 
   protected auth = inject(AuthService);
   private router = inject(Router);
+  protected isMobileMenuOpen = false;
 
 
   navigateByUrl(url: string) {
     this.router.navigateByUrl(url);
+    this.isMobileMenuOpen = false;
+  }
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
   }
 
 }

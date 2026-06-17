@@ -22,6 +22,7 @@ import {HeaderComponent} from "../components/header/header.component";
   styles: [`
     .app-layout {
       display: flex;
+      min-height: 100vh;
       height: 100vh;
       overflow: hidden;
     }
@@ -48,6 +49,28 @@ import {HeaderComponent} from "../components/header/header.component";
 
     .main-content {
       scrollbar-width: none;
+    }
+
+    @media (max-width: 900px) {
+      .app-layout {
+        flex-direction: column;
+        height: 100dvh;
+      }
+
+      .app-inner-layout {
+        height: auto;
+        min-height: 0;
+      }
+
+      .main-content {
+        padding: 18px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 14px;
+      }
     }
   `]
 })

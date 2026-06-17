@@ -1,7 +1,8 @@
 
 .goals-widget {
-  width: 352px;
-  height: 270px;
+  width: 100%;
+  max-width: 352px;
+  min-height: 270px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -14,6 +15,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     border-bottom: 1px solid var(--special-bg-opacity-25);
     padding-bottom: 10px;
 
@@ -24,6 +26,8 @@
 
       .goals-widget__top-container-goal {
         font-size: 22px;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
       }
 
       i {
@@ -39,6 +43,8 @@
     }
 
     .goals-widget__top-container-goal-month {
+      flex: 0 0 auto;
+      color: var(--gray02);
     }
 
   }
@@ -47,6 +53,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
 
     .goals-widget__targets-container {
       display: flex;
@@ -63,11 +70,14 @@
     .target-text {
       font-size: 16px;
       color: var(--gray02);
+      line-height: 1.35;
     }
 
     .target-text-value {
       font-size: 24px;
       font-weight: 700;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
     }
   }
 
@@ -77,7 +87,7 @@
 /*стилі для прогрес бару*/
 .gauge {
   width: 128px;
-
+  flex: 0 0 128px;
 
   svg {
     width: 100%;
@@ -139,6 +149,7 @@
     font-size: 24px;
     font-weight: 700;
     color: #191919;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -173,4 +184,63 @@
     transform: none;
   }
 
+}
+
+@media (max-width: 1180px) {
+  .goals-widget {
+    max-width: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .goals-widget {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .goals-widget .goals-widget__bottom-container {
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .goals-widget .goals-widget__top-container,
+  .goals-widget .goals-widget__bottom-container {
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .goals-widget .goals-widget__top-container-goal-month {
+    flex: 0 1 auto;
+  }
+
+  .gauge {
+    width: min(100%, 180px);
+    flex-basis: auto;
+    align-self: center;
+  }
+
+  .goals-widget__targets-container {
+    text-align:center;
+  }
+
+  .goals-widget__target-chart-continer {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .goals-widget {
+    padding: 16px;
+  }
+
+  .gauge__labels strong {
+    font-size: 20px;
+  }
+}
+
+.goal__value {
+  display: inherit;
+  text-align: center;
 }

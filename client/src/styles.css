@@ -20,6 +20,12 @@
   --special-white-opacity-8: rgba(255, 255, 255, 0.08);
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 p, h1, h2, h3, h4, h5, h6, a, input, button, select, textarea, input::placeholder, textarea::placeholder {
   font-family: Inter, sans-serif;
   margin: 0;
@@ -30,4 +36,75 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--app-background-color);
+}
+
+.p-dialog {
+  width: min(100vw - 32px, 28rem) !important;
+  max-width: calc(100vw - 32px) !important;
+  max-height: calc(100dvh - 32px) !important;
+}
+
+.p-dialog .p-dialog-header {
+  padding: 18px 20px 10px;
+}
+
+.p-dialog .p-dialog-content {
+  overflow-y: auto;
+  padding: 18px 20px 20px;
+}
+
+.p-dialog .p-dialog-footer {
+  padding: 0 20px 18px;
+}
+
+.p-dialog input,
+.p-dialog select,
+.p-dialog textarea,
+.p-dialog .p-inputnumber,
+.p-dialog .p-inputnumber-input,
+.p-dialog .p-password,
+.p-dialog .p-password-input {
+  width: 100%;
+  max-width: 100%;
+}
+
+.p-dialog .p-dialog-footer,
+.p-dialog .dialog__btns-container,
+.p-dialog .modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.p-dialog .p-dialog-footer button,
+.p-dialog .dialog__btns-container button,
+.p-dialog .modal-actions button {
+  min-width: 0;
+  flex: 1 1 140px;
+}
+
+@media (max-width: 480px) {
+  .p-dialog {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+  }
+
+  .p-dialog .p-dialog-header {
+    padding: 16px 16px 8px;
+  }
+
+  .p-dialog .p-dialog-content {
+    padding: 16px;
+  }
+
+  .p-dialog .p-dialog-footer {
+    padding: 0 16px 16px;
+  }
+
+  .p-dialog .p-dialog-footer button,
+  .p-dialog .dialog__btns-container button,
+  .p-dialog .modal-actions button {
+    flex-basis: 100%;
+  }
 }
