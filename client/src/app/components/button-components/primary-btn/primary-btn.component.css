@@ -1,18 +1,19 @@
 .primary-btn {
   display: flex;
   width: 100%;
+  min-height: 48px;
   justify-content: center;
   align-items: center;
   gap: 14px;
   background-color: var(--app-primary-color);
   border: none;
   border-radius: 4px;
-  padding: 12px 120px;
+  padding: 12px 24px;
   cursor: pointer;
   font-size: 16px;
   font-weight: 600;
   line-height: 24px;
-  word-wrap: break-word;
+  text-align: center;
   color: var(--default-white);
 
   .primary-btn__icon {
@@ -20,4 +21,11 @@
     width: 8px;
   }
 
+}
+
+@media (max-width: 360px) {
+  .primary-btn {
+    padding-inline: 16px;
+    font-size: 15px;
+  }
 }

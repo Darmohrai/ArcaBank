@@ -1,9 +1,28 @@
 <aside class="sidebar">
 
-  <div class="sidebar__top-content">
+  <div class="sidebar__mobile-header">
     <div class="sidebar__logo-container">
       <h1>ArcaBank</h1>
     </div>
+
+    <button
+      type="button"
+      class="sidebar__burger"
+      [class.open]="isMobileMenuOpen"
+      [attr.aria-expanded]="isMobileMenuOpen"
+      aria-label="Toggle navigation menu"
+      (click)="toggleMobileMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  <div class="sidebar__menu" [class.open]="isMobileMenuOpen">
+    <div class="sidebar__top-content">
+      <div class="sidebar__logo-container sidebar__desktop-logo">
+        <h1>ArcaBank</h1>
+      </div>
 
     <nav class="sidebar__navbar">
       <ul>
@@ -31,12 +50,13 @@
         </li>
       </ul>
     </nav>
-  </div>
+    </div>
 
-  <div class="sidebar__bottom-content">
-    <app-sidebar-logout-btn (click)="auth.signOut()"/>
-    <hr class="sidebar__bottom-hr">
-    <!--    <app-sidebar-user-profile userProfileName="Arsenii Redko" userProfilePicture="/assets/images/kabachok.jpg"/>-->
+    <div class="sidebar__bottom-content">
+      <app-sidebar-logout-btn (click)="auth.signOut()"/>
+      <hr class="sidebar__bottom-hr">
+      <!--    <app-sidebar-user-profile userProfileName="Arsenii Redko" userProfilePicture="/assets/images/kabachok.jpg"/>-->
+    </div>
   </div>
 
 </aside>

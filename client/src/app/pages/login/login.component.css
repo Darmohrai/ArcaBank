@@ -1,79 +1,99 @@
 .login {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 32px 18px;
+}
 
-  .login_main-content {
-    display: flex;
-    flex-direction: column;
-    gap: 60px;
-    .login__logo-container {
-      .login__logo {
-        text-align: center;
-        color: var(--app-primary-color);
-        font-size: 40px;
-        font-weight: 700;
-        line-height: 32px;
-        letter-spacing: 3.20px;
-      }
-    }
+.login_main-content {
+  width: min(100%, 400px);
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+}
 
-    .login__login-form {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      width: 400px;
+.login__logo {
+  text-align: center;
+  color: var(--app-primary-color);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+}
 
-      .login__input-container {
-        label {
-          color: var(--default-black);
-          font-weight: 500;
-          line-height: 24px;
-          font-size: 16px;
-        }
+.login__login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
 
-        .login__container {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
+.login__input-container label {
+  color: var(--default-black);
+  font-weight: 500;
+  line-height: 24px;
+  font-size: 16px;
+}
 
-        a {
-          text-decoration: none;
-          color: var(--app-primary-color);
-          font-size: 12px;
-          font-weight: 500;
-          cursor: pointer;
-        }
-      }
+.login__container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
 
-      .login__checkbox-container {
-      }
+.login__input-container a {
+  flex: 0 0 auto;
+  text-decoration: none;
+  color: var(--app-primary-color);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
 
-      .login__btn-container {
-      }
+.login__error {
+  margin: 0;
+  color: #b00020;
+  font-size: 14px;
+  line-height: 20px;
+}
 
-      .login__error {
-        margin: 0;
-        color: #b00020;
-        font-size: 14px;
-        line-height: 20px;
-      }
-    }
+.login__create-account-btn-container {
+  display: flex;
+  justify-content: center;
+}
 
-    .login__create-account-btn-container {
-      display: flex;
-      justify-content: center;
-      a {
-        color: var(--app-primary-color);
-        font-size: 16px;
-        font-weight: 600;
-        line-height: 24px;
-        cursor: pointer;
-      }
-    }
+.login__create-account-btn-container a {
+  color: var(--app-primary-color);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .login {
+    align-items: flex-start;
+    padding: 42px 16px 28px;
   }
 
+  .login_main-content {
+    gap: 32px;
+  }
 
+  .login__logo {
+    font-size: 32px;
+  }
+
+  .login__login-form {
+    gap: 18px;
+  }
+
+  .login__container {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
 }

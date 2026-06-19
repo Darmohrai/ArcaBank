@@ -104,3 +104,18 @@
   opacity: 0.65;
   cursor: not-allowed;
 }
+
+@media (max-width: 480px) {
+  .modal-form {
+    gap: 12px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
+  }
+}

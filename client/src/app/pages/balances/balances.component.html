@@ -12,13 +12,46 @@
 
         <div class="balances__cards-grid">
 
-          <div class="balances__card" *ngFor="let card of tab.cards">
-            <p class="balances__card-title">arcabank</p>
+          <div
+            class="balances__card"
+            [class.currency-uah]="tab.account.currency === 'UAH'"
+            [class.currency-usd]="tab.account.currency === 'USD'"
+            [class.currency-eur]="tab.account.currency === 'EUR'"
+            *ngFor="let card of tab.cards">
+            <div class="balances__card-top">
+              <p class="balances__card-title">ArcaBank</p>
+              <div class="balances__card-network" aria-hidden="true">
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <div class="balances__card-chip-row">
+              <div class="balances__card-chip" aria-hidden="true">
+                <span></span>
+                <span></span>
+              </div>
+              <p class="balances__card-currency">{{ tab.account.currency }}</p>
+            </div>
+
             <p class="balances__card-number">{{ formatCardNumber(card.cardNumber) }}</p>
-            <p class="balances__card-holder">{{ card.cardHolderName }}</p>
+
+            <div class="balances__card-bottom">
+              <div>
+                <p class="balances__card-label">Card holder</p>
+                <p class="balances__card-holder">{{ card.cardHolderName }}</p>
+              </div>
+
+              <div>
+                <p class="balances__card-label">Valid thru</p>
+                <p class="balances__card-date">{{ card.expirationDate }}</p>
+              </div>
+            </div>
           </div>
 
-          <button class="balances__create-account-btn" (click)="showCardCreationDialog()" type="button">+</button>
+          <button class="balances__create-account-btn" (click)="showCardCreationDialog()" type="button" aria-label="Create card">
+            <span>+</span>
+          </button>
 
         </div>
       </p-tabPanel>
